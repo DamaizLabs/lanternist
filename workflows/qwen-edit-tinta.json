@@ -1,0 +1,173 @@
+{
+  "id": "qwen-edit-tinta",
+  "estilo": "tinta",
+  "nota": "EDICION POR INSTRUCCION, no generacion. Se le da una imagen del objeto real y se le pide que conserve la estructura y cambie el estilo al del canal. Nace del hallazgo del 11-09: ni Qwen ni Flux saben dibujar los artefactos del canal en tinta desde cero, y el i2i no separa estilo de contenido (experimentos/i2i-foto-a-tinta-2026-09-11). El prompt es una INSTRUCCION sobre la imagen, no la descripcion de una escena, asi que el adaptador NO antepone el prefijo de estilo: va dentro de la instruccion.",
+  "modelo": {
+    "nombre": "Qwen-Image-Edit-2511 GGUF Q6_K + LoRA Lightning 8 pasos",
+    "pesos": [
+      "unet/qwen-image-edit-2511-Q6_K.gguf",
+      "loras/Qwen-Image-Lightning-8steps-V1.0.safetensors",
+      "text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "vae/qwen_image_vae.safetensors"
+    ],
+    "licencia": "Apache-2.0 (Qwen-Image-Edit y Qwen-Image-Lightning) - uso comercial permitido",
+    "url": "https://huggingface.co/Qwen/Qwen-Image-Edit-2511 · https://huggingface.co/unsloth/Qwen-Image-Edit-2511-GGUF · https://huggingface.co/lightx2v/Qwen-Image-Lightning",
+    "url_nota": "Las mismas tres url que qwen-edit-lienzo, que usa los mismos pesos (se unen con « · »): el modelo base, el GGUF Q6_K que se ejecuta y el LoRA Lightning de 8 pasos. El adaptador de imagen las copia a cada registro desde OC1.4.",
+    "local": true
+  },
+  "prefijo_estilo": "",
+  "parametros": {
+    "steps": 8,
+    "cfg": 1.0,
+    "shift": 3.1
+  },
+  "inyeccion": {
+    "prompt": "6:prompt",
+    "seed": "10:seed",
+    "steps": "10:steps",
+    "cfg": "10:cfg",
+    "shift": "9:shift",
+    "imagen": "5:image"
+  },
+  "nodo_salida": 12,
+  "grafo": {
+    "1": {
+      "class_type": "UnetLoaderGGUF",
+      "inputs": {
+        "unet_name": "qwen-image-edit-2511-Q6_K.gguf"
+      }
+    },
+    "2": {
+      "class_type": "LoraLoaderModelOnly",
+      "inputs": {
+        "lora_name": "Qwen-Image-Lightning-8steps-V1.0.safetensors",
+        "strength_model": 1.0,
+        "model": [
+          "1",
+          0
+        ]
+      }
+    },
+    "3": {
+      "class_type": "CLIPLoader",
+      "inputs": {
+        "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+        "type": "qwen_image",
+        "device": "default"
+      }
+    },
+    "4": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "qwen_image_vae.safetensors"
+      }
+    },
+    "5": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "referencia.png",
+        "upload": "image"
+      }
+    },
+    "6": {
+      "class_type": "TextEncodeQwenImageEditPlus",
+      "inputs": {
+        "clip": [
+          "3",
+          0
+        ],
+        "prompt": "",
+        "vae": [
+          "4",
+          0
+        ],
+        "image1": [
+          "5",
+          0
+        ]
+      }
+    },
+    "7": {
+      "class_type": "ConditioningZeroOut",
+      "inputs": {
+        "conditioning": [
+          "6",
+          0
+        ]
+      }
+    },
+    "8": {
+      "class_type": "VAEEncode",
+      "inputs": {
+        "pixels": [
+          "5",
+          0
+        ],
+        "vae": [
+          "4",
+          0
+        ]
+      }
+    },
+    "9": {
+      "class_type": "ModelSamplingAuraFlow",
+      "inputs": {
+        "shift": 3.1,
+        "model": [
+          "2",
+          0
+        ]
+      }
+    },
+    "10": {
+      "class_type": "KSampler",
+      "inputs": {
+        "seed": 42,
+        "steps": 8,
+        "cfg": 1.0,
+        "sampler_name": "euler",
+        "scheduler": "simple",
+        "denoise": 1.0,
+        "model": [
+          "9",
+          0
+        ],
+        "positive": [
+          "6",
+          0
+        ],
+        "negative": [
+          "7",
+          0
+        ],
+        "latent_image": [
+          "8",
+          0
+        ]
+      }
+    },
+    "11": {
+      "class_type": "VAEDecode",
+      "inputs": {
+        "samples": [
+          "10",
+          0
+        ],
+        "vae": [
+          "4",
+          0
+        ]
+      }
+    },
+    "12": {
+      "class_type": "SaveImage",
+      "inputs": {
+        "filename_prefix": "edit",
+        "images": [
+          "11",
+          0
+        ]
+      }
+    }
+  }
+}

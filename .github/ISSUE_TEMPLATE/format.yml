@@ -1,0 +1,37 @@
+name: New format
+description: Ask for a format that the catalogue does not have yet, with a video that shows it.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A format is the way a channel's videos look. The formats that exist, and their status, are in `docs/formats.md`.
+
+        The quickest way to fill this form: paste the video's link to Claude Code in your Lanternist folder and let the `propone-formato` skill compare it with the catalogue. Then paste its answer below.
+
+        Please link videos; do not attach videos downloaded from YouTube. Screenshots you took yourself are welcome.
+  - type: input
+    id: link
+    attributes:
+      label: A video in this format
+      description: The link of a YouTube video, or several, that shows the style.
+      placeholder: https://www.youtube.com/watch?v=...
+    validations:
+      required: true
+  - type: textarea
+    id: looks
+    attributes:
+      label: What the format looks like
+      description: What moves on the screen, how the images change, what text appears, and how long the videos are.
+    validations:
+      required: true
+  - type: textarea
+    id: closest
+    attributes:
+      label: The closest format in the catalogue, and what is missing
+      description: The answer of `propone-formato`, if you used it, or your own comparison.
+  - type: textarea
+    id: why
+    attributes:
+      label: Your channel
+      description: What your channel is about, and why this format fits it. Optional.

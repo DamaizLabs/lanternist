@@ -1,0 +1,109 @@
+{
+  "_comentario": "Receta de voz del canal de ejemplo de Lanternist. Nace el 15-10-2026 en la pasada 2b de OC1.4, siguiendo el paso 4 de `crea-canal`: la voz se elige en Kokoro y Orpheus la clona y narra (decisión 8). La ESTRUCTURA es la de una receta de Orpheus que funciona; cada VALOR se decide aquí para este canal, con su motivo. No lleva la voz ni la grabación de ninguna persona: la referencia es una voz de serie del catálogo de Kokoro.",
+  "fecha": "2026-10-15",
+  "canal": "example",
+  "motor": "orpheus",
+  "modelo": {
+    "paquete": "llama.cpp (server) + transformers 5.2.0 (tokenizador) + snac 1.2.1 (decodificador)",
+    "repo_id": "audo/orpheus-3b-0.1-ft",
+    "decodificador": "hubertsiuzdak/snac_24khz",
+    "licencia": "Llama 3.2 Community License (Orpheus TTS 3B deriva de meta-llama/Llama-3.2-3B-Instruct: Built with Llama; THIRD_PARTY_NOTICES.md, sección 5)",
+    "url": "https://huggingface.co/canopylabs/orpheus-3b-0.1-ft · https://huggingface.co/unsloth/orpheus-3b-0.1-ft-GGUF · https://huggingface.co/audo/orpheus-3b-0.1-ft · https://huggingface.co/hubertsiuzdak/snac_24khz",
+    "_por_que_url": "Cuatro url, en el orden de THIRD_PARTY_NOTICES.md, sección 5, comprobadas en su fuente el 14-10-2026: el modelo base, el GGUF Q8_0 que ejecuta llama-server, el tokenizador y el decodificador SNAC. Llegan al `assets.json` de cada run con la narración.",
+    "venv": ".venv-voz",
+    "_por_que": "No es un valor del canal: es el modelo del motor (`lib/config.py → MOTOR_DE_VOZ`). Se escribe aquí porque la procedencia de cada run lee de la receta qué modelo produjo el audio y con qué licencia (`assets.json`). Las fichas de Hugging Face dicen `apache-2.0`, pero el modelo es un derivado de Llama 3.2 y esa licencia manda sobre sus derivados (`lib/voice_worker.py → MotorOrpheus`, OC1.2)."
+  },
+  "voz": {
+    "id": "heart_clonada",
+    "tipo": "clonada",
+    "componentes": [
+      "af_heart"
+    ],
+    "_por_que": "Elegida el 15-10-2026 escuchando las muestras de la pasada 2a de OC1.4, entre cuatro voces de Kokoro, dos americanas (af_heart y am_michael, lang_code a) y dos británicas (bf_emma y bm_george, lang_code b), leyendo la narración de la lámina 1 del episodio de ejemplo a speed 1,0. Las muestras viven en la caché de voz, fuera del repo."
+  },
+  "parametros": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "repetition_penalty": 1.1,
+    "_por_que_muestreo": "Los valores que documenta Canopy Labs para Orpheus. Son del motor, no un gusto del canal: Orpheus no tiene mando de énfasis, y la emoción entra por cómo está escrito el texto.",
+    "wpm_esperado": 140.0,
+    "holgura_de_generacion": 1.6,
+    "_por_que_wpm_y_holgura": "No fijan el ritmo: fijan el TECHO de generación de cada segmento, para no pagar entera la divagación de Orpheus. Con 140 y 1,6, un segmento solo se corta si la voz habla más despacio de 87,5 wpm. En Kokoro, af_heart leyó la lámina 1 a 163,7 wpm, y el clon suele hablar algo más despacio que su referencia. La cata del ritmo da el habla real; si quedara cerca de 87,5 wpm, este número baja."
+  },
+  "segmentacion": {
+    "politica": "frase a frase, recortando el silencio de los bordes y concatenando con 300 ms",
+    "max_palabras_por_frase": 20,
+    "silencio_entre_frases_ms": 300,
+    "_por_que_silencio": "Un respiro corto entre frases: el canal cuenta una idea por lámina en unos veinte segundos, y los puntos suspensivos del guion ya meten sus propias pausas. Es una propuesta: se juzga de oído en el vídeo.",
+    "agrupa_hasta_palabras": 0,
+    "_por_que_frase_a_frase": "0 = frase a frase: cada frase es una llamada a Orpheus. Es lo que da el recorte por texto más fiable. Si la voz suena entrecortada, esta es la primera palanca que hay que medir.",
+    "recorte_bordes": {
+      "umbral_db": -45.0,
+      "margen_ms": 40,
+      "_por_que": "Quita el margen de silencio que el motor deja en cada llamada, para que entre frases solo quede la pausa que se pide. Los 40 ms evitan comerse una «s» inicial o una oclusiva final."
+    },
+    "recorte_por_texto": {
+      "modelo": "openai/whisper-small",
+      "margen_s": 0.15,
+      "vocabulario": [
+        "zip",
+        "slider",
+        "wedge",
+        "pries"
+      ],
+      "_por_que": "Orpheus divaga: termina la frase y sigue hablando. Sin este recorte, el vídeo llevaría frases que no están en el guion. El vocabulario son las palabras del episodio de ejemplo que whisper podría oír de otra forma."
+    },
+    "respiracion": null,
+    "_por_que_respiracion": "`null`: no se ensanchan las pausas del habla. Es un canal de un minuto a ritmo normal.",
+    "colas": null,
+    "_por_que_colas": "`null`: el filtro de colas, por nivel, no separa una cola del motor del final de una palabra, y puede callar consonantes finales. Lo que corta la divagación es `recorte_por_texto`.",
+    "limpieza_por_marcas": null,
+    "_por_que_limpieza_por_marcas": "`null`, por el mismo motivo: el filtro puede borrar narración real. Lo que corta la divagación de Orpheus es `recorte_por_texto`."
+  },
+  "seed": 4004,
+  "_por_que_seed": "Una semilla propia del canal; ninguna medida dice que una semilla suene mejor que otra. Deja reproducible el muestreo. Orpheus no repite byte a byte aunque se fije: la equivalencia de dos audios se mide contra el suelo de ruido del motor.",
+  "perfil_por_defecto": "neutro",
+  "perfiles_tonales": {
+    "neutro": {
+      "descripcion": "El registro de narración del canal. Orpheus entona solo, a partir del texto, así que no hay post-proceso que aplicar.",
+      "sobrescribe": {}
+    }
+  },
+  "etiquetas_emocionales": {
+    "permitidas": [],
+    "_por_que_ninguna": "El guion del ejemplo no lleva etiquetas emocionales. Lo que Orpheus no reconoce lo lee en voz alta, así que la lista vacía hace que cualquier `<algo>` del guion pare el run. Si un canal las quiere, se añaden solo las medidas en este motor."
+  },
+  "referencia_a_generar": {
+    "componentes": [
+      "af_heart"
+    ],
+    "speed": 1.0,
+    "lang_code": "a",
+    "sample_rate_hz": 24000,
+    "texto": "Who bent the first paper clip? Nobody is quite sure. It is only a short piece of steel wire, folded back on itself, and yet it holds a stack of pages without making a single hole. Before it, people pinned their papers together, or tied them up with a ribbon. Then someone noticed that a little spring in the bent wire was enough to grip them. That is the whole trick! The best inventions are often the ones we stop seeing, because they simply work, every single day, in every drawer.",
+    "_por_que_speed": "1,0, la velocidad a la que se oyó y se eligió la voz (15-10). Orpheus hereda el ritmo de la referencia, pero no 1:1. El ritmo final lo mide la cata.",
+    "_por_que_lang_code": "`a`, inglés americano: la voz es americana (af_), y el lang_code fija la fonética con que Kokoro la pronuncia.",
+    "_por_que_texto": "Frases del propio nicho (otro invento cotidiano, no el del episodio), escritas como se narrarán: declarativas cortas, una pregunta y una exclamación, para que el clon tenga de dónde sacar la entonación de cada una. Sin cifras con dígitos. 91 palabras, que a esta velocidad pasan de los 25 s que exige `scripts/referencia_voz.py → SEGUNDOS_MINIMOS`."
+  },
+  "referencia_de_voz": {
+    "origen": "SINTÉTICA: la genera scripts/referencia_voz.py con Kokoro af_heart a speed 1.0",
+    "variable_entorno": "RUTA_VOZ_EXAMPLE",
+    "idioma_de_la_referencia": "en",
+    "_por_que_idioma": "La lengua en que habla el clip que se clona: inglés, la misma que la narración del canal (`perfil.json → idioma.narracion`).",
+    "formato_clip": {
+      "sample_rate_hz": 24000,
+      "canales": 1,
+      "codec": "pcm_s16le"
+    },
+    "opcion_activa": "clip_entero",
+    "clip_entero": {
+      "id": "exampleref",
+      "offset_segundos": 0.0,
+      "duracion_segundos": 26.6,
+      "texto": "Who bent the first paper clip? Nobody is quite sure. It is only a short piece of steel wire, folded back on itself, and yet it holds a stack of pages without making a single hole. Before it, people pinned their papers together, or tied them up with a ribbon. Then someone noticed that a little spring in the bent wire was enough to grip them. That is the whole trick! The best inventions are often the ones we stop seeing, because they simply work, every single day, in every drawer.",
+      "descripcion": "El clip sintético de af_heart entero: 26,62 s y sus 91 palabras",
+      "_por_que_el_clip_entero": "Orpheus clona a partir de un EJEMPLO (texto más audio) y necesita saber qué se dice exactamente en el trozo que recibe. Con el clip entero, el texto coincide con el audio por construcción.",
+      "_por_que_duracion": "Medida, no estimada: Kokoro dio 26,62 s con af_heart a speed 1,0 (205,1 wpm) el 15-10-2026, según `scripts/referencia_voz.py`. 26,6 deja 20 ms de margen y supera los 25 s de `SEGUNDOS_MINIMOS`."
+    }
+  }
+}

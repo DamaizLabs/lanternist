@@ -1,0 +1,39 @@
+{
+  "_que_es": "Perfil de un canal FICTICIO para las pruebas del motor de escena (F6.2b). No es de ningún canal del estudio y no está en canales/, así que ni produce ni lo ve tests/test_capas.py. Solo lleva el bloque `escena`, con los valores que video_1 tenía dentro de su código: así las pruebas usan números realistas sin que el estudio los herede.",
+  "idioma": {"subtitulos": "en", "narracion": "en"},
+  "escena": {
+    "fps": 24,
+    "marco": {"w": 1920, "h": 1080},
+    "fundido": 0.14,
+    "camara_en_mano": 1,
+    "movimiento": {
+      "anda": {"v": 300, "paso": 2.0, "bote": 18, "balanceo": 2.2},
+      "habla": {"rebote": 7, "frecuencia": 3.1, "cabeceo": 1.2, "cabeceo_frecuencia": 1.3, "sube": 0.1, "baja": 0.15},
+      "respira": {"amplitud": 0.008, "periodo": 3.3},
+      "eventos": {
+        "risa": {"a": 14}, "tiembla": {"a": 8}, "ladea": {"r": 6}, "bote": {"h": 30, "n": 2}, "asiente": {"a": 6},
+        "bombea": {"a": 30, "f": 1.1}, "estira": {"a": 0.06}, "menea": {"a": 12, "f": 2.5}
+      },
+      "elementos": {"entra": 0.45, "sale": 0.35, "trazo": 0.8, "campana": 3}
+    },
+    "pausas": {"intro_s": 1.0, "entre_partes_s": 2.0, "cola_s": 1.5},
+    "cues": {"max_palabras": 12, "max_caracteres": 62},
+    "karaoke": {
+      "max_caracteres": 40,
+      "pausa_corte_s": 0.85,
+      "une_menos_de_caracteres": 16,
+      "une_pausa_menor_s": 0.5,
+      "antes_s": 0.18,
+      "despues_s": 0.45,
+      "separacion_s": 0.2,
+      "minimo_s": 0.8,
+      "palabra_minima_s": 0.08,
+      "conjunciones": ["and", "but", "because", "so", "then", "to"],
+      "no_cierran": ["the", "a", "of", "on", "to", "in", "her", "his"]
+    },
+    "habla": {"une_s": 0.35, "minimo_s": 0.1},
+    "reparto": {"Ana": "ana", "Bo": "bo"},
+    "narrador": "narrador",
+    "franja_karaoke_y": 860
+  }
+}

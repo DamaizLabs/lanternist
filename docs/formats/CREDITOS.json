@@ -1,0 +1,26 @@
+{
+  "_que_es": "La procedencia de las imágenes del catálogo de formatos (`docs/formats.md`, OC1.11), que viajan con el motor: la guarda de licencias (`scripts/guarda_licencias.py`) exige esta ficha a cada imagen versionada. Las tres llevan la marca de IA de Lanternist (`lib/marca_ia.py → marca_imagen`, el mismo camino que la miniatura): C2PA firmado y Video Seal. Si una se rehace, su sha256 cambia y esta ficha también.",
+  "ficheros": {
+    "laminas.png": {
+      "fuente": "fotograma del episodio de ejemplo «How Does a Zip Work?» (canal `example`, run 2026-10-15_115251_how-does-a-zip-work), sacado el 24-10-2026 con ffmpeg de su `subir-al-canal/final.mp4` en el segundo 47 y reducido a 1280×720 (lanczos). Es la lámina 3 con la cámara del motor y el karaoke. Se marcó como IA con `lib/marca_ia.py → marca_imagen`, en su sitio; las láminas que se ven tienen su procedencia en `canales/example/videos/2026-10-15_115251_how-does-a-zip-work/slides/CREDITOS.json`",
+      "licencia": "MIT, la licencia del repositorio de Lanternist (OC1.D1). La lámina la generaron pesos Apache-2.0 (Qwen-Image-2512 y Qwen-Image-Lightning), y el karaoke usa Patrick Hand SC (SIL Open Font License 1.1); los dos, en `THIRD_PARTY_NOTICES.md`",
+      "url": "https://huggingface.co/Qwen/Qwen-Image-2512",
+      "sha256": "3a06b94b103053b56c8cf1c9e4bd45a9c6d461901361b779ffbf0dd6987a80b3",
+      "notas": "La marca, comprobada con `scripts/detecta_marca.py` el 24-10-2026: C2PA válido (firmante local, `signingCredential.untrusted`) y Video Seal con 256 de 256 bits. El `final.mp4` ya lleva la marca de agua del vídeo; esta imagen lleva además su propio C2PA."
+    },
+    "personajes.png": {
+      "fuente": "imagen conceptual del formato «personajes», generada en local el 24-10-2026 con ComfyUI (workflow `qwen-2512-lightning-tinta`, seed 23, 1280×720). No es un fotograma del motor: el formato está en preparación y Lanternist no trae su capa de escena (fila 308). Rotulada «Concept image · not a frame from the engine» con Gelasio y marcada como IA con `lib/marca_ia.py → marca_imagen`. El prompt completo: «paper cut-out illustration, each character a flat rigid cut-out with a thin white paper border, flat colours with soft paper texture, simple stage-like set seen from the front, warm even lighting, no text, no letters, no watermark, wide 16:9 composition. two flat cut-out cartoon characters standing on the wooden floor of a cosy inventor's workshop set: a curious young woman with a red scarf and an old inventor with a white beard and round glasses, the inventor holds up a large brass gear and explains, the young woman points at it, a workbench with tools behind them and a blank paper card pinned to the wall beside them, the floor line of the set clearly visible, the characters fill the middle of the frame»",
+      "licencia": "MIT, la licencia del repositorio de Lanternist (OC1.D1). La generaron pesos Apache-2.0 (Qwen-Image-2512 y Qwen-Image-Lightning), y el rótulo usa Gelasio (SIL Open Font License 1.1); los dos, en `THIRD_PARTY_NOTICES.md`",
+      "url": "https://huggingface.co/Qwen/Qwen-Image-2512 · https://huggingface.co/unsloth/Qwen-Image-2512-GGUF · https://huggingface.co/lightx2v/Qwen-Image-Lightning",
+      "sha256": "6df7324287ff0e75739a3e8973d6cfc3396ba7fda25ec91e8f4e060c2265919f",
+      "notas": "La marca, comprobada por la autocomprobación de `marca_imagen` el 24-10-2026: C2PA válido y Video Seal con 256 de 256 bits."
+    },
+    "pizarra.png": {
+      "fuente": "imagen conceptual del formato «pizarra», generada en local el 24-10-2026 con ComfyUI (workflow `qwen-2512-lightning-pizarra`, seed 11, 1280×720). No es un fotograma del motor: el formato está en preparación y Lanternist no trae su capa de escena (fila 308). Rotulada «Concept image · not a frame from the engine» con Gelasio y marcada como IA con `lib/marca_ia.py → marca_imagen`. El prompt completo: «white chalk drawing on a black chalkboard, simple hand-drawn chalk lines with a soft powdery edge, like a teacher's quick sketch, a few accents in pale yellow chalk, faint smudges of erased chalk, the black surface of the board fills the picture from edge to edge, the bottom quarter of the board left empty, no text, no watermark, wide 16:9 composition. a simple economics lesson: a bar chart with four bars rising from left to right, a curved arrow going from a small drawing of a coin to a small drawing of a factory with a chimney, a light bulb sketch in the top right corner, a few small stars and underline strokes»",
+      "licencia": "MIT, la licencia del repositorio de Lanternist (OC1.D1). La generaron pesos Apache-2.0 (Qwen-Image-2512 y Qwen-Image-Lightning), y el rótulo usa Gelasio (SIL Open Font License 1.1); los dos, en `THIRD_PARTY_NOTICES.md`",
+      "url": "https://huggingface.co/Qwen/Qwen-Image-2512 · https://huggingface.co/unsloth/Qwen-Image-2512-GGUF · https://huggingface.co/lightx2v/Qwen-Image-Lightning",
+      "sha256": "afe4dae80d4d79e86083b74978da87230865a68f1663272a121899ba5b5dbc09",
+      "notas": "La marca, comprobada por la autocomprobación de `marca_imagen` el 24-10-2026: C2PA válido y Video Seal con 256 de 256 bits."
+    }
+  }
+}

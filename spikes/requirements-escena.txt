@@ -1,0 +1,94 @@
+# Dependencias de `.venv-escena`: el obrero de activos del motor de escena (F6.2c, Loop 6).
+#
+# Qué corre aquí: `lib/escena/obrero_worker.py`, que amplía ×4 con Real-ESRGAN (spandrel), recorta con
+# SAM 2.1 (transformers) y deja cada figura lista para el catálogo. OpenCV y scikit-image van para la
+# geometría y el color de las piezas de un canal (la bici por piezas, el pelaje que Qwen aclaró), que
+# llegan con F6.3. El resto del pipeline sigue en `.venv`; este venv no lo usa nadie más.
+#
+# Por qué un venv propio y no el de ComfyUI: en video_1 estas herramientas corrieron dentro de
+# el `.venv` de ComfyUI (`<COMFY_ROOT>\.venv`), que puede ser compartido con otros proyectos. El estudio no
+# instala nada ahí (plan de F6.2, regla 4). Del ComfyUI solo se LEE el peso de Real-ESRGAN
+# (`lib/config.py → ESCENA_ESRGAN_PESO`); SAM 2.1 sale de la caché de Hugging Face.
+#
+# Python: 3.12, el mismo de los otros entornos, para que quien instala Lanternist necesite uno solo (OC1.7). Se creó
+# el 29-09-2026 con 3.14.4, el del sistema; el 24-10-2026 se comprobó con `pip install --dry-run --python-version 3.12
+# --only-binary=:all:` que todo tiene rueda para 3.12, y la prueba de humo de OC1.7 lo creó así y produjo con él
+# (`progress/impl_OC1.7.md`).
+#
+# Lo crea `py -3.12 instala.py` (paso entornos). A mano son TRES pasos, y el orden importa:
+#
+#     py -3.12 -m venv .venv-escena
+#     .venv-escena\Scripts\python -m pip install torch==2.13.0+cu130 torchvision==0.28.0+cu130 --index-url https://download.pytorch.org/whl/cu130
+#     .venv-escena\Scripts\python -m pip install -r spikes\requirements-escena.txt
+#
+# **La trampa, medida al crearlo**: spandrel depende de torchvision, y si torch y torchvision no se
+# instalan ANTES desde el índice de CUDA, pip trae de PyPI `torch 2.14.0+cpu` y desinstala el de CUDA
+# sin avisar. El obrero lo cazaría (exige `torch.cuda.is_available()`), pero es una hora perdida.
+# torch 2.13.0+cu130 es la misma versión que usa el ComfyUI de la máquina con esta tarjeta y este
+# controlador: la combinación ya probada.
+#
+# **La marca de IA (OC1.5, filas 309, 311 y 312) también corre aquí**: `lib/marca_ia_worker.py` marca la imagen del
+# vídeo y la miniatura con Video Seal (un TorchScript que solo pide torch), el audio con AudioSeal, y firma con C2PA
+# (c2pa-python, que trae cryptography). PyAV decodifica el vídeo dentro del proceso: leer 1080p por una tubería de
+# ffmpeg desde Python es cinco veces más lento en Windows. AudioSeal 0.2 compila su modelo con `torch.compile`, que en
+# Windows pide Triton: el trabajador pone `NO_TORCH_COMPILE=1` antes de importarlo. Instalados el 15-10-2026 con el
+# permiso del dueño (fila 311), con `pip check` sin roturas. La wheel de PyAV para Windows trae FFmpeg con x264 y x265,
+# que son GPL: se instala desde PyPI y Lanternist no la redistribuye (`THIRD_PARTY_NOTICES.md`).
+torch==2.13.0+cu130
+torchvision==0.28.0+cu130
+transformers==5.15.1
+spandrel==0.4.2
+opencv-python-headless==5.0.0.93
+scikit-image==0.26.0
+scipy==1.18.0
+numpy==2.5.2
+pillow==12.3.0
+audioseal==0.2.0
+c2pa-python==0.38.0
+av==19.0.1
+# Lo que arrastran los de arriba, congelado con `pip freeze` el 29-09-2026.
+annotated-doc==0.0.5
+anyio==4.15.1
+certifi==2026.7.22
+click==8.5.0
+colorama==0.4.6
+einops==0.8.2
+filelock==3.32.3
+fsspec==2026.7.0
+h11==0.16.0
+hf-xet==1.6.0
+httpcore==1.0.9
+httpx==0.28.1
+huggingface_hub==1.33.0
+idna==3.20
+ImageIO==2.38.0
+Jinja2==3.1.6
+lazy-loader==0.6
+markdown-it-py==4.2.0
+MarkupSafe==3.0.3
+mdurl==0.1.2
+mpmath==1.3.0
+networkx==3.6.1
+packaging==26.3
+Pygments==2.21.0
+PyYAML==6.0.3
+regex==2026.9.10
+rich==15.0.0
+safetensors==0.8.0
+setuptools==78.1.0
+shellingham==1.5.4
+sympy==1.14.0
+tifffile==2026.9.20
+tokenizers==0.22.2
+tqdm==4.70.1
+typer==0.27.2
+typing_extensions==4.16.0
+# Lo que arrastran los tres de la marca de IA, congelado con `pip freeze` el 15-10-2026.
+cffi==2.1.1
+charset-normalizer==3.5.2
+cryptography==50.0.2
+omegaconf==2.4.0
+pycparser==3.11
+requests==2.34.2
+toml==0.10.2
+urllib3==2.8.0

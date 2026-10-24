@@ -1,0 +1,122 @@
+{
+  "titulo": "GUION minimo de prueba del motor de escena",
+  "idioma": "en",
+  "fps": 24,
+  "duracion": 1.5,
+  "marco": {"w": 1920, "h": 1080},
+  "fundido": 0.14,
+  "camara_en_mano": 1,
+  "movimiento": {
+    "anda": {"v": 300, "paso": 2.0, "bote": 18, "balanceo": 2.2},
+    "habla": {"rebote": 7, "frecuencia": 3.1, "cabeceo": 1.2, "cabeceo_frecuencia": 1.3, "sube": 0.1, "baja": 0.15},
+    "respira": {"amplitud": 0.008, "periodo": 3.3},
+    "eventos": {
+      "risa": {"a": 14}, "tiembla": {"a": 8}, "ladea": {"r": 6}, "bote": {"h": 30, "n": 2}, "asiente": {"a": 6},
+      "bombea": {"a": 30, "f": 1.1}, "estira": {"a": 0.06}, "menea": {"a": 12, "f": 2.5}
+    },
+    "elementos": {"entra": 0.45, "sale": 0.35, "trazo": 0.8, "campana": 3}
+  },
+  "planos": [
+    {
+      "id": "p1", "t0": 0, "t1": 0.9, "entra": {"tipo": "corte", "d": 0},
+      "fondo": {"src": "assets/img/fondo-a.png", "w": 2400, "h": 1350},
+      "desenfoque": 0,
+      "camara": [
+        {"t": 0, "tr": 0, "e": "inout", "cx": 1200, "cy": 675, "z": 1.0, "sigue": null},
+        {"t": 0.2, "tr": 0.6, "e": "suave", "cx": 1300, "cy": 700, "z": 1.3, "sigue": null}
+      ],
+      "actores": [
+        {
+          "id": "a1", "escala": 1.0, "padre": null, "z": 10, "pj": "voz1", "rasgos": {"anda": true},
+          "posturas": {
+            "de_pie": {"src": "assets/img/figura-a.png", "w": 200, "h": 400, "ax": 100, "ay": 400, "k": 1},
+            "brazos": {"src": "assets/img/figura-b.png", "w": 200, "h": 400, "ax": 100, "ay": 400, "k": 1}
+          },
+          "pista": [
+            {"t": 0, "tr": 0, "e": "inout", "x": 900, "y": 1100, "s": 1, "r": 0, "op": 1, "flip": 0, "post": "de_pie", "giro": 0, "ancho": 1, "dz": 0},
+            {"t": 0.3, "tr": 0.5, "e": "inout", "x": 1400, "y": 1100, "s": 1, "r": 0, "op": 1, "flip": 0, "post": "brazos", "giro": 0, "ancho": 1, "dz": 0}
+          ],
+          "eventos": [{"tipo": "salto", "t": 0.4, "d": 0.4, "h": 40}]
+        },
+        {
+          "id": "a2", "escala": 1.0, "padre": "a1", "z": 11, "pj": null, "rasgos": {"rueda": 50},
+          "posturas": {
+            "rueda": {"src": "assets/img/rueda.png", "w": 100, "h": 100, "ax": 50, "ay": 50, "k": 1}
+          },
+          "pista": [
+            {"t": 0, "tr": 0, "e": "inout", "x": 0, "y": -60, "s": 1, "r": 0, "op": 1, "flip": 0, "post": "rueda", "giro": 0, "ancho": 1, "dz": 0}
+          ],
+          "eventos": []
+        }
+      ]
+    },
+    {
+      "id": "p2", "t0": 0.9, "t1": 1.5, "entra": {"tipo": "funde", "d": 0.25},
+      "fondo": {"src": "assets/img/fondo-b.png", "w": 1920, "h": 1080},
+      "camara": [
+        {"t": 0.9, "tr": 0, "e": "inout", "cx": 0, "cy": -300, "z": 1.0, "sigue": "a3"}
+      ],
+      "actores": [
+        {
+          "id": "a3", "escala": 1.2, "padre": null, "z": 5, "pj": "voz2", "rasgos": {},
+          "posturas": {
+            "de_pie": {"src": "assets/img/figura-a.png", "w": 200, "h": 400, "ax": 100, "ay": 400, "k": 1}
+          },
+          "pista": [
+            {"t": 0.9, "tr": 0, "e": "inout", "x": 960, "y": 900, "s": 1, "r": 0, "op": 1, "flip": 1, "post": "de_pie", "giro": 0, "ancho": 1, "dz": 0}
+          ],
+          "eventos": [{"tipo": "risa", "t": 1.0, "d": 0.4}]
+        }
+      ]
+    }
+  ],
+  "elementos": [
+    {
+      "id": "e1", "t0": 0.1, "t1": 1.4, "capa": "pantalla", "clase": "rotulo",
+      "html": "<div class=\"caja\">A small test label</div>",
+      "x": 120, "y": 90, "w": 520, "h": 120, "z": 1, "entra": "pop", "sale": "baja", "bucle": "flota"
+    },
+    {
+      "id": "e2", "t0": 0.2, "t1": 0.85, "capa": "p1", "clase": "",
+      "html": "<svg viewBox=\"0 0 100 100\"><circle class=\"trazo\" cx=\"50\" cy=\"50\" r=\"40\"/></svg>",
+      "x": 1600, "y": 500, "w": 200, "h": 200, "z": 2, "entra": "crece", "trazo": true
+    }
+  ],
+  "karaoke": [
+    {"id": "k0", "t": 0.05, "t1": 0.85, "w": [[0.1, 0.4, "hello", "voz1"], [0.42, 0.8, "there", "voz1"]]},
+    {"id": "k1", "t": 0.95, "t1": 1.45, "w": [[1.0, 1.2, "good", "voz2"], [1.22, 1.4, "day", "voz2"]]}
+  ],
+  "habla": {"voz1": [{"t": 0.1, "t1": 0.8}], "voz2": [{"t": 1.0, "t1": 1.4}]},
+  "transiciones": [{"id": "x1", "t": 0.8, "d": 0.3, "tipo": "destello"}],
+  "rig": {
+    "piezas": {
+      "cinta": {
+        "post": "de_pie", "png": "assets/rig/cinta.png", "tipo": "cadena",
+        "x": 60, "y": 40, "w": 80, "h": 160, "cols": 3, "filas": 5,
+        "i0": [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+        "i1": [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "w0": [1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 1, 1, 1, 1, 1, 1],
+        "arts": [[100, 40], [100, 120], [100, 200]], "amp": 14, "freq": 1.5, "fase": 0
+      },
+      "pierna": {
+        "post": "brazos", "png": "assets/rig/pierna.png", "tipo": "pierna",
+        "x": 70, "y": 280, "w": 60, "h": 120, "cols": 2, "filas": 4,
+        "i0": [0, 0, 0, 0, 1, 1, 2, 2],
+        "i1": [0, 0, 1, 1, 1, 1, 2, 2],
+        "w0": [1, 1, 0.5, 0.5, 1, 1, 1, 1],
+        "cadera": [100, 290], "rodilla": [100, 340], "tobillo": [100, 390], "biela": [110, 370],
+        "px_vuelta": 300, "fase": 0
+      },
+      "cuerpo": {
+        "post": "de_pie", "png": "assets/rig/cuerpo.png", "tipo": "cuadrupedo",
+        "x": 70, "y": 90, "w": 60, "h": 210, "cols": 2, "filas": 3,
+        "i0": [0, 0, 1, 2, 3, 4],
+        "i1": [0, 0, 1, 2, 3, 4],
+        "w0": [1, 1, 1, 1, 1, 1],
+        "px_zancada": 200, "amp_pata": 20, "cola_amp": 10, "cola_freq": 2.6,
+        "patas": [{"art": [80, 200], "fase": 0}, {"art": [120, 200], "fase": 3.14159}],
+        "cola": [[100, 100], [100, 150], [100, 200]]
+      }
+    }
+  }
+}

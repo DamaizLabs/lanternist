@@ -1,0 +1,2 @@
+# Los .cmd de Windows salen con CRLF en cualquier clon, tenga o no core.autocrlf.
+*.cmd text eol=crlf

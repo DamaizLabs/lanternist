@@ -1,0 +1,181 @@
+{
+  "id": "qwen-edit-lienzo",
+  "estilo": "el del canal, dentro de la instrucción",
+  "nota": "EDICION POR INSTRUCCION con la referencia y el lienzo APARTE (motor de escena, F6.2c). Hermano de qwen-edit-tinta, con un nodo mas: alli el lienzo es la propia referencia (VAEEncode cuelga de la misma LoadImage), y asi no se puede pedir una hoja de personaje sobre un lienzo de croma de otro tamano que la lamina de referencia. Es el grafo con que video_1 genero sus 124 imagenes (su comfy.py, grafo_edita). Cuando la referencia ES el lienzo (una postura sobre su lienzo de referencia, una variante en su sitio, un objeto en una hoja), se inyecta el mismo nombre en los dos. El estilo no va en un prefijo: lo escribe el canal dentro de la instruccion (lib/escena/activos.py).",
+  "modelo": {
+    "nombre": "Qwen-Image-Edit-2511 GGUF Q6_K + LoRA Lightning 8 pasos",
+    "pesos": [
+      "unet/qwen-image-edit-2511-Q6_K.gguf",
+      "loras/Qwen-Image-Lightning-8steps-V1.0.safetensors",
+      "text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "vae/qwen_image_vae.safetensors"
+    ],
+    "licencia": "Apache-2.0 (Qwen-Image-Edit y Qwen-Image-Lightning) - uso comercial permitido",
+    "url": "https://huggingface.co/Qwen/Qwen-Image-Edit-2511 · https://huggingface.co/unsloth/Qwen-Image-Edit-2511-GGUF · https://huggingface.co/lightx2v/Qwen-Image-Lightning",
+    "url_nota": "Tres url, en el orden del registro de procedencia (se unen con « · »): el modelo base, el repositorio del GGUF Q6_K que se ejecuta (experimentos/qwen-edit-2026-09-11/conclusiones.md, donde se midió su descarga) y el del LoRA Lightning de 8 pasos, que es el de su fichero (Qwen-Image-Lightning-8steps-V1.0.safetensors). La del LoRA no se comprobó contra la red (decisión 6): sale del nombre del fichero, que es el de su publicación (F6.2d, auditoría de F6.2c, recomendación 7).",
+    "local": true
+  },
+  "prefijo_estilo": "",
+  "parametros": {
+    "steps": 8,
+    "cfg": 1.0,
+    "shift": 3.1
+  },
+  "inyeccion": {
+    "prompt": "6:prompt",
+    "seed": "10:seed",
+    "steps": "10:steps",
+    "cfg": "10:cfg",
+    "shift": "9:shift",
+    "referencia": "5:image",
+    "lienzo": "20:image"
+  },
+  "nodo_salida": 12,
+  "grafo": {
+    "1": {
+      "class_type": "UnetLoaderGGUF",
+      "inputs": {
+        "unet_name": "qwen-image-edit-2511-Q6_K.gguf"
+      }
+    },
+    "2": {
+      "class_type": "LoraLoaderModelOnly",
+      "inputs": {
+        "lora_name": "Qwen-Image-Lightning-8steps-V1.0.safetensors",
+        "strength_model": 1.0,
+        "model": [
+          "1",
+          0
+        ]
+      }
+    },
+    "3": {
+      "class_type": "CLIPLoader",
+      "inputs": {
+        "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+        "type": "qwen_image",
+        "device": "default"
+      }
+    },
+    "4": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "qwen_image_vae.safetensors"
+      }
+    },
+    "5": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "referencia.png",
+        "upload": "image"
+      }
+    },
+    "20": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "lienzo.png",
+        "upload": "image"
+      }
+    },
+    "6": {
+      "class_type": "TextEncodeQwenImageEditPlus",
+      "inputs": {
+        "clip": [
+          "3",
+          0
+        ],
+        "prompt": "",
+        "vae": [
+          "4",
+          0
+        ],
+        "image1": [
+          "5",
+          0
+        ]
+      }
+    },
+    "7": {
+      "class_type": "ConditioningZeroOut",
+      "inputs": {
+        "conditioning": [
+          "6",
+          0
+        ]
+      }
+    },
+    "8": {
+      "class_type": "VAEEncode",
+      "inputs": {
+        "pixels": [
+          "20",
+          0
+        ],
+        "vae": [
+          "4",
+          0
+        ]
+      }
+    },
+    "9": {
+      "class_type": "ModelSamplingAuraFlow",
+      "inputs": {
+        "shift": 3.1,
+        "model": [
+          "2",
+          0
+        ]
+      }
+    },
+    "10": {
+      "class_type": "KSampler",
+      "inputs": {
+        "seed": 7,
+        "steps": 8,
+        "cfg": 1.0,
+        "sampler_name": "euler",
+        "scheduler": "simple",
+        "denoise": 1.0,
+        "model": [
+          "9",
+          0
+        ],
+        "positive": [
+          "6",
+          0
+        ],
+        "negative": [
+          "7",
+          0
+        ],
+        "latent_image": [
+          "8",
+          0
+        ]
+      }
+    },
+    "11": {
+      "class_type": "VAEDecode",
+      "inputs": {
+        "samples": [
+          "10",
+          0
+        ],
+        "vae": [
+          "4",
+          0
+        ]
+      }
+    },
+    "12": {
+      "class_type": "SaveImage",
+      "inputs": {
+        "filename_prefix": "activo",
+        "images": [
+          "11",
+          0
+        ]
+      }
+    }
+  }
+}

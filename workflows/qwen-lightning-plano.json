@@ -1,0 +1,152 @@
+{
+  "id": "qwen-lightning-plano",
+  "estilo": "plano",
+  "nota": "Estilo firmado en el gate 0 de un canal del estudio: ilustración plana y cálida, la del canal de su captura. El prefijo lo antepone el adaptador y el prompt de la escena llega del pipeline. OJO a la diferencia de fondo con `tinta`: allí la lámina ES el sujeto, mientras que aquí la lámina es un FONDO sobre el que van la onda de ecualizador y los subtítulos karaoke, así que el prefijo pide poco contraste y profundidad de campo suave — si el fondo tiene detalle o contraste alto, el texto blanco deja de leerse y el vídeo no sirve.",
+  "modelo": {
+    "nombre": "Qwen-Image GGUF Q6_K + LoRA Lightning 8 pasos",
+    "pesos": [
+      "unet/qwen-image-Q6_K.gguf",
+      "loras/Qwen-Image-Lightning-8steps-V1.0.safetensors",
+      "text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "vae/qwen_image_vae.safetensors"
+    ],
+    "licencia": "Apache-2.0 (Qwen-Image y Qwen-Image-Lightning) — uso comercial permitido",
+    "local": true
+  },
+  "prefijo_estilo": "flat vector illustration, soft warm palette of dusty orange and cream, clean rounded shapes, gentle gradients, no outlines, friendly modern character design, soft depth of field with a blurred background, calm low-contrast lighting that leaves the lower half quiet, no text, no watermark, wide 16:9 composition.",
+  "parametros": {
+    "steps": 8,
+    "cfg": 1.0,
+    "shift": 3.1
+  },
+  "inyeccion": {
+    "prompt": "5:text",
+    "seed": "9:seed",
+    "steps": "9:steps",
+    "cfg": "9:cfg",
+    "shift": "8:shift",
+    "width": "7:width",
+    "height": "7:height"
+  },
+  "nodo_salida": "11",
+  "grafo": {
+    "1": {
+      "class_type": "UnetLoaderGGUF",
+      "inputs": {
+        "unet_name": "qwen-image-Q6_K.gguf"
+      }
+    },
+    "2": {
+      "class_type": "LoraLoaderModelOnly",
+      "inputs": {
+        "model": [
+          "1",
+          0
+        ],
+        "lora_name": "Qwen-Image-Lightning-8steps-V1.0.safetensors",
+        "strength_model": 1.0
+      }
+    },
+    "3": {
+      "class_type": "CLIPLoader",
+      "inputs": {
+        "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+        "type": "qwen_image",
+        "device": "default"
+      }
+    },
+    "4": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "qwen_image_vae.safetensors"
+      }
+    },
+    "5": {
+      "class_type": "CLIPTextEncode",
+      "inputs": {
+        "text": "",
+        "clip": [
+          "3",
+          0
+        ]
+      }
+    },
+    "6": {
+      "class_type": "ConditioningZeroOut",
+      "inputs": {
+        "conditioning": [
+          "5",
+          0
+        ]
+      }
+    },
+    "7": {
+      "class_type": "EmptySD3LatentImage",
+      "inputs": {
+        "width": 1344,
+        "height": 768,
+        "batch_size": 1
+      }
+    },
+    "8": {
+      "class_type": "ModelSamplingAuraFlow",
+      "inputs": {
+        "model": [
+          "2",
+          0
+        ],
+        "shift": 3.1
+      }
+    },
+    "9": {
+      "class_type": "KSampler",
+      "inputs": {
+        "model": [
+          "8",
+          0
+        ],
+        "seed": 42,
+        "steps": 8,
+        "cfg": 1.0,
+        "sampler_name": "euler",
+        "scheduler": "simple",
+        "positive": [
+          "5",
+          0
+        ],
+        "negative": [
+          "6",
+          0
+        ],
+        "latent_image": [
+          "7",
+          0
+        ],
+        "denoise": 1.0
+      }
+    },
+    "10": {
+      "class_type": "VAEDecode",
+      "inputs": {
+        "samples": [
+          "9",
+          0
+        ],
+        "vae": [
+          "4",
+          0
+        ]
+      }
+    },
+    "11": {
+      "class_type": "SaveImage",
+      "inputs": {
+        "images": [
+          "10",
+          0
+        ],
+        "filename_prefix": "img"
+      }
+    }
+  }
+}

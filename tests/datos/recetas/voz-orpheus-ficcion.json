@@ -1,0 +1,102 @@
+{
+  "_que_es": "Receta de voz de PRUEBA, de un canal de ficción inventado: Orpheus con frases agrupadas hasta 21 palabras, respiración ensanchada y tres etiquetas. Es la otra política de troceo, para que las guardas comparen dos recetas que deciden distinto. Sale de la forma de una receta real de producción, sin sus comentarios ni sus textos.",
+  "fecha": "2026-10-09",
+  "motor": "orpheus",
+  "modelo": {
+    "paquete": "llama.cpp (server) + transformers 5.2.0 (tokenizador) + snac 1.2.1 (decodificador)",
+    "repo_id": "audo/orpheus-3b-0.1-ft",
+    "decodificador": "hubertsiuzdak/snac_24khz",
+    "licencia": "Apache-2.0",
+    "venv": ".venv-voz"
+  },
+  "voz": {
+    "id": "voz_de_prueba",
+    "tipo": "clonada",
+    "componentes": [
+      "bf_emma"
+    ]
+  },
+  "parametros": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "repetition_penalty": 1.1,
+    "wpm_esperado": 110.0,
+    "holgura_de_generacion": 1.8
+  },
+  "segmentacion": {
+    "politica": "frases agrupadas hasta 21 palabras por llamada, concatenadas con 1300 ms",
+    "max_palabras_por_frase": 20,
+    "silencio_entre_frases_ms": 1300,
+    "recorte_bordes": {
+      "umbral_db": -45.0,
+      "margen_ms": 40
+    },
+    "agrupa_hasta_palabras": 21,
+    "respiracion": {
+      "umbral_db": -38,
+      "pausa_desde_ms": 300,
+      "pausa_minima_ms": 570,
+      "pausa_maxima_ms": 1500,
+      "factor": 1.55,
+      "fundido_ms": 60
+    },
+    "colas": null,
+    "limpieza_por_marcas": null,
+    "recorte_por_texto": {
+      "modelo": "openai/whisper-small",
+      "margen_s": 0.15
+    }
+  },
+  "seed": 1234,
+  "perfil_por_defecto": "neutro",
+  "perfiles_tonales": {
+    "neutro": {
+      "descripcion": "El registro de narración del canal. Orpheus entona por su cuenta a partir del texto, así que aquí no hay post-proceso que aplicar.",
+      "sobrescribe": {}
+    },
+    "grave": {
+      "descripcion": "PENDIENTE de decidir si sigue teniendo sentido con Orpheus. Existía para el énfasis de Chatterbox, que era un parámetro del motor; aquí no hay equivalente. Se conserva vacío para no borrar el sitio.",
+      "sobrescribe": {}
+    }
+  },
+  "etiquetas_emocionales": {
+    "permitidas": [
+      "laugh",
+      "chuckle",
+      "sigh"
+    ]
+  },
+  "referencia_a_generar": {
+    "componentes": [
+      "bf_emma"
+    ],
+    "speed": 0.6,
+    "lang_code": "b",
+    "sample_rate_hz": 24000,
+    "texto": "It was a rainy Monday. The street was very quiet. A small dog looked out of the window. He wanted to go outside. The girl said, \"We are going for a walk. A short one, just to the park.\" The dog looked at the rain. He was not sure. But the park was close, and a walk was a very good idea. How wet can it be? They went down the stairs, very slowly, without a sound."
+  },
+  "referencia_de_voz": {
+    "origen": "SINTÉTICA: la genera scripts/referencia_voz.py con una voz de serie de Kokoro",
+    "variable_entorno": "RUTA_VOZ_PRUEBA_FICCION",
+    "idioma_de_la_referencia": "en",
+    "formato_clip": {
+      "sample_rate_hz": 24000,
+      "canales": 1,
+      "codec": "pcm_s16le"
+    },
+    "opcion_activa": "clip_entero",
+    "veinte_segundos": {
+      "id": "fic20s",
+      "offset_segundos": 2.0,
+      "duracion_segundos": 20.0,
+      "descripcion": "20 s del clip sintético, saltando el arranque"
+    },
+    "clip_entero": {
+      "id": "fic35s",
+      "offset_segundos": 0.0,
+      "duracion_segundos": 35.2,
+      "texto": "It was a rainy Monday. The street was very quiet. A small dog looked out of the window. He wanted to go outside. The girl said, \"We are going for a walk. A short one, just to the park.\" The dog looked at the rain. He was not sure. But the park was close, and a walk was a very good idea. How wet can it be? They went down the stairs, very slowly, without a sound.",
+      "descripcion": "El clip sintético entero"
+    }
+  }
+}

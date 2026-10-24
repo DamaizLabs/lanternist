@@ -1,0 +1,112 @@
+{
+  "_que_es": "Receta de voz de PRUEBA, de un canal documental inventado: Orpheus, frase a frase, sin respiración ni colas, cinco etiquetas emocionales. Sale de la forma de una receta real de producción, sin sus comentarios ni sus textos. La usan las guardas que comprueban que toda receta declara lo que el motor exige (F4.9), para que no queden vacías cuando el repositorio no trae ninguna receta real.",
+  "fecha": "2026-10-09",
+  "motor": "orpheus",
+  "modelo": {
+    "paquete": "llama.cpp (server) + transformers 5.2.0 (tokenizador) + snac 1.2.1 (decodificador)",
+    "repo_id": "audo/orpheus-3b-0.1-ft",
+    "decodificador": "hubertsiuzdak/snac_24khz",
+    "licencia": "Apache-2.0",
+    "venv": ".venv-voz (el mismo que Kokoro; solo hizo falta añadir snac con --no-deps)"
+  },
+  "parametros": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "repetition_penalty": 1.1,
+    "wpm_esperado": 124.0,
+    "holgura_de_generacion": 1.6
+  },
+  "seed": 1234,
+  "referencia_de_voz": {
+    "origen": "SINTÉTICA: la genera scripts/referencia_voz.py con una voz de serie de Kokoro",
+    "variable_entorno": "RUTA_VOZ_PRUEBA_DOCUMENTAL",
+    "idioma_de_la_referencia": "en",
+    "formato_clip": {
+      "sample_rate_hz": 24000,
+      "canales": 1,
+      "codec": "pcm_s16le"
+    },
+    "opcion_activa": "cuatro_frases",
+    "cuatro_frases": {
+      "id": "docref14s",
+      "offset_segundos": 0.0,
+      "duracion_segundos": 14.1,
+      "texto": "The zip is not a modern invention Its first patent is more than a hundred years old, and nobody wanted it Not tailors Not soldiers.",
+      "descripcion": "Las cuatro primeras frases del clip de referencia"
+    },
+    "ocho_frases": {
+      "id": "docref32s",
+      "offset_segundos": 0.0,
+      "duracion_segundos": 31.86,
+      "texto": "The zip is not a modern invention. Its first patent is more than a hundred years old, and nobody wanted it. Not tailors. Not soldiers. Then a boot maker tried it, and the small metal teeth found their place. So why did it take so long? A good idea can still wait for the right shoe.",
+      "descripcion": "El clip de referencia entero"
+    }
+  },
+  "segmentacion": {
+    "politica": "frase a frase, recortando el silencio de los bordes y concatenando con 250 ms",
+    "max_palabras_por_frase": 20,
+    "silencio_entre_frases_ms": 250,
+    "agrupa_hasta_palabras": 0,
+    "recorte_bordes": {
+      "umbral_db": -45.0,
+      "margen_ms": 40
+    },
+    "recorte_por_texto": {
+      "modelo": "openai/whisper-small",
+      "margen_s": 0.15,
+      "vocabulario": [
+        "zip",
+        "patent",
+        "tailors"
+      ]
+    },
+    "respiracion": null,
+    "colas": null,
+    "limpieza_por_marcas": null
+  },
+  "perfil_por_defecto": "neutro",
+  "perfiles_tonales": {
+    "neutro": {
+      "descripcion": "El registro de narración del canal. Orpheus entona por su cuenta a partir del texto, así que el 'perfil' aquí no es post-proceso: lo que cambia el tono es cómo está escrito el guion y qué etiquetas lleva.",
+      "sobrescribe": {}
+    },
+    "dramatico": {
+      "descripcion": "Para las láminas donde el guion carga el argumento. Mismo motor y misma referencia: lo que cambia es que el texto lleva etiquetas emocionales. Se declara para que exista el sitio, sin sobrescribir nada todavía.",
+      "sobrescribe": {}
+    }
+  },
+  "etiquetas_emocionales": {
+    "permitidas": [
+      "gasp",
+      "sigh",
+      "groan",
+      "laugh",
+      "chuckle"
+    ],
+    "medidas_en_bf16_el_2026_09_07": {
+      "groan": "FUNCIONA. +1,04 s en su sitio, el mayor de los 47 saltos de su pista, y whisper llega a transcribir un «Ugh,» que no está en el texto: es sonido de verdad.",
+      "gasp": "FUNCIONA. +0,86 s, también el mayor salto de su pista, y sin que se lea ninguna palabra.",
+      "sigh": "INCONSTANTE. En tres colocaciones dio +0,38 s, +0,16 s y +0,02 s. La última queda por debajo de la variación normal entre palabras."
+    },
+    "medidas_en_Q8_0_el_2026_09_08": {
+      "groan": "FUNCIONA. Hueco de 0,79 s con energía 1,058× la del habla y tono a 113 Hz, en **4 de 6** pasadas, y las cuatro con tono; whisper transcribe «Oh», «Ah» o «Ugh» —que no están en el guion— en 3 de 6. Sonido, no palabras.",
+      "gasp": "NO HACE NADA. Hueco de 0,05 s y energía 0,001×, o sea lo mismo que sin etiqueta (0,06 s). 0 de 6 pasadas con sonido.",
+      "sigh": "1 de 6 con vocalización tonal (semilla 66: 0,80 s, energía 1,180×, f0 106 Hz) y **2 de 6** si se cuenta también el aire sin tono (semilla 55: 0,58 s, energía 0,113×, sonoridad 0,0) — que es lo que da `resumen.sigh.con_sonido`. Las dos cifras son ciertas con criterios distintos, y por eso van las dos. A mitad de frase, tras «like…», 0 de 6 con cualquiera de los dos."
+    },
+    "comparacion_bf16_vs_Q8_el_2026_09_08": {},
+    "medidas_en_Q8_0_el_2026_09_09_alegria": {
+      "laugh": "CONVIERTE EN SONIDO. Pronunciada 0/6 (whisper no transcribe 'laugh' ni parecido); sonido en el hueco en 4/6 (energía 0,63-0,87× la del habla, 3/6 con tono a 138-175 Hz, 2-5 pulsos); en 2/6 se ignora sin leerse (energía 0,015-0,041×).",
+      "chuckle": "CONVIERTE EN SONIDO. Pronunciada 0/6; sonido en 4/6 (energía 0,20-0,87×, 2/6 con tono a 140-181 Hz, 1-3 pulsos); en 2/6 se ignora."
+    }
+  },
+  "referencia_a_generar": {
+    "componentes": [
+      "am_onyx",
+      "bm_lewis"
+    ],
+    "speed": 0.72,
+    "lang_code": "b",
+    "sample_rate_hz": 24000,
+    "texto": "The zip is not a modern invention. Its first patent is more than a hundred years old, and nobody wanted it. Not tailors. Not soldiers. Then a boot maker tried it, and the small metal teeth found their place. So why did it take so long? A good idea can still wait for the right shoe."
+  }
+}

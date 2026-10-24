@@ -1,0 +1,167 @@
+{
+  "_comentario": "El canal de ejemplo de Lanternist (OC1.1, filas 302 y 303). Declara todas las decisiones que el motor exige a un canal, para que las pruebas y el `--check` corran en un clon recién descargado y sin `.env`. Su primer episodio, «How Does a Zip Work?», viaja con el motor: el guion de unos 60 s y las tres láminas en `videos/2026-10-15_115251_how-does-a-zip-work/`, su procedencia en `datos/assets/`, su guion de escena en `datos/escenas/`, la receta de voz en `datos/voz-example-en.json` y la capa de escena del canal en `escena/`. No es de nadie: no tiene canal de YouTube, ni handle, ni identificador, ni token.",
+  "id": "example",
+  "nombre": "Lantern Slides",
+  "estado": "ejemplo: configuración completa y un episodio entero (guion, láminas, voz, escena, vídeo y miniatura)",
+  "creado": "2026-10-09",
+  "nicho": {
+    "id": "inventos-cotidianos",
+    "descripcion": "Pequeñas historias de inventos cotidianos: cada vídeo toma un objeto corriente (la cremallera, el paraguas, el clip) y cuenta en un minuto qué problema resolvió y cómo funciona.",
+    "sin_fuentes_verificadas": "Es el canal de ejemplo del motor: un episodio de un minuto que enseña cómo se produce, no un canal de divulgación. Un canal real que afirme hechos debería llevar fichas verificadas (`fuentes.py`) y declarar `nicho.fichas_verificadas` en su lugar.",
+    "_por_que_este_tema": "Neutro y apto para cualquier público: sin personas reales, sin marcas y sin líneas rojas (fila 308)."
+  },
+  "formato": {
+    "duracion_objetivo_min": [0.75, 1],
+    "_por_que_esta_duracion": "Minutos de NARRACIÓN, que es lo que compara `scripts/verifica_guion.py`. Era [1, 2]: con el ritmo medido (3,073 palabras/s) pedía unas 92 palabras por lámina y al menos 60 s de voz, casi el doble de lo que cuenta un episodio de un minuto. El primero narra 49,5 s y, con sus pausas, dura unos 55 s (OC1.4).",
+    "capitulos": false,
+    "_por_que_sin_capitulos": "Un vídeo de un minuto no tiene partes que indexar.",
+    "estilo_visual": "grabado en sepia sobre papel envejecido, una lámina por idea, con la cámara del motor de escena recorriendo cada una",
+    "_por_que_este_estilo": "Es el acabado que sale del workflow `qwen-2512-lightning-tinta` con la semilla del canal: un grabado de museo en sepia, no una ilustración a tinta. Se dejó así el 15-10-2026, viendo las tres láminas del primer episodio (OC1.4).",
+    "contrato_de_prompt": "contrato-prompt-imagen.md",
+    "laminas_por_video_estimadas": 3
+  },
+  "imagen": {
+    "modelo": "qwen-2512-lightning-tinta",
+    "seed": 2026,
+    "_por_que_esta_semilla": "Una semilla propia de este canal y no la de otro (F4.9). La consistencia de estilo entre láminas depende de ella; si el estilo cambia en OC1.4, se elige otra a la vista.",
+    "acento_de_color": false,
+    "miniatura_clausulas": [],
+    "fuente_de_la_miniatura": "Anton-Regular.ttf",
+    "_por_que_esta_fuente_de_miniatura": "La letra del texto de la miniatura (OC1.4), de la biblioteca del estudio: Anton, con licencia libre (SIL Open Font License 1.1), viaja en el repositorio con su texto (`datos/escena/fuentes/OFL-Anton.txt`) y entra en `assets.json` con su licencia. Es una palo seco estrecha y gruesa, como Impact, la que el motor leía de Windows hasta OC1.4 y no se puede redistribuir: un texto así sobrevive a la reducción a 168 px.",
+    "adjetivos_prohibidos": [],
+    "_por_que_listas_vacias": "Dos decisiones, no dos olvidos: la miniatura no añade cláusulas al contrato de prompt, y el grabado en sepia del ejemplo no tiene todavía una lista negra de materialidad medida."
+  },
+  "voz": {
+    "receta": "voz-example-en.json",
+    "_por_que": "La receta (`datos/voz-example-en.json`) es de la pasada 2b de OC1.4: la referencia es af_heart, una voz de serie del catálogo de Kokoro elegida el 15-10-2026, y Orpheus la clona y narra (decisión 8). No es la voz ni la grabación de ninguna persona.",
+    "palabras_por_segundo": 3.073,
+    "_palabras_por_segundo_por_que": "Medido sobre el primer episodio entero (OC1.4): 152 palabras en 49,46 s de narración, la suma de `videos/2026-10-15_115251_how-does-a-zip-work/audio/slide-0{1,2,3}.wav` medida con ffprobe. La cata previa con `scripts/cata_ritmo.py` dio 3,021 (111 palabras en 36,75 s, `experimentos/cata-ritmo-example-2026-10-15-132002.json`), un 1,7 % menos. Provisional: se remide si cambia la receta o el estilo del guion."
+  },
+  "idioma": {
+    "narracion": "en",
+    "subtitulos": "en"
+  },
+  "lineas_rojas": {
+    "resumen": "Objetos cotidianos y cómo funcionan. Ni personas reales, ni marcas, ni logotipos.",
+    "si": "el objeto entero o en corte · el mecanismo · manos anónimas usándolo · plano general o detalle",
+    "no": "personas reconocibles · marcas o logotipos · texto legible dentro de la imagen",
+    "guardianes_de_color": [],
+    "_por_que_ningun_guardian_de_color": "Este canal no tiene ninguna línea roja que se mida por un color: la lista vacía es una respuesta, no un olvido (F4.8)."
+  },
+  "publicacion": {
+    "canal_youtube": null,
+    "handle": null,
+    "canal_id": null,
+    "afiliacion": null,
+    "eslogan": "Small stories of everyday inventions.",
+    "hecho_para_ninos": false,
+    "categoria_youtube": "27",
+    "refresh_token_env": "YOUTUBE_REFRESH_TOKEN",
+    "verificado_por_telefono": false,
+    "_por_que_vacio": "El canal de ejemplo no se sube a ningún sitio. Quien use el motor crea SU canal con la skill `crea-canal`, y es en el suyo donde rellena el canal de YouTube, el handle, el identificador y, si lo sube el motor por la API, el token (docs/youtube-upload.md)."
+  },
+  "marca": {
+    "banner": {
+      "escena": "a shelf of everyday objects seen straight on: a zip, an umbrella, a paper clip, a safety pin and a pencil, evenly spaced on a plain wooden shelf, a plain wall behind them",
+      "clausulas": [
+        "the engraved hatching is even and quiet, so the centre of the plate stays calm"
+      ],
+      "incluye_eslogan": true,
+      "fuente": "Anton-Regular.ttf",
+      "_por_que_esta_fuente": "La del nombre y el eslogan del banner (OC1.4), la misma que la miniatura y por el mismo motivo: tiene que leerse en el área segura reducida a un móvil."
+    },
+    "avatar": {
+      "escena": "a single paper clip seen straight on, centred, on a plain empty background",
+      "clausulas": [
+        "the engraved lines are thicker and more contrasted than usual, so the shape survives at 98 px"
+      ]
+    },
+    "marca_de_agua": {
+      "opacidad": 0.55
+    },
+    "descripcion": "Lantern Slides tells small stories of everyday inventions: one ordinary object per video, the problem it solved and how it works, in about a minute.\n\nThis is the example channel of Lanternist, a local video engine. The illustrations and the narration are generated with AI tools, and every video declares it.",
+    "palabras_clave": [
+      "everyday inventions",
+      "how things work",
+      "history of objects",
+      "inventions explained",
+      "short history"
+    ]
+  },
+  "musica": {
+    "activa": true,
+    "escena": "instrumental, no vocals, no singing, light documentary underscore, soft piano, plucked strings, gentle and curious, slow tempo, major key, sparse, unobtrusive background, no drums, no percussion loop, no melody hook",
+    "volumen_db": -19.0,
+    "tramo_segundos": 45.0,
+    "solape_segundos": 4.0,
+    "sonoridad_por_tramo": null,
+    "umbral_ducking": 0.05,
+    "ratio_ducking": 6.0,
+    "ataque_ms": 20,
+    "suelta_ms": 500,
+    "semilla_base": 2026,
+    "_de_donde_salen_los_valores": "Los de la mezcla (volumen, tramo, solape y ducking) son los que el estudio midió para un documental narrado a tinta en el formato «láminas». Se ajustan de oído cuando el canal tenga voz (OC1.4)."
+  },
+  "subtitulos": {
+    "activos": true,
+    "srt": true,
+    "fuente": "Patrick Hand SC",
+    "_por_que_esta_fuente": "Licencia libre (SIL Open Font License 1.1) y su texto viaja con ella en `datos/escena/fuentes/OFL-PatrickHandSC.txt`. Georgia no vale: es de Windows y no se puede redistribuir (OC1.2).",
+    "cuerpo": 60,
+    "max_palabras_por_linea": 10,
+    "margen_inferior_px": 150,
+    "margen_lateral_px": 200,
+    "traducciones": [],
+    "personajes": {}
+  },
+  "ideas": {
+    "minimo_disponibles": 1,
+    "acepta_externas": true
+  },
+  "escena": {
+    "_que_es": "El bloque del motor de escena. Formato «láminas» (`escena.laminas`): una lámina entera por idea y la cámara recorriéndola. Los valores de movimiento, pausas y karaoke son los que el estudio midió en ese formato; se afinan a la vista en OC1.4.",
+    "fps": 24,
+    "marco": {"w": 1920, "h": 1080},
+    "fundido": 0.4,
+    "camara_en_mano": 0,
+    "movimiento": {
+      "anda": {"v": 300, "paso": 2.0, "bote": 18, "balanceo": 2.2},
+      "habla": {"rebote": 7, "frecuencia": 3.1, "cabeceo": 1.2, "cabeceo_frecuencia": 1.3, "sube": 0.1, "baja": 0.15},
+      "respira": {"amplitud": 0.008, "periodo": 3.3},
+      "eventos": {
+        "risa": {"a": 14}, "tiembla": {"a": 8}, "ladea": {"r": 6}, "bote": {"h": 30, "n": 2}, "asiente": {"a": 6},
+        "bombea": {"a": 30, "f": 1.1}, "estira": {"a": 0.06}, "menea": {"a": 12, "f": 2.5}
+      },
+      "elementos": {"entra": 0.9, "sale": 0.8, "trazo": 0.8, "campana": 3}
+    },
+    "laminas": {
+      "zoom_base": 1.06,
+      "zoom_maximo": 1.45,
+      "toma_s": 10,
+      "toma_minima_s": 5,
+      "transicion_s": 2.0,
+      "transiciones_excluidas": ["plate_reveal"],
+      "fuentes_de_los_rotulos": {"redonda": "Gelasio-VariableFont_wght.ttf", "cursiva": "Gelasio-Italic-VariableFont_wght.ttf"},
+      "_por_que_estas_fuentes": "Gelasio, con licencia libre (SIL Open Font License 1.1): viaja en el repositorio con su texto (`datos/escena/fuentes/OFL-Gelasio.txt`) y entra en `assets.json` con su licencia. Está hecha con las métricas de Georgia, la letra de los rótulos del formato hasta OC1.2, que es de Windows y no se puede redistribuir. No tiene versalitas. Se revisa en la muestra de OC1.2 y al ver el canal en OC1.4."
+    },
+    "pausas": {"intro_s": 1.0, "entre_partes_s": 1.0, "cola_s": 2.0},
+    "cues": {"max_palabras": 10, "max_caracteres": 48},
+    "karaoke": {
+      "max_caracteres": 48,
+      "pausa_corte_s": 0.85,
+      "une_menos_de_caracteres": 16,
+      "une_pausa_menor_s": 0.5,
+      "antes_s": 0.18,
+      "despues_s": 0.45,
+      "separacion_s": 0.2,
+      "minimo_s": 0.8,
+      "palabra_minima_s": 0.08,
+      "conjunciones": ["and", "because", "but", "so", "then", "to", "while", "with"],
+      "no_cierran": ["the", "a", "an", "of", "on", "to", "in", "its", "that"]
+    },
+    "habla": {"une_s": 0.35, "minimo_s": 0.1},
+    "reparto": {},
+    "narrador": "narrador",
+    "franja_karaoke_y": 790
+  }
+}

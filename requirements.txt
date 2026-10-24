@@ -1,0 +1,44 @@
+requests==2.34.2
+python-dotenv==1.2.3
+# Pillow: el adaptador de imagen (lib/comfy_client.py) la usa para limpiar los
+# metadatos de generación de las imágenes publicables (addendum de doc/02, fila 7).
+pillow==12.3.0
+# La guarda de líneas rojas (lib/lineas_rojas.py) mide los píxeles de las láminas: sin
+# numpy, `--check` daba verde y el run reventaba al cerrar la etapa de imagen con la GPU
+# ya gastada. Falla cerrado, pero el arreglo es declararlo.
+numpy==2.5.2
+# Mismo caso, cazado por la auditoría de F3.6: `lib/miniatura.py` usa cv2 para localizar el objeto
+# por su acento de color, y opencv solo estaba declarado en el `requirements-detector.txt` que se
+# retiró con el detector el 25-09 (addendum fila 194). En un
+# entorno montado solo con este fichero, `--stage thumbnail` moría con ImportError DESPUÉS de
+# imágenes, voz y montaje — con toda la GPU del run ya gastada— y `--check` no lo veía porque el
+# import está dentro de la etapa. Mientras hubo dos ficheros, la versión era la misma en los dos a
+# propósito: dos pines distintos del mismo paquete en un solo venv es una pelea de pip esperando a pasar.
+opencv-python-headless==5.0.0.93
+# SciPy: el núcleo del recorte del motor de escena (`lib/escena/recorte.py`, F6.2c) quita el fondo de croma, separa
+# figuras y afina máscaras con `scipy.ndimage`. Lo usan el obrero en `.venv-escena` y, en este venv, los lienzos de
+# referencia de `lib/escena/activos.py`, la escala de cabezas de `lib/escena/obrero.py` y sus pruebas sin GPU. Es la
+# misma versión que la de `spikes/requirements-escena.txt`, a propósito: el mismo recorte en los dos entornos.
+scipy==1.18.0
+# fontTools (MIT): los rótulos escritos a tinta del motor de escena (`lib/escena/tinta.py`, F6.8) sacan de la fuente
+# del sistema el contorno de cada letra, su versalita y su interletraje. El navegador no sabe recorrer el contorno de
+# un texto, así que la composición lleva las letras como trazos de SVG.
+fonttools==4.66.1
+# pypdf (BSD-3-Clause, sin dependencias): el proveedor `documento` del módulo de fuentes (lib/fuentes/proveedores/
+# documento.py, F7.12, fila 275) lee el texto de un informe anual en PDF para buscar en él la frase exacta de una cifra.
+# El HTML lo lee la biblioteca estándar; un PDF no, y sin esto el origen de una cifra de empresa no se podría comprobar.
+pypdf==6.19.0
+# Pruebas del camino critico (tests/), decision del 02-09 tras la auditoria
+pytest==9.1.1
+# torch: SOLO para las pruebas de la voz y del obrero del motor de escena, que lo cargan con `importorskip`
+# (tests/test_limpia_voz.py, test_voz_respaldo.py, test_voz_respiracion.py, test_voz_se_comio_texto.py y
+# tests/escena/test_obrero.py). El pipeline no lo importa en este venv: la voz corre en .venv-voz y el obrero en
+# .venv-escena. Sin declararlo, un venv reconstruido desde este fichero saltaba esas pruebas en silencio (medido el
+# 01-10-2026, fila 225). Dos cosas que saber: aquí es la 2.13.0 y la voz de verdad corre con la 2.6.0 de .venv-voz,
+# así que estas pruebas no ven la versión de producción; y en Windows PyPI da el torch de CPU, que basta para ellas
+# (el instalado hoy es el cu126).
+torch==2.13.0
+# El linter ES el gate de pre-commit (.claude/hooks/pre-commit-gate.ps1): sin declararlo, un venv
+# reconstruido desde este fichero se quedaba sin lint y el hook se lo saltaba en silencio, que es lo
+# que midio la auditoria del 10-09. El hook falla ahora si no esta.
+ruff==0.16.3

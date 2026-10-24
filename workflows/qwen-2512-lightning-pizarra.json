@@ -1,0 +1,154 @@
+{
+  "id": "qwen-2512-lightning-pizarra",
+  "estilo": "pizarra",
+  "nota": "Estilo del formato «pizarra»; nació para un canal del estudio, y se firmó en su gate 0: pizarra con tiza, el estilo del hueco pizarra-tiza x business. Copia de qwen-2512-lightning-tinta, que es el modelo del estudio desde el 11-09 (addendum fila 150): mismo grafo, mismos pesos, misma licencia y mismos parámetros; solo cambia el prefijo. OJO: una pizarra es de los objetos a los que Qwen les pinta garabatos que imitan letras (medido en el contrato de prompt de otro canal, límite 1). El prefijo pide 'no text' y el avatar y el banner del canal son la primera medida de si lo cumple.",
+  "modelo": {
+    "nombre": "Qwen-Image-2512 GGUF Q6_K + LoRA Lightning 8 pasos",
+    "pesos": [
+      "unet/qwen-image-2512-Q6_K.gguf",
+      "loras/Qwen-Image-Lightning-8steps-V1.0.safetensors",
+      "text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "vae/qwen_image_vae.safetensors"
+    ],
+    "licencia": "Apache-2.0 (Qwen-Image-2512 y Qwen-Image-Lightning) - uso comercial permitido",
+    "url": "https://huggingface.co/Qwen/Qwen-Image-2512 · https://huggingface.co/unsloth/Qwen-Image-2512-GGUF · https://huggingface.co/lightx2v/Qwen-Image-Lightning",
+    "url_nota": "Tres url, en el orden del registro de procedencia (se unen con « · »): el modelo base, el repositorio del GGUF Q6_K que se ejecuta y el del LoRA Lightning de 8 pasos. Son las de THIRD_PARTY_NOTICES.md, sección 5, comprobadas en su fuente el 14-10-2026. El adaptador de imagen las copia a cada registro desde OC1.4.",
+    "local": true
+  },
+  "prefijo_estilo": "white chalk drawing on a black chalkboard, simple hand-drawn chalk lines with a soft powdery edge, like a teacher's quick sketch, a few accents in pale yellow chalk, faint smudges of erased chalk, the black surface of the board fills the picture from edge to edge, the bottom quarter of the board left empty, no text, no watermark, wide 16:9 composition.",
+  "parametros": {
+    "steps": 8,
+    "cfg": 1.0,
+    "shift": 3.1
+  },
+  "inyeccion": {
+    "prompt": "5:text",
+    "seed": "9:seed",
+    "steps": "9:steps",
+    "cfg": "9:cfg",
+    "shift": "8:shift",
+    "width": "7:width",
+    "height": "7:height"
+  },
+  "nodo_salida": "11",
+  "grafo": {
+    "1": {
+      "class_type": "UnetLoaderGGUF",
+      "inputs": {
+        "unet_name": "qwen-image-2512-Q6_K.gguf"
+      }
+    },
+    "2": {
+      "class_type": "LoraLoaderModelOnly",
+      "inputs": {
+        "model": [
+          "1",
+          0
+        ],
+        "lora_name": "Qwen-Image-Lightning-8steps-V1.0.safetensors",
+        "strength_model": 1.0
+      }
+    },
+    "3": {
+      "class_type": "CLIPLoader",
+      "inputs": {
+        "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+        "type": "qwen_image",
+        "device": "default"
+      }
+    },
+    "4": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "qwen_image_vae.safetensors"
+      }
+    },
+    "5": {
+      "class_type": "CLIPTextEncode",
+      "inputs": {
+        "text": "",
+        "clip": [
+          "3",
+          0
+        ]
+      }
+    },
+    "6": {
+      "class_type": "ConditioningZeroOut",
+      "inputs": {
+        "conditioning": [
+          "5",
+          0
+        ]
+      }
+    },
+    "7": {
+      "class_type": "EmptySD3LatentImage",
+      "inputs": {
+        "width": 1344,
+        "height": 768,
+        "batch_size": 1
+      }
+    },
+    "8": {
+      "class_type": "ModelSamplingAuraFlow",
+      "inputs": {
+        "model": [
+          "2",
+          0
+        ],
+        "shift": 3.1
+      }
+    },
+    "9": {
+      "class_type": "KSampler",
+      "inputs": {
+        "model": [
+          "8",
+          0
+        ],
+        "seed": 42,
+        "steps": 8,
+        "cfg": 1.0,
+        "sampler_name": "euler",
+        "scheduler": "simple",
+        "positive": [
+          "5",
+          0
+        ],
+        "negative": [
+          "6",
+          0
+        ],
+        "latent_image": [
+          "7",
+          0
+        ],
+        "denoise": 1.0
+      }
+    },
+    "10": {
+      "class_type": "VAEDecode",
+      "inputs": {
+        "samples": [
+          "9",
+          0
+        ],
+        "vae": [
+          "4",
+          0
+        ]
+      }
+    },
+    "11": {
+      "class_type": "SaveImage",
+      "inputs": {
+        "images": [
+          "10",
+          0
+        ],
+        "filename_prefix": "img"
+      }
+    }
+  }
+}

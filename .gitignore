@@ -1,0 +1,94 @@
+# Credenciales y entorno — jamás en git (doc/02, Punto 5)
+.env
+.venv/
+.venv-voz/
+# El obrero de activos del motor de escena (F6.2c): torch de CUDA, Real-ESRGAN y SAM. Se reconstruye con
+# spikes/requirements-escena.txt. (Python 3.14 ya deja un .gitignore dentro del venv; esto no depende de él.)
+.venv-escena/
+
+# Una grabación de voz JAMÁS entra en git (lista negra) — cinturón y tirantes
+*.wav
+*.WAV
+
+# Artefactos generados: pesados y regenerables. `canales/` NO se ignora entera y es
+# deliberado: dentro viven las fotos de métricas, la procedencia de cada run, el perfil y las
+# fichas de fuentes, que no se pueden regenerar (2,3 MB). Lo que se ignora es lo que sí.
+canales/*/videos/
+# Salvo el episodio del canal de ejemplo, que viaja con el motor (OC1.4): su guion (`slides.json`) y sus láminas con
+# sus créditos. Lo demás del run se queda fuera como en cualquier canal: la voz, el vídeo, los intermedios y los
+# registros de los adaptadores, que llevan rutas de este PC. Su procedencia viaja espejada en `datos/assets/`.
+!canales/example/videos/
+canales/example/videos/*/*
+!canales/example/videos/*/slides.json
+!canales/example/videos/*/slides/
+canales/example/videos/*/slides/*
+!canales/example/videos/*/slides/slide-*.png
+!canales/example/videos/*/slides/CREDITOS.json
+canales/*/marca/
+experimentos/
+logs/
+
+# Modelos descargados y cachés de torch/huggingface
+modelos/
+*.safetensors
+*.ckpt
+*.pth
+*.pt
+*.gguf
+*.onnx
+.cache/
+
+# Python
+__pycache__/
+*.pyc
+
+# Claude Code local (el settings.json compartido y los agentes SÍ se versionan)
+.claude/settings.local.json
+.claude/worktrees/
+
+# Las paginas de los gates: el documento que se aprueba es el .md, que si entra
+# en git; el .html es la vista para que el usuario lo lea con doble clic y la rehace su script.
+progress/*.html
+
+# Y con la pagina del calendario: el plan editorial que se decide es el .json + el .md, que
+# entran en git; el .html lo rehace scripts/pagina_calendario.py leyendo el estado de cada run.
+canales/*/calendario/*.html
+
+# Y con la revision visual de las laminas: es una VISTA del run (mosaico + pagina), la rehace
+# scripts/revisa_laminas.py en segundos y **no puede vivir dentro del run**, porque provenance.py
+# contaria el mosaico como un asset del video y la decision 5 pararia la subida.
+canales/*/revision/
+
+# Configuracion del editor de cada uno, no del proyecto (deriva 02-09)
+*.code-workspace
+
+# Y con la pagina del buzon de ideas (F5.11): lo que no se regenera es `ideas.json` —las ideas y su
+# estado, que son trabajo del usuario y del estudio— y ese SI entra en git. El `.html` es la vista, la
+# rehace `ideas.py --pagina` en un segundo y lleva dentro el texto de terceros ya escapado.
+canales/*/ideas/ideas.html
+
+# La página de confirmación de las cifras de una ficha (F7.12) es una vista: la rehace
+# `fuentes.py --comprueba-cifras` junto a la ficha. Lo que entra en git es la ficha `.json`, con lo que el
+# código encontró en cada documento y la confirmación del usuario.
+canales/*/datos/fuentes/*.html
+
+# El panel de observación de produce-semana (scripts/panel_semana.py) es una vista: se regenera
+# entera desde el calendario y el estado de cada run, y no guarda nada propio (08-09).
+canales/*/panel-semana.html
+
+# Empaquetado derivado de una skill: lo genera la herramienta al editarla y se rehace solo.
+# Apareció el 14-09-2026 al tocar produce-semana; su contenido son los mismos ficheros que ya
+# están versionados al lado, así que commitearlo sería guardar dos veces lo mismo y dejar que
+# diverjan.
+.claude/skills/*.zip
+
+# Motor de escena (Loop 6): las dependencias de Node se instalan con `cd motor; npm ci`
+node_modules/
+
+# Lo que instala `instala.py` cuando el .env no declara otra ruta (OC1.7): ComfyUI, llama.cpp, el GGUF de Orpheus y el
+# Chrome con WebGPU. Pesa decenas de GB y es de terceros: nunca entra en git.
+herramientas/
+
+# Los efectos de sonido de Pixabay no se pueden redistribuir sueltos (OC1.2): se instalan desde HyperFrames con
+# `scripts/instala_efectos.py`, que comprueba el sha256 de cada uno. Lo versionado es su `CREDITOS.json`.
+datos/escena/sfx/*.mp3

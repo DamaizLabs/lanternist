@@ -1,0 +1,69 @@
+{
+  "_que_es": "La procedencia de cada fuente de la biblioteca del estudio (decisión 5). Qué fuente usa un canal lo decide su perfil y su CSS; aquí solo están los ficheros y de dónde salen. El motor de escena comprueba el sha256. Todas son OFL y viajan en el repositorio con el texto de su licencia al lado (`texto_de_la_licencia`), como pide la OFL (OC1.2). Una fuente que no se pueda redistribuir no entra aquí.",
+  "_como_se_comprobo": "El autor, la url y la licencia se leyeron de la tabla `name` de cada fichero (fontkit o fontTools, en local, sin red): copyright, versión y licenseURL. Los textos OFL de Baloo 2, Fredoka y Gelasio se bajaron del repositorio de Google Fonts (google/fonts, commit e9678a5385322c63730122ba464765baad83cfd8) el 14-10-2026 (OC1.2). Anton y su OFL.txt se bajaron del mismo repositorio en el commit cee74d7ca45d66d5c1878c828645c862f2788d2d el 15-10-2026 (OC1.4), y son byte a byte los de ese commit: lo dice `git hash-object --no-filters`, que da el mismo blob que el árbol de google/fonts (4d65707d… y 93feddee…).",
+  "ficheros": {
+    "Anton-Regular.ttf": {
+      "fuente": "Anton Regular, versión 2.116, de Vernon Adams; bajada del repositorio de Google Fonts (ofl/anton/Anton-Regular.ttf, commit cee74d7) el 15-10-2026",
+      "licencia": "SIL Open Font License 1.1 (OFL): uso comercial permitido, también incrustada; el texto de la licencia va al lado (OFL-Anton.txt)",
+      "url": "https://github.com/google/fonts/tree/cee74d7ca45d66d5c1878c828645c862f2788d2d/ofl/anton",
+      "autor": "Copyright 2020 The Anton Project Authors (https://github.com/googlefonts/AntonFont.git); diseño de Vernon Adams",
+      "texto_de_la_licencia": "OFL-Anton.txt",
+      "sha256": "a4ba3a92350ebb031da0cb47630ac49eb265082ca1bc0450442f4a83ab947cab",
+      "notas": "La letra del texto de la miniatura y del nombre y el eslogan del banner del canal de ejemplo (OC1.4): sustituye a Impact, que se leía de la carpeta de fuentes de Windows y no se puede redistribuir. Según su ficha en Google Fonts (DESCRIPTION.en_us.html, leída el 15-10-2026), es «a reworking of a traditional advertising sans serif typeface», con los trazos pensados «for use as bold display font»: una palo seco estrecha y gruesa, como Impact. Tiene versalitas (smcp), que la miniatura no usa. Autor, versión y licencia leídos de su tabla `name` con fontTools (nameID 0, 5, 13 y 14): «Version 2.116»."
+    },
+    "baloo-2-latin-700-normal.woff2": {
+      "fuente": "Baloo 2 Bold, versión 1.700; vía el repositorio de HyperFrames (skills/embedded-captions), según el CREDITOS.md de video_1",
+      "licencia": "SIL Open Font License 1.1 (OFL): uso comercial permitido, también incrustada; el texto de la licencia va al lado (OFL-Baloo2.txt, de google/fonts ofl/baloo2, 14-10-2026)",
+      "url": "https://github.com/EkType/Baloo2",
+      "autor": "Copyright 2019 The Baloo 2 Project Authors",
+      "sha256": "8e7ffc9b993aa8caa89bcab81e103c9eb2da4e3e042f37b7a5115d0ddbff12c0",
+      "notas": "Traída de video_1 (canal/assets/fonts/).",
+      "texto_de_la_licencia": "OFL-Baloo2.txt"
+    },
+    "fredoka-latin-400-normal.woff2": {
+      "fuente": "Fredoka Regular, versión 2.001; vía el repositorio de HyperFrames (skills/embedded-captions), según el CREDITOS.md de video_1",
+      "licencia": "SIL Open Font License 1.1 (OFL): uso comercial permitido, también incrustada; el texto de la licencia va al lado (OFL-Fredoka.txt, de google/fonts ofl/fredoka, 14-10-2026)",
+      "url": "https://github.com/hafontia/Fredoka-One",
+      "autor": "Copyright 2016 The Fredoka Project Authors",
+      "sha256": "9cf74f703532ef61311d6c6dd32a582b6e410727f5fce1dbf5570cbe6b023c2f",
+      "notas": "Traída de video_1 (canal/assets/fonts/).",
+      "texto_de_la_licencia": "OFL-Fredoka.txt"
+    },
+    "fredoka-latin-700-normal.woff2": {
+      "fuente": "Fredoka Bold, versión 2.001; vía el repositorio de HyperFrames (skills/embedded-captions), según el CREDITOS.md de video_1",
+      "licencia": "SIL Open Font License 1.1 (OFL): uso comercial permitido, también incrustada; el texto de la licencia va al lado (OFL-Fredoka.txt, de google/fonts ofl/fredoka, 14-10-2026)",
+      "url": "https://github.com/hafontia/Fredoka-One",
+      "autor": "Copyright 2016 The Fredoka Project Authors",
+      "sha256": "ee61b48acab42fcfee4e1c398b03bbae7e09d1be8471779c440a97dc85118c16",
+      "notas": "Traída de video_1 (canal/assets/fonts/).",
+      "texto_de_la_licencia": "OFL-Fredoka.txt"
+    },
+    "Gelasio-Italic-VariableFont_wght.ttf": {
+      "fuente": "Gelasio Italic, versión 1.008, de Eben Sorkin; bajada del repositorio de Google Fonts (ofl/gelasio/Gelasio-Italic[wght].ttf, commit e9678a5) el 14-10-2026",
+      "licencia": "SIL Open Font License 1.1 (OFL): uso comercial permitido, también incrustada; el texto de la licencia va al lado (OFL-Gelasio.txt)",
+      "url": "https://github.com/google/fonts/tree/e9678a5385322c63730122ba464765baad83cfd8/ofl/gelasio",
+      "autor": "Copyright 2022 The Gelasio Project Authors (https://github.com/SorkinType/Gelasio); diseño de Eben Sorkin",
+      "texto_de_la_licencia": "OFL-Gelasio.txt",
+      "sha256": "52559e845a4d33514e5f93bb9ae7dbeae1894a53f2c565a15f18af40cd337c09",
+      "notas": "La fuente de los rótulos a tinta del canal de ejemplo en el formato «láminas» (OC1.2): sustituye a Georgia, que es de Windows y no se puede redistribuir. Según su ficha en Google Fonts (DESCRIPTION.en_us.html, leída el 14-10-2026), es «metrics compatible with Georgia» en redonda, negrita y cursiva: ocupa lo mismo. Es variable (peso 400-700) y la tinta lee la instancia por defecto, la 400. No tiene versalitas (smcp). En google/fonts se llama Gelasio-Italic[wght].ttf; aquí lleva el nombre de la descarga de Google Fonts, porque los corchetes son comodines en PowerShell. Autor, versión y licencia leídos de su tabla `name` con fontTools (nameID 0, 5, 13 y 14): «Version 1.008»."
+    },
+    "Gelasio-VariableFont_wght.ttf": {
+      "fuente": "Gelasio Regular, versión 1.008, de Eben Sorkin; bajada del repositorio de Google Fonts (ofl/gelasio/Gelasio[wght].ttf, commit e9678a5) el 14-10-2026",
+      "licencia": "SIL Open Font License 1.1 (OFL): uso comercial permitido, también incrustada; el texto de la licencia va al lado (OFL-Gelasio.txt)",
+      "url": "https://github.com/google/fonts/tree/e9678a5385322c63730122ba464765baad83cfd8/ofl/gelasio",
+      "autor": "Copyright 2022 The Gelasio Project Authors (https://github.com/SorkinType/Gelasio); diseño de Eben Sorkin",
+      "texto_de_la_licencia": "OFL-Gelasio.txt",
+      "sha256": "4daecea457258c9ebeb8bc99ed3fd24353618bfad3ea4b93fa0b5d0468fc04e4",
+      "notas": "La fuente de los rótulos a tinta del canal de ejemplo en el formato «láminas» (OC1.2): sustituye a Georgia, que es de Windows y no se puede redistribuir. Según su ficha en Google Fonts (DESCRIPTION.en_us.html, leída el 14-10-2026), es «metrics compatible with Georgia» en redonda, negrita y cursiva: ocupa lo mismo. Es variable (peso 400-700) y la tinta lee la instancia por defecto, la 400. No tiene versalitas (smcp). En google/fonts se llama Gelasio[wght].ttf; aquí lleva el nombre de la descarga de Google Fonts, porque los corchetes son comodines en PowerShell. Autor, versión y licencia leídos de su tabla `name` con fontTools (nameID 0, 5, 13 y 14): «Version 1.008»."
+    },
+    "PatrickHandSC-Regular.ttf": {
+      "fuente": "Patrick Hand SC Regular, versión 2.001, de Patrick Wagesreiter; bajada del repositorio de Google Fonts (ofl/patrickhandsc) el 05-10-2026",
+      "licencia": "SIL Open Font License 1.1 (OFL): uso comercial permitido, también incrustada; el texto de la licencia va al lado (OFL-PatrickHandSC.txt)",
+      "url": "https://github.com/google/fonts/tree/main/ofl/patrickhandsc",
+      "autor": "Copyright 2012 The Patrick Hand Authors (mail@patrickwagesreiter.at)",
+      "sha256": "83eff88cfa3c4e501e25f334c0a1a88eb4d4af1ea9d4c32900edf2fb178244dc",
+      "notas": "La letra de tiza del formato «pizarra» (F7.10, fila 256): la tinta (lib/escena/tinta.py) lee sus contornos para escribir cada letra trazo a trazo. El autor, la versión y la licencia se leyeron de su tabla `name` con fontTools (nameID 0, 5, 13 y 14). Se eligió por sus versalitas a mano, que son las del vídeo de origen.",
+      "texto_de_la_licencia": "OFL-PatrickHandSC.txt"
+    }
+  }
+}

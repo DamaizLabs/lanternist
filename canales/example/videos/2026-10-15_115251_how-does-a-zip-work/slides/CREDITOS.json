@@ -1,0 +1,26 @@
+{
+  "_que_es": "La procedencia de las láminas del episodio de ejemplo (OC1.4), que viajan con el motor: la guarda de licencias (`scripts/guarda_licencias.py`) exige esta ficha a cada imagen versionada. Si una lámina se regenera, su sha256 cambia y esta ficha también.",
+  "ficheros": {
+    "slide-01.png": {
+      "fuente": "generada en local el 15-10-2026 con ComfyUI y el workflow `qwen-2512-lightning-tinta` (Qwen-Image-2512 GGUF Q6_K + LoRA Lightning 8 pasos), semilla 2026, a partir del `image_prompt` de su lámina en `slides.json`; el registro completo está en `canales/example/datos/assets/2026-10-15_115251_how-does-a-zip-work.json`",
+      "licencia": "MIT, la licencia del repositorio de Lanternist (OC1.D1). Los pesos que la generaron son Apache-2.0 (Qwen-Image-2512 y Qwen-Image-Lightning; `THIRD_PARTY_NOTICES.md`)",
+      "url": "https://huggingface.co/Qwen/Qwen-Image-2512",
+      "sha256": "b27b186c765d66d9aa456f05694a08605286830a8a4c62a29a25c944df6120bc",
+      "notas": "Pesos: unet/qwen-image-2512-Q6_K.gguf, loras/Qwen-Image-Lightning-8steps-V1.0.safetensors, text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors, vae/qwen_image_vae.safetensors. La URL es la del modelo base; la de cada peso está en `THIRD_PARTY_NOTICES.md`."
+    },
+    "slide-02.png": {
+      "fuente": "generada en local el 15-10-2026 con ComfyUI y el workflow `qwen-2512-lightning-tinta` (Qwen-Image-2512 GGUF Q6_K + LoRA Lightning 8 pasos), semilla 2026, a partir del `image_prompt` de su lámina en `slides.json`; el registro completo está en `canales/example/datos/assets/2026-10-15_115251_how-does-a-zip-work.json`",
+      "licencia": "MIT, la licencia del repositorio de Lanternist (OC1.D1). Los pesos que la generaron son Apache-2.0 (Qwen-Image-2512 y Qwen-Image-Lightning; `THIRD_PARTY_NOTICES.md`)",
+      "url": "https://huggingface.co/Qwen/Qwen-Image-2512",
+      "sha256": "59eb318387a39690d96b002e6796e774e63ad17b47c1391d7d5908fba27da0f9",
+      "notas": "Pesos: unet/qwen-image-2512-Q6_K.gguf, loras/Qwen-Image-Lightning-8steps-V1.0.safetensors, text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors, vae/qwen_image_vae.safetensors. La URL es la del modelo base; la de cada peso está en `THIRD_PARTY_NOTICES.md`. Es la tercera versión de esta lámina (OC1.4, pasada 2b): la primera cruzaba dos cremalleras y la segunda dibujó una pieza en Y sobre una cremallera cerrada. Se cambió el texto del prompt y se conservó la semilla."
+    },
+    "slide-03.png": {
+      "fuente": "generada en local el 15-10-2026 con ComfyUI y el workflow `qwen-2512-lightning-tinta` (Qwen-Image-2512 GGUF Q6_K + LoRA Lightning 8 pasos), semilla 2027, a partir del `image_prompt` y el `prefijo_estilo` de su lámina en `slides.json`, los dos en español; el registro completo está en `canales/example/datos/assets/2026-10-15_115251_how-does-a-zip-work.json`",
+      "licencia": "MIT, la licencia del repositorio de Lanternist (OC1.D1). Los pesos que la generaron son Apache-2.0 (Qwen-Image-2512 y Qwen-Image-Lightning; `THIRD_PARTY_NOTICES.md`)",
+      "url": "https://huggingface.co/Qwen/Qwen-Image-2512",
+      "sha256": "b9aec99e3dca2ebdaa53397368d0d20684f626eb35af770410b287f9cabea3f3",
+      "notas": "Pesos: unet/qwen-image-2512-Q6_K.gguf, loras/Qwen-Image-Lightning-8steps-V1.0.safetensors, text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors, vae/qwen_image_vae.safetensors. La URL es la del modelo base; la de cada peso está en `THIRD_PARTY_NOTICES.md`. La primera versión dibujaba dos tiradores en el cursor; ni el prompt en inglés ni dos ediciones con Qwen-Image-Edit lo quitaron, y el prompt entero en español sí, con la semilla 2027 (OC1.4, pasada 2b)."
+    }
+  }
+}

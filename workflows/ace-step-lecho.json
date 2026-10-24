@@ -1,0 +1,155 @@
+{
+  "id": "ace-step-lecho",
+  "estilo": "musica",
+  "nota": "Lecho musical instrumental generado en local con ACE-Step. Nace de la queja del 24-08: el lecho de osciladores de la primera prueba «no se escucha nada de fondo». La medición del vídeo de referencia le dio la razón y explicó por qué: allí los graves van +2,1 dB POR ENCIMA de la voz, y mi lecho estaba ~25 dB por debajo (progress/analisis_referencia_produccion.md).",
+  "modelo": {
+    "nombre": "ACE-Step v1 3.5B (all-in-one)",
+    "pesos": [
+      "checkpoints/ace_step_v1_3.5b.safetensors"
+    ],
+    "licencia": "Apache-2.0 — uso comercial permitido. VERIFICADO contra la API de HuggingFace el 24-08 (Comfy-Org/ACE-Step_ComfyUI_repackaged, campo cardData.license), no de memoria.",
+    "url": "https://huggingface.co/ACE-Step/ACE-Step-v1-3.5B · https://huggingface.co/Comfy-Org/ACE-Step_ComfyUI_repackaged",
+    "url_nota": "Dos url, en el orden del registro de procedencia (se unen con « · »): el modelo base y el repositorio del fichero que se ejecuta (ace_step_v1_3.5b.safetensors). Son las de THIRD_PARTY_NOTICES.md, sección 5, comprobadas en su fuente el 14-10-2026. El adaptador de música las copia a su registro desde OC1.4.",
+    "local": true,
+    "por_que_generar_y_no_descargar": "Se propuso música Creative Commons de biblioteca. Se descartó porque CC NO protege de Content ID —muchas pistas CC están registradas por distribuidoras— y un reclamo es PARADA TOTAL del sistema por precedencia de paradas. La música generada es original: no puede reclamarla nadie. Además CC-BY obligaría a atribución en cada descripción."
+  },
+  "prefijo_estilo": "",
+  "_nota_prefijo_estilo": "Vacío desde F6.5b (30-09-2026, addendum fila 210). Hasta entonces llevaba el estilo musical del primer canal («cinematic underscore… solemn, minor key… church reverb, dark…») y, como este workflow es del ESTUDIO (`datos/base-del-estudio.json → produccion.lecho_musical.workflow`), se anteponía a la `musica.escena` de TODOS los canales: la música infantil del segundo habría salido con coro, timbales y tonalidad menor. El estilo es del canal (regla F4.9): el texto entero que recibe ACE-Step es `perfil.json → musica.escena`. Los canales que lo usaban llevan ahora ese prefijo escrito al principio de su escena, así que su prompt sigue siendo el mismo carácter a carácter.",
+  "parametros": {
+    "steps": 50,
+    "cfg": 5.0,
+    "shift": 5.0,
+    "tonemap": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "segundos": 30.0,
+    "letra": "[instrumental]"
+  },
+  "inyeccion": {
+    "prompt": "14:tags",
+    "seed": "52:seed",
+    "steps": "52:steps",
+    "cfg": "52:cfg",
+    "shift": "51:shift",
+    "segundos": "17:seconds",
+    "letra": "14:lyrics"
+  },
+  "nodo_salida": "59",
+  "_nota_inyeccion": "Los puntos de inyección de `segundos` y `letra` estaban INERTES hasta la auditoría de F2.12: `build_prompt_graph` tenía una tabla cerrada de parámetros lógicos y saltaba los que no conocía, así que el grafo usaba el valor escrito a mano aquí y la procedencia registraba el de `parametros` — un registro que se contradecía consigo mismo. Ahora todo lo que esté en `parametros` se inyecta si tiene punto de inyección, y un punto declarado sin valor FALLA en vez de quedarse inerte. El equivalente temporal de `width`/`height` aquí es `segundos`: la duración máxima útil de una pasada son ~240 s, así que un vídeo largo se genera por tramos encadenados con solape, no en una sola.",
+  "grafo": {
+    "40": {
+      "class_type": "CheckpointLoaderSimple",
+      "inputs": {
+        "ckpt_name": "ace_step_v1_3.5b.safetensors"
+      }
+    },
+    "14": {
+      "class_type": "TextEncodeAceStepAudio",
+      "inputs": {
+        "clip": [
+          "40",
+          1
+        ],
+        "tags": "",
+        "lyrics": "[instrumental]",
+        "lyrics_strength": 0.99
+      }
+    },
+    "44": {
+      "class_type": "ConditioningZeroOut",
+      "inputs": {
+        "conditioning": [
+          "14",
+          0
+        ]
+      }
+    },
+    "17": {
+      "class_type": "EmptyAceStepLatentAudio",
+      "inputs": {
+        "seconds": 30.0,
+        "batch_size": 1
+      }
+    },
+    "51": {
+      "class_type": "ModelSamplingSD3",
+      "inputs": {
+        "model": [
+          "40",
+          0
+        ],
+        "shift": 5.0
+      }
+    },
+    "50": {
+      "class_type": "LatentOperationTonemapReinhard",
+      "inputs": {
+        "multiplier": 1.0
+      }
+    },
+    "49": {
+      "class_type": "LatentApplyOperationCFG",
+      "inputs": {
+        "model": [
+          "51",
+          0
+        ],
+        "operation": [
+          "50",
+          0
+        ]
+      }
+    },
+    "52": {
+      "class_type": "KSampler",
+      "inputs": {
+        "model": [
+          "49",
+          0
+        ],
+        "positive": [
+          "14",
+          0
+        ],
+        "negative": [
+          "44",
+          0
+        ],
+        "latent_image": [
+          "17",
+          0
+        ],
+        "seed": 1234,
+        "steps": 50,
+        "cfg": 5.0,
+        "sampler_name": "euler",
+        "scheduler": "simple",
+        "denoise": 1.0
+      }
+    },
+    "18": {
+      "class_type": "VAEDecodeAudio",
+      "inputs": {
+        "samples": [
+          "52",
+          0
+        ],
+        "vae": [
+          "40",
+          2
+        ]
+      }
+    },
+    "59": {
+      "class_type": "SaveAudioMP3",
+      "inputs": {
+        "audio": [
+          "18",
+          0
+        ],
+        "filename_prefix": "audio/lecho",
+        "quality": "V0"
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+/* CSS de un canal FICTICIO para las pruebas del motor de escena (F6.2a). No es de ningún canal del estudio:
+   solo demuestra que el estilo llega como parámetro y que compone.py lo mete tal cual en la página. */
+html, body { background: #20242a; }
+.plano { background: #20242a; }
+#root { font-family: sans-serif; }
+#karaoke { bottom: 40px; height: 200px; }
+.kin { padding: 10px 30px; border-radius: 24px; background: rgba(20, 20, 30, .6); font: 700 56px/1.2 sans-serif; color: #ffffff; }
+.w { margin: 0 .1em; }
+.w.h-voz1 { --c: #f2c94c; }
+.w.h-voz2 { --c: #6fcf97; }
+.rotulo .caja { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  background: #fff8ec; border-radius: 30px; font: 700 40px/1 sans-serif; color: #333333; }
+.el .trazo { fill: none; stroke: #eb5757; stroke-width: 8; }
+.tr.destello { background: #fff6e6; }
+/* marca-del-canal-de-prueba */

@@ -1,0 +1,1496 @@
+{
+ "_que_es": "El par de control de F5.7: la MISMA lamina 5 del episodio 2 de un canal, transcrita por el mismo whisper-small del pipeline sobre los dos audios que existen de ella. `con_filtro` es el audio que se subio a YouTube el 14-09-2026, al que la limpieza por marcas le borro 5,6 s de narracion; `sin_filtro` es el mismo segmento generado sin ese filtro. El texto de los dos es casi igual —whisper falla en el mismo sitio en ambos— y lo que los separa es el AUDIO: uno esta callado ahi y el otro habla.",
+ "_como_se_hizo": "lib/alineador.alinea() con openai/whisper-small sobre los dos .wav, 14-09-2026",
+ "narracion": "For ten seconds, nobody moved. The white cloud came down slowly, like snow in a film. Ollie was still on the chair. His hair was white. His eyebrows were white too. He looked like a very small old man. <chuckle> Nora looked at her brother. Ollie looked at his sister. Nobody said a word. Then they heard feet. Fast feet. Biscuit came into the kitchen, because in this house a big noise usually meant food. He ran through the flour. He ran in a big circle. He came back, and he ran through the flour again. He was very, very happy. Now there were small white footprints on the floor. They went from the table to the door. They went from the door to the table. They went everywhere. Nora whispered, \"Biscuit. No. Sit.\" Biscuit sat down. He looked at the two children. He was completely white now, and he was very proud of himself.",
+ "silencio_medido_s": {
+  "_que_es": "silencio real dentro de la ventana de cada hallazgo, ffmpeg silencedetect a -50 dB, 14-09-2026",
+  "con_filtro": {
+   "desde_s": 29.82,
+   "hasta_s": 37.88,
+   "silencio_s": 6.07,
+   "palabras": 14
+  },
+  "sin_filtro": {
+   "desde_s": 29.82,
+   "hasta_s": 35.82,
+   "silencio_s": 2.56,
+   "palabras": 8
+  }
+ },
+ "duracion_audio_s": 81.84,
+ "con_filtro": {
+  "transcripcion": "For ten seconds nobody moved. The white cloud came down slowly like snow in a film. Olly was still on the chair. His hair was white. His eyebrows were white too. He looked like a very small old man. Nora looked at her brother. Olly looked at his sister. Nobody said a word. heard. Then they heard f*****g f** noise usually meant food, he ran through the flower. He ran in a big circle. He came back and he ran through the flower again. He was very, very happy. Now there were small white footprints on the floor. They went from the table to the door. They went from the door to the table. They went everywhere. Nora whispered. Biscuit. No. Sit. Biscuit sat down. He looked at the two children. He was completely white now and he was very proud of himself.",
+  "marcas": [
+   {
+    "texto": "For",
+    "desde": 0.0,
+    "hasta": 0.18
+   },
+   {
+    "texto": "ten",
+    "desde": 0.18,
+    "hasta": 0.48
+   },
+   {
+    "texto": "seconds",
+    "desde": 0.48,
+    "hasta": 1.24
+   },
+   {
+    "texto": "nobody",
+    "desde": 1.24,
+    "hasta": 1.62
+   },
+   {
+    "texto": "moved.",
+    "desde": 1.62,
+    "hasta": 3.18
+   },
+   {
+    "texto": "The",
+    "desde": 3.18,
+    "hasta": 3.36
+   },
+   {
+    "texto": "white",
+    "desde": 3.36,
+    "hasta": 3.64
+   },
+   {
+    "texto": "cloud",
+    "desde": 3.64,
+    "hasta": 4.18
+   },
+   {
+    "texto": "came",
+    "desde": 4.18,
+    "hasta": 4.5
+   },
+   {
+    "texto": "down",
+    "desde": 4.5,
+    "hasta": 4.8
+   },
+   {
+    "texto": "slowly",
+    "desde": 4.8,
+    "hasta": 5.4
+   },
+   {
+    "texto": "like",
+    "desde": 5.4,
+    "hasta": 5.98
+   },
+   {
+    "texto": "snow",
+    "desde": 5.98,
+    "hasta": 6.38
+   },
+   {
+    "texto": "in",
+    "desde": 6.38,
+    "hasta": 6.72
+   },
+   {
+    "texto": "a",
+    "desde": 6.72,
+    "hasta": 6.82
+   },
+   {
+    "texto": "film.",
+    "desde": 6.82,
+    "hasta": 8.76
+   },
+   {
+    "texto": "Olly",
+    "desde": 8.86,
+    "hasta": 9.1
+   },
+   {
+    "texto": "was",
+    "desde": 9.1,
+    "hasta": 9.34
+   },
+   {
+    "texto": "still",
+    "desde": 9.34,
+    "hasta": 9.7
+   },
+   {
+    "texto": "on",
+    "desde": 9.7,
+    "hasta": 9.96
+   },
+   {
+    "texto": "the",
+    "desde": 9.96,
+    "hasta": 10.1
+   },
+   {
+    "texto": "chair.",
+    "desde": 10.1,
+    "hasta": 11.28
+   },
+   {
+    "texto": "His",
+    "desde": 11.28,
+    "hasta": 11.46
+   },
+   {
+    "texto": "hair",
+    "desde": 11.46,
+    "hasta": 11.88
+   },
+   {
+    "texto": "was",
+    "desde": 11.88,
+    "hasta": 12.18
+   },
+   {
+    "texto": "white.",
+    "desde": 12.18,
+    "hasta": 13.52
+   },
+   {
+    "texto": "His",
+    "desde": 13.52,
+    "hasta": 13.74
+   },
+   {
+    "texto": "eyebrows",
+    "desde": 13.74,
+    "hasta": 14.16
+   },
+   {
+    "texto": "were",
+    "desde": 14.16,
+    "hasta": 14.54
+   },
+   {
+    "texto": "white",
+    "desde": 14.54,
+    "hasta": 14.92
+   },
+   {
+    "texto": "too.",
+    "desde": 14.92,
+    "hasta": 16.26
+   },
+   {
+    "texto": "He",
+    "desde": 16.98,
+    "hasta": 17.24
+   },
+   {
+    "texto": "looked",
+    "desde": 17.24,
+    "hasta": 17.54
+   },
+   {
+    "texto": "like",
+    "desde": 17.54,
+    "hasta": 17.84
+   },
+   {
+    "texto": "a",
+    "desde": 17.84,
+    "hasta": 18.04
+   },
+   {
+    "texto": "very",
+    "desde": 18.04,
+    "hasta": 18.34
+   },
+   {
+    "texto": "small",
+    "desde": 18.34,
+    "hasta": 18.78
+   },
+   {
+    "texto": "old",
+    "desde": 18.78,
+    "hasta": 19.34
+   },
+   {
+    "texto": "man.",
+    "desde": 19.34,
+    "hasta": 20.56
+   },
+   {
+    "texto": "Nora",
+    "desde": 21.24,
+    "hasta": 21.78
+   },
+   {
+    "texto": "looked",
+    "desde": 21.78,
+    "hasta": 22.22
+   },
+   {
+    "texto": "at",
+    "desde": 22.22,
+    "hasta": 22.46
+   },
+   {
+    "texto": "her",
+    "desde": 22.46,
+    "hasta": 22.62
+   },
+   {
+    "texto": "brother.",
+    "desde": 22.62,
+    "hasta": 24.16
+   },
+   {
+    "texto": "Olly",
+    "desde": 24.16,
+    "hasta": 24.94
+   },
+   {
+    "texto": "looked",
+    "desde": 24.94,
+    "hasta": 25.24
+   },
+   {
+    "texto": "at",
+    "desde": 25.24,
+    "hasta": 25.5
+   },
+   {
+    "texto": "his",
+    "desde": 25.5,
+    "hasta": 25.7
+   },
+   {
+    "texto": "sister.",
+    "desde": 25.7,
+    "hasta": 26.82
+   },
+   {
+    "texto": "Nobody",
+    "desde": 26.82,
+    "hasta": 27.22
+   },
+   {
+    "texto": "said",
+    "desde": 27.22,
+    "hasta": 27.66
+   },
+   {
+    "texto": "a",
+    "desde": 27.66,
+    "hasta": 27.86
+   },
+   {
+    "texto": "word.",
+    "desde": 27.86,
+    "hasta": 28.8
+   },
+   {
+    "texto": "heard.",
+    "desde": 28.16,
+    "hasta": 28.76
+   },
+   {
+    "texto": "Then",
+    "desde": 28.76,
+    "hasta": 29.26
+   },
+   {
+    "texto": "they",
+    "desde": 29.26,
+    "hasta": 29.5
+   },
+   {
+    "texto": "heard",
+    "desde": 29.5,
+    "hasta": 29.82
+   },
+   {
+    "texto": "f*****g",
+    "desde": 29.82,
+    "hasta": 29.98
+   },
+   {
+    "texto": "f**",
+    "desde": 29.98,
+    "hasta": 29.98
+   },
+   {
+    "texto": "noise",
+    "desde": 37.88,
+    "hasta": 38.28
+   },
+   {
+    "texto": "usually",
+    "desde": 38.28,
+    "hasta": 38.96
+   },
+   {
+    "texto": "meant",
+    "desde": 38.96,
+    "hasta": 39.3
+   },
+   {
+    "texto": "food,",
+    "desde": 39.3,
+    "hasta": 40.56
+   },
+   {
+    "texto": "he",
+    "desde": 40.56,
+    "hasta": 40.7
+   },
+   {
+    "texto": "ran",
+    "desde": 40.7,
+    "hasta": 40.96
+   },
+   {
+    "texto": "through",
+    "desde": 40.96,
+    "hasta": 41.24
+   },
+   {
+    "texto": "the",
+    "desde": 41.24,
+    "hasta": 41.4
+   },
+   {
+    "texto": "flower.",
+    "desde": 41.4,
+    "hasta": 46.0
+   },
+   {
+    "texto": "He",
+    "desde": 43.56,
+    "hasta": 43.64
+   },
+   {
+    "texto": "ran",
+    "desde": 43.64,
+    "hasta": 43.92
+   },
+   {
+    "texto": "in",
+    "desde": 43.92,
+    "hasta": 44.16
+   },
+   {
+    "texto": "a",
+    "desde": 44.16,
+    "hasta": 44.3
+   },
+   {
+    "texto": "big",
+    "desde": 44.3,
+    "hasta": 44.54
+   },
+   {
+    "texto": "circle.",
+    "desde": 44.54,
+    "hasta": 45.92
+   },
+   {
+    "texto": "He",
+    "desde": 45.92,
+    "hasta": 46.16
+   },
+   {
+    "texto": "came",
+    "desde": 46.16,
+    "hasta": 46.44
+   },
+   {
+    "texto": "back",
+    "desde": 46.44,
+    "hasta": 46.82
+   },
+   {
+    "texto": "and",
+    "desde": 46.82,
+    "hasta": 47.24
+   },
+   {
+    "texto": "he",
+    "desde": 47.24,
+    "hasta": 47.44
+   },
+   {
+    "texto": "ran",
+    "desde": 47.44,
+    "hasta": 47.72
+   },
+   {
+    "texto": "through",
+    "desde": 47.72,
+    "hasta": 48.12
+   },
+   {
+    "texto": "the",
+    "desde": 48.12,
+    "hasta": 48.32
+   },
+   {
+    "texto": "flower",
+    "desde": 48.32,
+    "hasta": 48.72
+   },
+   {
+    "texto": "again.",
+    "desde": 48.72,
+    "hasta": 50.02
+   },
+   {
+    "texto": "He",
+    "desde": 50.02,
+    "hasta": 50.3
+   },
+   {
+    "texto": "was",
+    "desde": 50.3,
+    "hasta": 50.54
+   },
+   {
+    "texto": "very,",
+    "desde": 50.54,
+    "hasta": 51.24
+   },
+   {
+    "texto": "very",
+    "desde": 51.24,
+    "hasta": 51.44
+   },
+   {
+    "texto": "happy.",
+    "desde": 51.44,
+    "hasta": 53.28
+   },
+   {
+    "texto": "Now",
+    "desde": 53.28,
+    "hasta": 53.96
+   },
+   {
+    "texto": "there",
+    "desde": 53.96,
+    "hasta": 54.3
+   },
+   {
+    "texto": "were",
+    "desde": 54.3,
+    "hasta": 54.46
+   },
+   {
+    "texto": "small",
+    "desde": 54.46,
+    "hasta": 54.82
+   },
+   {
+    "texto": "white",
+    "desde": 54.82,
+    "hasta": 55.22
+   },
+   {
+    "texto": "footprints",
+    "desde": 55.22,
+    "hasta": 55.8
+   },
+   {
+    "texto": "on",
+    "desde": 55.8,
+    "hasta": 56.14
+   },
+   {
+    "texto": "the",
+    "desde": 56.14,
+    "hasta": 56.3
+   },
+   {
+    "texto": "floor.",
+    "desde": 56.3,
+    "hasta": 57.38
+   },
+   {
+    "texto": "They",
+    "desde": 57.7,
+    "hasta": 57.8
+   },
+   {
+    "texto": "went",
+    "desde": 57.8,
+    "hasta": 58.06
+   },
+   {
+    "texto": "from",
+    "desde": 58.06,
+    "hasta": 58.3
+   },
+   {
+    "texto": "the",
+    "desde": 58.3,
+    "hasta": 58.46
+   },
+   {
+    "texto": "table",
+    "desde": 58.46,
+    "hasta": 58.88
+   },
+   {
+    "texto": "to",
+    "desde": 58.88,
+    "hasta": 59.16
+   },
+   {
+    "texto": "the",
+    "desde": 59.16,
+    "hasta": 59.28
+   },
+   {
+    "texto": "door.",
+    "desde": 59.28,
+    "hasta": 60.9
+   },
+   {
+    "texto": "They",
+    "desde": 60.9,
+    "hasta": 61.44
+   },
+   {
+    "texto": "went",
+    "desde": 61.44,
+    "hasta": 61.72
+   },
+   {
+    "texto": "from",
+    "desde": 61.72,
+    "hasta": 61.96
+   },
+   {
+    "texto": "the",
+    "desde": 61.96,
+    "hasta": 62.1
+   },
+   {
+    "texto": "door",
+    "desde": 62.1,
+    "hasta": 62.4
+   },
+   {
+    "texto": "to",
+    "desde": 62.4,
+    "hasta": 62.62
+   },
+   {
+    "texto": "the",
+    "desde": 62.62,
+    "hasta": 62.74
+   },
+   {
+    "texto": "table.",
+    "desde": 62.74,
+    "hasta": 63.78
+   },
+   {
+    "texto": "They",
+    "desde": 63.2,
+    "hasta": 64.12
+   },
+   {
+    "texto": "went",
+    "desde": 64.14,
+    "hasta": 64.5
+   },
+   {
+    "texto": "everywhere.",
+    "desde": 64.5,
+    "hasta": 66.28
+   },
+   {
+    "texto": "Nora",
+    "desde": 66.28,
+    "hasta": 66.74
+   },
+   {
+    "texto": "whispered.",
+    "desde": 66.74,
+    "hasta": 68.16
+   },
+   {
+    "texto": "Biscuit.",
+    "desde": 68.16,
+    "hasta": 69.46
+   },
+   {
+    "texto": "No.",
+    "desde": 69.46,
+    "hasta": 70.58
+   },
+   {
+    "texto": "Sit.",
+    "desde": 70.58,
+    "hasta": 71.84
+   },
+   {
+    "texto": "Biscuit",
+    "desde": 71.84,
+    "hasta": 72.38
+   },
+   {
+    "texto": "sat",
+    "desde": 72.38,
+    "hasta": 72.6
+   },
+   {
+    "texto": "down.",
+    "desde": 72.6,
+    "hasta": 74.36
+   },
+   {
+    "texto": "He",
+    "desde": 74.7,
+    "hasta": 74.88
+   },
+   {
+    "texto": "looked",
+    "desde": 74.88,
+    "hasta": 75.14
+   },
+   {
+    "texto": "at",
+    "desde": 75.14,
+    "hasta": 75.38
+   },
+   {
+    "texto": "the",
+    "desde": 75.38,
+    "hasta": 75.5
+   },
+   {
+    "texto": "two",
+    "desde": 75.5,
+    "hasta": 75.82
+   },
+   {
+    "texto": "children.",
+    "desde": 75.82,
+    "hasta": 77.32
+   },
+   {
+    "texto": "He",
+    "desde": 77.32,
+    "hasta": 77.56
+   },
+   {
+    "texto": "was",
+    "desde": 77.56,
+    "hasta": 77.76
+   },
+   {
+    "texto": "completely",
+    "desde": 77.76,
+    "hasta": 78.36
+   },
+   {
+    "texto": "white",
+    "desde": 78.36,
+    "hasta": 78.9
+   },
+   {
+    "texto": "now",
+    "desde": 78.9,
+    "hasta": 79.38
+   },
+   {
+    "texto": "and",
+    "desde": 79.38,
+    "hasta": 79.8
+   },
+   {
+    "texto": "he",
+    "desde": 79.8,
+    "hasta": 79.96
+   },
+   {
+    "texto": "was",
+    "desde": 79.96,
+    "hasta": 80.14
+   },
+   {
+    "texto": "very",
+    "desde": 80.14,
+    "hasta": 80.46
+   },
+   {
+    "texto": "proud",
+    "desde": 80.46,
+    "hasta": 80.82
+   },
+   {
+    "texto": "of",
+    "desde": 80.82,
+    "hasta": 81.06
+   },
+   {
+    "texto": "himself.",
+    "desde": 81.06,
+    "hasta": 81.82
+   }
+  ]
+ },
+ "sin_filtro": {
+  "transcripcion": "For ten seconds nobody moved. The white cloud came down slowly like snow in a film. Olly was still on the chair. His hair was white. His eyebrows were white too. He looked like a very small old man. Nora looked at her brother. Olly looked at his sister. Nobody said a word. heard. Then they heard f*****g f*****g f***** because in this house a big noise usually meant food. He ran through the flower. He ran in a big circle. He came back and he ran through the flower again. He was very, very happy. Now there were small white footprints on the floor. They went from the table to the door. They went from the door to the table. They went everywhere. Nora whispered. Biscuit. No. Sit. Biscuit sat down. He looked at the two children. He was completely white now and he was very proud of himself.",
+  "marcas": [
+   {
+    "texto": "For",
+    "desde": 0.0,
+    "hasta": 0.18
+   },
+   {
+    "texto": "ten",
+    "desde": 0.18,
+    "hasta": 0.48
+   },
+   {
+    "texto": "seconds",
+    "desde": 0.48,
+    "hasta": 1.24
+   },
+   {
+    "texto": "nobody",
+    "desde": 1.24,
+    "hasta": 1.62
+   },
+   {
+    "texto": "moved.",
+    "desde": 1.62,
+    "hasta": 3.18
+   },
+   {
+    "texto": "The",
+    "desde": 3.18,
+    "hasta": 3.36
+   },
+   {
+    "texto": "white",
+    "desde": 3.36,
+    "hasta": 3.64
+   },
+   {
+    "texto": "cloud",
+    "desde": 3.64,
+    "hasta": 4.18
+   },
+   {
+    "texto": "came",
+    "desde": 4.18,
+    "hasta": 4.5
+   },
+   {
+    "texto": "down",
+    "desde": 4.5,
+    "hasta": 4.8
+   },
+   {
+    "texto": "slowly",
+    "desde": 4.8,
+    "hasta": 5.4
+   },
+   {
+    "texto": "like",
+    "desde": 5.4,
+    "hasta": 5.98
+   },
+   {
+    "texto": "snow",
+    "desde": 5.98,
+    "hasta": 6.38
+   },
+   {
+    "texto": "in",
+    "desde": 6.38,
+    "hasta": 6.72
+   },
+   {
+    "texto": "a",
+    "desde": 6.72,
+    "hasta": 6.82
+   },
+   {
+    "texto": "film.",
+    "desde": 6.82,
+    "hasta": 8.76
+   },
+   {
+    "texto": "Olly",
+    "desde": 8.86,
+    "hasta": 9.1
+   },
+   {
+    "texto": "was",
+    "desde": 9.1,
+    "hasta": 9.34
+   },
+   {
+    "texto": "still",
+    "desde": 9.34,
+    "hasta": 9.7
+   },
+   {
+    "texto": "on",
+    "desde": 9.7,
+    "hasta": 9.96
+   },
+   {
+    "texto": "the",
+    "desde": 9.96,
+    "hasta": 10.1
+   },
+   {
+    "texto": "chair.",
+    "desde": 10.1,
+    "hasta": 11.28
+   },
+   {
+    "texto": "His",
+    "desde": 11.28,
+    "hasta": 11.46
+   },
+   {
+    "texto": "hair",
+    "desde": 11.46,
+    "hasta": 11.88
+   },
+   {
+    "texto": "was",
+    "desde": 11.88,
+    "hasta": 12.18
+   },
+   {
+    "texto": "white.",
+    "desde": 12.18,
+    "hasta": 13.52
+   },
+   {
+    "texto": "His",
+    "desde": 13.52,
+    "hasta": 13.74
+   },
+   {
+    "texto": "eyebrows",
+    "desde": 13.74,
+    "hasta": 14.16
+   },
+   {
+    "texto": "were",
+    "desde": 14.16,
+    "hasta": 14.54
+   },
+   {
+    "texto": "white",
+    "desde": 14.54,
+    "hasta": 14.92
+   },
+   {
+    "texto": "too.",
+    "desde": 14.92,
+    "hasta": 16.26
+   },
+   {
+    "texto": "He",
+    "desde": 16.98,
+    "hasta": 17.24
+   },
+   {
+    "texto": "looked",
+    "desde": 17.24,
+    "hasta": 17.54
+   },
+   {
+    "texto": "like",
+    "desde": 17.54,
+    "hasta": 17.84
+   },
+   {
+    "texto": "a",
+    "desde": 17.84,
+    "hasta": 18.04
+   },
+   {
+    "texto": "very",
+    "desde": 18.04,
+    "hasta": 18.34
+   },
+   {
+    "texto": "small",
+    "desde": 18.34,
+    "hasta": 18.78
+   },
+   {
+    "texto": "old",
+    "desde": 18.78,
+    "hasta": 19.34
+   },
+   {
+    "texto": "man.",
+    "desde": 19.34,
+    "hasta": 20.56
+   },
+   {
+    "texto": "Nora",
+    "desde": 21.24,
+    "hasta": 21.78
+   },
+   {
+    "texto": "looked",
+    "desde": 21.78,
+    "hasta": 22.22
+   },
+   {
+    "texto": "at",
+    "desde": 22.22,
+    "hasta": 22.46
+   },
+   {
+    "texto": "her",
+    "desde": 22.46,
+    "hasta": 22.62
+   },
+   {
+    "texto": "brother.",
+    "desde": 22.62,
+    "hasta": 24.16
+   },
+   {
+    "texto": "Olly",
+    "desde": 24.16,
+    "hasta": 24.94
+   },
+   {
+    "texto": "looked",
+    "desde": 24.94,
+    "hasta": 25.24
+   },
+   {
+    "texto": "at",
+    "desde": 25.24,
+    "hasta": 25.5
+   },
+   {
+    "texto": "his",
+    "desde": 25.5,
+    "hasta": 25.7
+   },
+   {
+    "texto": "sister.",
+    "desde": 25.7,
+    "hasta": 26.82
+   },
+   {
+    "texto": "Nobody",
+    "desde": 26.82,
+    "hasta": 27.22
+   },
+   {
+    "texto": "said",
+    "desde": 27.22,
+    "hasta": 27.66
+   },
+   {
+    "texto": "a",
+    "desde": 27.66,
+    "hasta": 27.86
+   },
+   {
+    "texto": "word.",
+    "desde": 27.86,
+    "hasta": 28.8
+   },
+   {
+    "texto": "heard.",
+    "desde": 28.16,
+    "hasta": 28.76
+   },
+   {
+    "texto": "Then",
+    "desde": 28.76,
+    "hasta": 29.26
+   },
+   {
+    "texto": "they",
+    "desde": 29.26,
+    "hasta": 29.5
+   },
+   {
+    "texto": "heard",
+    "desde": 29.5,
+    "hasta": 29.82
+   },
+   {
+    "texto": "f*****g",
+    "desde": 29.82,
+    "hasta": 29.98
+   },
+   {
+    "texto": "f*****g",
+    "desde": 29.98,
+    "hasta": 29.98
+   },
+   {
+    "texto": "f*****",
+    "desde": 29.98,
+    "hasta": 29.98
+   },
+   {
+    "texto": "because",
+    "desde": 35.82,
+    "hasta": 36.44
+   },
+   {
+    "texto": "in",
+    "desde": 36.44,
+    "hasta": 36.8
+   },
+   {
+    "texto": "this",
+    "desde": 36.8,
+    "hasta": 37.06
+   },
+   {
+    "texto": "house",
+    "desde": 37.06,
+    "hasta": 37.42
+   },
+   {
+    "texto": "a",
+    "desde": 37.42,
+    "hasta": 37.62
+   },
+   {
+    "texto": "big",
+    "desde": 37.62,
+    "hasta": 37.88
+   },
+   {
+    "texto": "noise",
+    "desde": 37.88,
+    "hasta": 38.28
+   },
+   {
+    "texto": "usually",
+    "desde": 38.28,
+    "hasta": 38.94
+   },
+   {
+    "texto": "meant",
+    "desde": 38.94,
+    "hasta": 39.3
+   },
+   {
+    "texto": "food.",
+    "desde": 39.3,
+    "hasta": 40.54
+   },
+   {
+    "texto": "He",
+    "desde": 40.54,
+    "hasta": 40.7
+   },
+   {
+    "texto": "ran",
+    "desde": 40.7,
+    "hasta": 40.96
+   },
+   {
+    "texto": "through",
+    "desde": 40.96,
+    "hasta": 41.24
+   },
+   {
+    "texto": "the",
+    "desde": 41.24,
+    "hasta": 41.4
+   },
+   {
+    "texto": "flower.",
+    "desde": 41.4,
+    "hasta": 43.08
+   },
+   {
+    "texto": "He",
+    "desde": 43.08,
+    "hasta": 43.6
+   },
+   {
+    "texto": "ran",
+    "desde": 43.6,
+    "hasta": 43.92
+   },
+   {
+    "texto": "in",
+    "desde": 43.92,
+    "hasta": 44.16
+   },
+   {
+    "texto": "a",
+    "desde": 44.16,
+    "hasta": 44.3
+   },
+   {
+    "texto": "big",
+    "desde": 44.3,
+    "hasta": 44.54
+   },
+   {
+    "texto": "circle.",
+    "desde": 44.54,
+    "hasta": 45.92
+   },
+   {
+    "texto": "He",
+    "desde": 45.92,
+    "hasta": 46.16
+   },
+   {
+    "texto": "came",
+    "desde": 46.16,
+    "hasta": 46.44
+   },
+   {
+    "texto": "back",
+    "desde": 46.44,
+    "hasta": 46.82
+   },
+   {
+    "texto": "and",
+    "desde": 46.82,
+    "hasta": 47.24
+   },
+   {
+    "texto": "he",
+    "desde": 47.24,
+    "hasta": 47.44
+   },
+   {
+    "texto": "ran",
+    "desde": 47.44,
+    "hasta": 47.72
+   },
+   {
+    "texto": "through",
+    "desde": 47.72,
+    "hasta": 48.12
+   },
+   {
+    "texto": "the",
+    "desde": 48.12,
+    "hasta": 48.32
+   },
+   {
+    "texto": "flower",
+    "desde": 48.32,
+    "hasta": 48.72
+   },
+   {
+    "texto": "again.",
+    "desde": 48.72,
+    "hasta": 50.02
+   },
+   {
+    "texto": "He",
+    "desde": 50.02,
+    "hasta": 50.3
+   },
+   {
+    "texto": "was",
+    "desde": 50.3,
+    "hasta": 50.54
+   },
+   {
+    "texto": "very,",
+    "desde": 50.54,
+    "hasta": 51.24
+   },
+   {
+    "texto": "very",
+    "desde": 51.24,
+    "hasta": 51.44
+   },
+   {
+    "texto": "happy.",
+    "desde": 51.44,
+    "hasta": 53.28
+   },
+   {
+    "texto": "Now",
+    "desde": 53.28,
+    "hasta": 53.96
+   },
+   {
+    "texto": "there",
+    "desde": 53.96,
+    "hasta": 54.3
+   },
+   {
+    "texto": "were",
+    "desde": 54.3,
+    "hasta": 54.46
+   },
+   {
+    "texto": "small",
+    "desde": 54.46,
+    "hasta": 54.82
+   },
+   {
+    "texto": "white",
+    "desde": 54.82,
+    "hasta": 55.22
+   },
+   {
+    "texto": "footprints",
+    "desde": 55.22,
+    "hasta": 55.8
+   },
+   {
+    "texto": "on",
+    "desde": 55.8,
+    "hasta": 56.14
+   },
+   {
+    "texto": "the",
+    "desde": 56.14,
+    "hasta": 56.3
+   },
+   {
+    "texto": "floor.",
+    "desde": 56.3,
+    "hasta": 57.38
+   },
+   {
+    "texto": "They",
+    "desde": 57.7,
+    "hasta": 57.8
+   },
+   {
+    "texto": "went",
+    "desde": 57.8,
+    "hasta": 58.06
+   },
+   {
+    "texto": "from",
+    "desde": 58.06,
+    "hasta": 58.3
+   },
+   {
+    "texto": "the",
+    "desde": 58.3,
+    "hasta": 58.46
+   },
+   {
+    "texto": "table",
+    "desde": 58.46,
+    "hasta": 58.88
+   },
+   {
+    "texto": "to",
+    "desde": 58.88,
+    "hasta": 59.16
+   },
+   {
+    "texto": "the",
+    "desde": 59.16,
+    "hasta": 59.28
+   },
+   {
+    "texto": "door.",
+    "desde": 59.28,
+    "hasta": 60.9
+   },
+   {
+    "texto": "They",
+    "desde": 60.9,
+    "hasta": 61.44
+   },
+   {
+    "texto": "went",
+    "desde": 61.44,
+    "hasta": 61.72
+   },
+   {
+    "texto": "from",
+    "desde": 61.72,
+    "hasta": 61.96
+   },
+   {
+    "texto": "the",
+    "desde": 61.96,
+    "hasta": 62.1
+   },
+   {
+    "texto": "door",
+    "desde": 62.1,
+    "hasta": 62.4
+   },
+   {
+    "texto": "to",
+    "desde": 62.4,
+    "hasta": 62.62
+   },
+   {
+    "texto": "the",
+    "desde": 62.62,
+    "hasta": 62.74
+   },
+   {
+    "texto": "table.",
+    "desde": 62.74,
+    "hasta": 63.78
+   },
+   {
+    "texto": "They",
+    "desde": 63.2,
+    "hasta": 64.12
+   },
+   {
+    "texto": "went",
+    "desde": 64.14,
+    "hasta": 64.5
+   },
+   {
+    "texto": "everywhere.",
+    "desde": 64.5,
+    "hasta": 66.28
+   },
+   {
+    "texto": "Nora",
+    "desde": 66.28,
+    "hasta": 66.74
+   },
+   {
+    "texto": "whispered.",
+    "desde": 66.74,
+    "hasta": 68.16
+   },
+   {
+    "texto": "Biscuit.",
+    "desde": 68.16,
+    "hasta": 69.46
+   },
+   {
+    "texto": "No.",
+    "desde": 69.46,
+    "hasta": 70.58
+   },
+   {
+    "texto": "Sit.",
+    "desde": 70.58,
+    "hasta": 71.84
+   },
+   {
+    "texto": "Biscuit",
+    "desde": 71.84,
+    "hasta": 72.38
+   },
+   {
+    "texto": "sat",
+    "desde": 72.38,
+    "hasta": 72.6
+   },
+   {
+    "texto": "down.",
+    "desde": 72.6,
+    "hasta": 74.36
+   },
+   {
+    "texto": "He",
+    "desde": 74.7,
+    "hasta": 74.88
+   },
+   {
+    "texto": "looked",
+    "desde": 74.88,
+    "hasta": 75.14
+   },
+   {
+    "texto": "at",
+    "desde": 75.14,
+    "hasta": 75.38
+   },
+   {
+    "texto": "the",
+    "desde": 75.38,
+    "hasta": 75.5
+   },
+   {
+    "texto": "two",
+    "desde": 75.5,
+    "hasta": 75.82
+   },
+   {
+    "texto": "children.",
+    "desde": 75.82,
+    "hasta": 77.32
+   },
+   {
+    "texto": "He",
+    "desde": 77.32,
+    "hasta": 77.56
+   },
+   {
+    "texto": "was",
+    "desde": 77.56,
+    "hasta": 77.76
+   },
+   {
+    "texto": "completely",
+    "desde": 77.76,
+    "hasta": 78.36
+   },
+   {
+    "texto": "white",
+    "desde": 78.36,
+    "hasta": 78.9
+   },
+   {
+    "texto": "now",
+    "desde": 78.9,
+    "hasta": 79.38
+   },
+   {
+    "texto": "and",
+    "desde": 79.38,
+    "hasta": 79.8
+   },
+   {
+    "texto": "he",
+    "desde": 79.8,
+    "hasta": 79.96
+   },
+   {
+    "texto": "was",
+    "desde": 79.96,
+    "hasta": 80.14
+   },
+   {
+    "texto": "very",
+    "desde": 80.14,
+    "hasta": 80.46
+   },
+   {
+    "texto": "proud",
+    "desde": 80.46,
+    "hasta": 80.82
+   },
+   {
+    "texto": "of",
+    "desde": 80.82,
+    "hasta": 81.06
+   },
+   {
+    "texto": "himself.",
+    "desde": 81.06,
+    "hasta": 81.82
+   }
+  ]
+ }
+}

@@ -1,0 +1,78 @@
+{
+  "_que_es": "La procedencia de cada efecto de sonido de la biblioteca del estudio (decisión 5), y la lista de lo que se instala. Los ficheros NO viajan en el repositorio: son de Pixabay y su licencia no deja distribuirlos sueltos (OC1.2). `scripts/instala_efectos.py` los copia desde la copia de HyperFrames 0.8.78 que deja `cd motor; npm ci` (lib/config.py → HYPERFRAMES_SFX_DIR) y niega uno con otro sha256. El motor de escena no usa un fichero de esta carpeta que no esté aquí, y vuelve a comprobar su sha256 al copiarlo al run.",
+  "_licencia": "https://pixabay.com/service/license-summary/",
+  "ficheros": {
+    "chime.mp3": {
+      "fuente": "Pixabay, en la copia que trae HyperFrames 0.8.78 en dist/skills/media-use/audio/assets/sfx/ (motor/node_modules/hyperframes): byte a byte la misma, comprobado con sha256 el 29-09-2026",
+      "licencia": "Pixabay Content License: uso comercial y modificación permitidos, sin atribución obligatoria",
+      "url": "https://pixabay.com/sound-effects/",
+      "autor": "",
+      "sha256": "74823b1b27703c56e0652db838f503c150ce9c2442d47d27430af3d5121d6d12",
+      "notas": "Traído de video_1 (canal/assets/sfx/), que lo sacó de HyperFrames. Desde OC1.2 se instala desde HyperFrames con scripts/instala_efectos.py y no se versiona."
+    },
+    "click-soft.mp3": {
+      "fuente": "Pixabay, en la copia que trae HyperFrames 0.8.78 en dist/skills/media-use/audio/assets/sfx/ (motor/node_modules/hyperframes): byte a byte la misma, comprobado con sha256 el 29-09-2026",
+      "licencia": "Pixabay Content License: uso comercial y modificación permitidos, sin atribución obligatoria",
+      "url": "https://pixabay.com/sound-effects/",
+      "autor": "",
+      "sha256": "075e17bdac5c13662a1c9530050e0046f81d4138e00eb3bf30427a7b4404103d",
+      "notas": "Traído de video_1 (canal/assets/sfx/), que lo sacó de HyperFrames. Desde OC1.2 se instala desde HyperFrames con scripts/instala_efectos.py y no se versiona."
+    },
+    "notification.mp3": {
+      "fuente": "Pixabay, en la copia que trae HyperFrames 0.8.78 en dist/skills/media-use/audio/assets/sfx/ (motor/node_modules/hyperframes): byte a byte la misma, comprobado con sha256 el 29-09-2026",
+      "licencia": "Pixabay Content License: uso comercial y modificación permitidos, sin atribución obligatoria",
+      "url": "https://pixabay.com/sound-effects/",
+      "autor": "",
+      "sha256": "b1559967dedb7994a82371f10cec9f7f3992e6b147b4cd88d62112bcdc3f9ba3",
+      "notas": "Traído de video_1 (canal/assets/sfx/), que lo sacó de HyperFrames. Desde OC1.2 se instala desde HyperFrames con scripts/instala_efectos.py y no se versiona."
+    },
+    "ping.mp3": {
+      "fuente": "Pixabay, en la copia que trae HyperFrames 0.8.78 en dist/skills/media-use/audio/assets/sfx/ (motor/node_modules/hyperframes): byte a byte la misma, comprobado con sha256 el 29-09-2026",
+      "licencia": "Pixabay Content License: uso comercial y modificación permitidos, sin atribución obligatoria",
+      "url": "https://pixabay.com/sound-effects/",
+      "autor": "",
+      "sha256": "c54d088fa2709e6b3c9ce87594a9187d0d5338d3a8c683271f9c4353a8ee8c91",
+      "notas": "Traído de video_1 (canal/assets/sfx/), que lo sacó de HyperFrames. Desde OC1.2 se instala desde HyperFrames con scripts/instala_efectos.py y no se versiona."
+    },
+    "pop.mp3": {
+      "fuente": "Pixabay, en la copia que trae HyperFrames 0.8.78 en dist/skills/media-use/audio/assets/sfx/ (motor/node_modules/hyperframes): byte a byte la misma, comprobado con sha256 el 29-09-2026",
+      "licencia": "Pixabay Content License: uso comercial y modificación permitidos, sin atribución obligatoria",
+      "url": "https://pixabay.com/sound-effects/",
+      "autor": "",
+      "sha256": "19ab7193f626ff57fdeef60b45543bac416fcbcec803cfb417abe4b271c1b352",
+      "notas": "Traído de video_1 (canal/assets/sfx/), que lo sacó de HyperFrames. Desde OC1.2 se instala desde HyperFrames con scripts/instala_efectos.py y no se versiona."
+    },
+    "riser.mp3": {
+      "fuente": "Pixabay, en la copia que trae HyperFrames 0.8.78 en dist/skills/media-use/audio/assets/sfx/ (motor/node_modules/hyperframes): byte a byte la misma, comprobado con sha256 el 29-09-2026",
+      "licencia": "Pixabay Content License: uso comercial y modificación permitidos, sin atribución obligatoria",
+      "url": "https://pixabay.com/sound-effects/",
+      "autor": "",
+      "sha256": "d2f29d49f27dee7d3b25af22ffe5bebc39390cc5d5fb3b3e1c433499c77f3d1d",
+      "notas": "Traído de video_1 (canal/assets/sfx/), que lo sacó de HyperFrames. Desde OC1.2 se instala desde HyperFrames con scripts/instala_efectos.py y no se versiona."
+    },
+    "sparkle.mp3": {
+      "fuente": "Pixabay, en la copia que trae HyperFrames 0.8.78 en dist/skills/media-use/audio/assets/sfx/ (motor/node_modules/hyperframes): byte a byte la misma, comprobado con sha256 el 29-09-2026",
+      "licencia": "Pixabay Content License: uso comercial y modificación permitidos, sin atribución obligatoria",
+      "url": "https://pixabay.com/sound-effects/",
+      "autor": "",
+      "sha256": "a66b2829a307bcb5b1f6551d7cdc72fe45bbe9a91abfb994d28db8d5e4e42ea8",
+      "notas": "Traído de video_1 (canal/assets/sfx/), que lo sacó de HyperFrames. Desde OC1.2 se instala desde HyperFrames con scripts/instala_efectos.py y no se versiona."
+    },
+    "whoosh-short.mp3": {
+      "fuente": "Pixabay, en la copia que trae HyperFrames 0.8.78 en dist/skills/media-use/audio/assets/sfx/ (motor/node_modules/hyperframes): byte a byte la misma, comprobado con sha256 el 29-09-2026",
+      "licencia": "Pixabay Content License: uso comercial y modificación permitidos, sin atribución obligatoria",
+      "url": "https://pixabay.com/sound-effects/",
+      "autor": "",
+      "sha256": "c2efd9d902a59bf9ec5019035d7deadd17762136896b6e3cb6dd99ea50997a30",
+      "notas": "Traído de video_1 (canal/assets/sfx/), que lo sacó de HyperFrames. Desde OC1.2 se instala desde HyperFrames con scripts/instala_efectos.py y no se versiona. Es el mismo fichero que whoosh.mp3 (mismo sha256), también en HyperFrames."
+    },
+    "whoosh.mp3": {
+      "fuente": "Pixabay, en la copia que trae HyperFrames 0.8.78 en dist/skills/media-use/audio/assets/sfx/ (motor/node_modules/hyperframes): byte a byte la misma, comprobado con sha256 el 29-09-2026",
+      "licencia": "Pixabay Content License: uso comercial y modificación permitidos, sin atribución obligatoria",
+      "url": "https://pixabay.com/sound-effects/",
+      "autor": "",
+      "sha256": "c2efd9d902a59bf9ec5019035d7deadd17762136896b6e3cb6dd99ea50997a30",
+      "notas": "Traído de video_1 (canal/assets/sfx/), que lo sacó de HyperFrames. Desde OC1.2 se instala desde HyperFrames con scripts/instala_efectos.py y no se versiona."
+    }
+  }
+}

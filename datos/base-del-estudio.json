@@ -1,0 +1,53 @@
+{
+  "_que_es_esto": "LO QUE COMPARTEN TODOS LOS CANALES, y solo eso. Nace el 16-09-2026 de una regla: «el primer canal no tiene que ser referente de ningún canal ni del estudio. Es el primer canal que arrancamos y tiene sus particularidades, y el segundo tiene sus otras particularidades. Hemos de aislar cada canal con sus métricas y sus configuraciones, y solo compartirán configuración lo que se establezca como base para todos los canales».",
+  "_por_que_hacia_falta_un_fichero": "Hasta hoy 'lo común' no estaba en ningún sitio: estaba repartido entre `lib/config.py`, dos bloques `DEFECTOS` dentro de `lib/`, el `CLAUDE.md` y la costumbre. Y cuando lo común vive en un defecto, **el primer canal que se escribió se convierte en el referente de los demás sin que nadie lo decida**: el segundo canal hereda hoy la tipografía, los márgenes y el CRF de los subtítulos del primero porque no los declara y `lib/subtitulos.py` los rellena. Esto no es un fichero de configuración más: es la frontera. Lo que está aquí se comparte porque alguien lo decidió; lo que no está aquí es de cada canal y su perfil lo declara **sin defecto** (F4.9).",
+  "_como_se_anade_algo": "Una entrada entra aquí cuando es una DECISIÓN del dueño del estudio que vale para todos los canales presentes y futuros, con su fecha y su cita. No entra por ser igual en los dos canales de hoy: que los dos primeros canales narren en inglés es una coincidencia de sus nichos, no una regla del estudio, y escribirla aquí obligaría al primer canal en español a pelearse con ella.",
+
+  "produccion": {
+    "_cinemagraph_y_kaggle": "Retirados del estudio el 02-10-2026 (F6.7), con su código. El cinemagraph salió del pipeline el 13-09-2026 (fila 158: «no vamos a hacer más vídeos con cinemagraph… sacamos del pipeline Kaggle») y Kaggle era la única pieza que salía del PC, así que el proyecto es enteramente local salvo la API de YouTube.",
+    "motor_de_voz": "orpheus",
+    "karaoke": {
+      "modelo_alineacion": "openai/whisper-small",
+      "_por_que": "El reconocedor que saca las marcas de tiempo del karaoke y del `.srt` es un motor, como Orpheus lo es de la voz: un canal no lo elige. Subió aquí el 25-09-2026 desde `lib/subtitulos.py → DEFECTOS`, con el resto de ese diccionario bajando a cada perfil, por la decisión «Arreglar los 3 técnicos» (`progress/plan_aislar_canales.md`, addendum fila 196). El `crf`, el listón técnico del quemado, salió con el karaoke quemado en F6.7."
+    },
+    "lecho_musical": {
+      "workflow": "ace-step-lecho",
+      "objetivo_lufs": -14.0,
+      "pico_max_dbtp": -1.5,
+      "_por_que": "El workflow es el motor. Los -14 LUFS son el punto al que YouTube normaliza, no una preferencia, y los -1,5 dBTP el techo para no recortar tras esa normalización. Subieron aquí el 25-09-2026 desde `lib/musica.py → DEFECTOS`, por la decisión «Arreglar los 3 técnicos» (addendum fila 196)."
+    },
+    "_motor_de_voz": "Decisión 13, precisada el 08-09-2026: «Kokoro será nuestra fábrica de voces y Orpheus será nuestro motor de voces para todos los canales, por lo tanto esto está a nivel de estudio y no de canal». Un canal elige QUÉ voz y con qué ritmo, nunca QUIÉN clona. Lo declara `lib/config.py → MOTOR_DE_VOZ` y `tests/test_capas.py` falla en rojo si un perfil intenta declarar motor."
+  },
+
+  "publicacion": {
+    "visibilidad_al_subir": "private",
+    "_visibilidad_al_subir": "Decisión cerrada 2: la subida es borrador privado **por construcción**, no por configuración — `lib/youtube_client.VISIBILIDAD`. Pasar a público es el gate 2 y lo da el usuario vídeo a vídeo. Ningún canal puede apartarse de esto.",
+    "flag_contenido_sintetico": true,
+    "declaracion_de_ia_en_la_descripcion": true,
+    "_flag_y_declaracion": "Decisión cerrada 7: el flag del Art. 50 (`status.containsSyntheticMedia`) y la declaración de IA derivada del `assets.json` van en **cada** subida. En vigor desde el 02-08-2026; es parte de publicar, no un añadido. Y es la única garantía que queda: desde que Chatterbox salió del proyecto (07-09-2026) ningún motor del estudio marca el audio como sintético.",
+    "procedencia_obligatoria": true,
+    "_procedencia_obligatoria": "Decisión cerrada 5: `assets.json` con fuente, licencia y URL de cada asset en cada run. Sin él un error de licencia se replica a volumen antes de detectarse."
+  },
+
+  "imagen": {
+    "adjetivos_prohibidos": [
+      "heavy",
+      "worn",
+      "rough",
+      "thick",
+      "dense",
+      "gnarled",
+      "weathered",
+      "textured",
+      "grainy",
+      "deep vertical folds"
+    ],
+    "_adjetivos_prohibidos": "**Es un límite del MODELO, no un gusto de un canal**, y por eso es del estudio: pedir materialidad es pedir relieve, y Qwen lo talla. Se aprendió con el grabado en tinta y aplica igual en el acabado plano, donde el daño es peor — una sola palabra de materialidad convierte la ilustración vectorial en un render con sombras. El día que se cambie de modelo de imagen, esta lista se re-mide.",
+    "la_miniatura_sale_de_una_lamina": true,
+    "_la_miniatura_sale_de_una_lamina": "12-09-2026, tras dos episodios seguidos en que la miniatura generada dibujó otra pieza: sale de `slides.json → thumbnail_lamina`, obligatorio, y no se genera ninguna imagen aparte. El gate de líneas rojas no la cazaba porque mide color y una figura en tinta no tiene color que medir (addendum filas 155 y 156)."
+  },
+
+  "_lo_que_NO_esta_aqui_y_es_de_cada_canal": "Su nicho y su identidad · su idioma · su formato (duración, láminas, capítulos) · el ritmo medido de su voz y su receta · su estilo visual y su contrato de prompt · sus líneas rojas y sus guardianes de color · el aspecto de sus subtítulos y de su onda · su música · su reparto de personajes · su OAuth · sus métricas. **Todo eso se declara en `canales/<id>/perfil.json` y no tiene defecto**: si falta, el run se para y dice qué escribir. Un defecto en el estudio es la decisión de otro canal heredada en silencio — y, en la práctica, la del primero que se escribió.",
+
+  "_deuda_conocida_16_09_2026": "**Resuelta el 25-09-2026** (addendum fila 196): los defectos de subtítulos y música se repartieron entre `produccion.karaoke`/`produccion.lecho_musical` y cada perfil, sin defecto, y lo vigila `tests/test_aislar_canales.py`. El texto de entonces: Este fichero DECLARA la frontera; todavía no la hace cumplir en todos los sitios. Pendiente al cerrar la tanda de la semana W38: (1) `lib/subtitulos.py → DEFECTOS` rellena diez valores de aspecto —fuente Georgia, cuerpo 60, márgenes 150/200, crf 18— que son los del primer canal y que el segundo hereda sin declararlos; (2) `lib/musica.py → DEFECTOS` hace lo mismo con doce; (3) `tests/test_capas.py` no los ve porque solo lee el AST de `lib/config.py`. No se tocó en caliente porque la producción de los cuatro episodios estaba corriendo y quitar un defecto para el run en curso."
+}

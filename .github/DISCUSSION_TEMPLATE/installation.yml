@@ -1,0 +1,33 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Many installation problems are already answered in the FAQ, `docs/faq.md`. The `instala-lanternist` skill also knows the usual errors: ask Claude Code in your Lanternist folder first.
+
+        **Before you paste anything, remove your keys, your tokens and anything personal**: your Windows user name in a path, your channel id or your email. Never paste your `.env`.
+  - type: input
+    id: gpu
+    attributes:
+      label: Graphics card, VRAM and driver
+      description: Run `nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader` and paste the line.
+    validations:
+      required: true
+  - type: input
+    id: step
+    attributes:
+      label: The installer step
+      description: The step that stopped (`requisitos`, `entornos`, `comfyui`, `pesos`, `voz`, `escena`, `marca`…), if you know it.
+  - type: textarea
+    id: check
+    attributes:
+      label: What `py -3.12 instala.py --comprueba` prints
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: What you tried, and the error message as text.
+    validations:
+      required: true

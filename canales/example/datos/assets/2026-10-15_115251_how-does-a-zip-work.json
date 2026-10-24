@@ -1,0 +1,740 @@
+{
+  "esquema": "assets/1.0",
+  "assets": [
+    {
+      "id": "activos/img/lamina_01.jpg",
+      "tipo": "imagen",
+      "etapa": "images",
+      "ruta": "canales/example/videos/2026-10-15_115251_how-does-a-zip-work/activos/img/lamina_01.jpg",
+      "registro": "adaptador",
+      "existe": true,
+      "bytes": 608591,
+      "fuente": "derivado en local de slides/slide-01.png por el obrero de escena (lib/escena/obrero.py en .venv-escena) (sin red)",
+      "modelo": "Qwen-Image-2512 GGUF Q6_K + LoRA Lightning 8 pasos → Real-ESRGAN x4plus anime 6B",
+      "licencia": "Apache-2.0 (Qwen-Image-2512 y Qwen-Image-Lightning) - uso comercial permitido · herramientas: Real-ESRGAN x4plus anime 6B (BSD-3-Clause)",
+      "url": "https://huggingface.co/Qwen/Qwen-Image-2512 · https://huggingface.co/unsloth/Qwen-Image-2512-GGUF · https://huggingface.co/lightx2v/Qwen-Image-Lightning · https://github.com/xinntao/Real-ESRGAN",
+      "origen": "derivado de slide-01.png: ampliada ×4 con Real-ESRGAN y bajada a su ancho de trabajo, sin recortar",
+      "detalle": {
+        "derivado_de": "slides/slide-01.png",
+        "resolucion": "2688x1536",
+        "operacion": "fondo",
+        "herramientas": {
+          "esrgan": {
+            "peso": "RealESRGAN_x4plus_anime_6B.pth",
+            "sha256": "f872d837d3c90ed2e05227bed711af5671a6fd1c9f7d7e91c911a61f155e99da",
+            "arquitectura": "RRDBNet",
+            "spandrel": "0.4.2",
+            "carga_s": 1.93
+          }
+        },
+        "seed": 2026,
+        "metadatos_png": "guardado sin metadatos de generación"
+      }
+    },
+    {
+      "id": "activos/img/lamina_02.jpg",
+      "tipo": "imagen",
+      "etapa": "images",
+      "ruta": "canales/example/videos/2026-10-15_115251_how-does-a-zip-work/activos/img/lamina_02.jpg",
+      "registro": "adaptador",
+      "existe": true,
+      "bytes": 663027,
+      "fuente": "derivado en local de slides/slide-02.png por el obrero de escena (lib/escena/obrero.py en .venv-escena) (sin red)",
+      "modelo": "Qwen-Image-2512 GGUF Q6_K + LoRA Lightning 8 pasos → Real-ESRGAN x4plus anime 6B",
+      "licencia": "Apache-2.0 (Qwen-Image-2512 y Qwen-Image-Lightning) - uso comercial permitido · herramientas: Real-ESRGAN x4plus anime 6B (BSD-3-Clause)",
+      "url": "https://huggingface.co/Qwen/Qwen-Image-2512 · https://huggingface.co/unsloth/Qwen-Image-2512-GGUF · https://huggingface.co/lightx2v/Qwen-Image-Lightning · https://github.com/xinntao/Real-ESRGAN",
+      "origen": "derivado de slide-02.png: ampliada ×4 con Real-ESRGAN y bajada a su ancho de trabajo, sin recortar",
+      "detalle": {
+        "derivado_de": "slides/slide-02.png",
+        "resolucion": "2688x1536",
+        "operacion": "fondo",
+        "herramientas": {
+          "esrgan": {
+            "peso": "RealESRGAN_x4plus_anime_6B.pth",
+            "sha256": "f872d837d3c90ed2e05227bed711af5671a6fd1c9f7d7e91c911a61f155e99da",
+            "arquitectura": "RRDBNet",
+            "spandrel": "0.4.2",
+            "carga_s": 1.93
+          }
+        },
+        "seed": 2026,
+        "metadatos_png": "guardado sin metadatos de generación"
+      }
+    },
+    {
+      "id": "activos/img/lamina_03.jpg",
+      "tipo": "imagen",
+      "etapa": "images",
+      "ruta": "canales/example/videos/2026-10-15_115251_how-does-a-zip-work/activos/img/lamina_03.jpg",
+      "registro": "adaptador",
+      "existe": true,
+      "bytes": 837635,
+      "fuente": "derivado en local de slides/slide-03.png por el obrero de escena (lib/escena/obrero.py en .venv-escena) (sin red)",
+      "modelo": "Qwen-Image-2512 GGUF Q6_K + LoRA Lightning 8 pasos → Real-ESRGAN x4plus anime 6B",
+      "licencia": "Apache-2.0 (Qwen-Image-2512 y Qwen-Image-Lightning) - uso comercial permitido · herramientas: Real-ESRGAN x4plus anime 6B (BSD-3-Clause)",
+      "url": "https://huggingface.co/Qwen/Qwen-Image-2512 · https://huggingface.co/unsloth/Qwen-Image-2512-GGUF · https://huggingface.co/lightx2v/Qwen-Image-Lightning · https://github.com/xinntao/Real-ESRGAN",
+      "origen": "derivado de slide-03.png: ampliada ×4 con Real-ESRGAN y bajada a su ancho de trabajo, sin recortar",
+      "detalle": {
+        "derivado_de": "slides/slide-03.png",
+        "resolucion": "2688x1536",
+        "operacion": "fondo",
+        "herramientas": {
+          "esrgan": {
+            "peso": "RealESRGAN_x4plus_anime_6B.pth",
+            "sha256": "f872d837d3c90ed2e05227bed711af5671a6fd1c9f7d7e91c911a61f155e99da",
+            "arquitectura": "RRDBNet",
+            "spandrel": "0.4.2",
+            "carga_s": 1.93
+          }
+        },
+        "seed": 2027,
+        "metadatos_png": "guardado sin metadatos de generación"
+      }
+    },
+    {
+      "id": "slides/slide-01.png",
+      "tipo": "imagen",
+      "etapa": "images",
+      "ruta": "canales/example/videos/2026-10-15_115251_how-does-a-zip-work/slides/slide-01.png",
+      "registro": "adaptador",
+      "existe": true,
+      "bytes": 1716598,
+      "fuente": "generación local (ComfyUI en 127.0.0.1, sin servicios de pago)",
+      "modelo": "Qwen-Image-2512 GGUF Q6_K + LoRA Lightning 8 pasos",
+      "licencia": "Apache-2.0 (Qwen-Image-2512 y Qwen-Image-Lightning) - uso comercial permitido",
+      "url": "https://huggingface.co/Qwen/Qwen-Image-2512 · https://huggingface.co/unsloth/Qwen-Image-2512-GGUF · https://huggingface.co/lightx2v/Qwen-Image-Lightning",
+      "origen": "generado en local con ComfyUI (127.0.0.1)",
+      "detalle": {
+        "workflow": "qwen-2512-lightning-tinta",
+        "pesos": [
+          "unet/qwen-image-2512-Q6_K.gguf",
+          "loras/Qwen-Image-Lightning-8steps-V1.0.safetensors",
+          "text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors",
+          "vae/qwen_image_vae.safetensors"
+        ],
+        "prompt": "pen and ink illustration with graphite pencil hatching and cross-hatching, sepia and charcoal tones on aged parchment, antique museum engraving plate, dramatic chiaroscuro lighting, no text, no watermark, wide 16:9 composition. a tall old-fashioned boot fastened with a long row of small round buttons up its side, standing alone on a plain wooden table, seen straight on from the side, the whole boot in frame",
+        "seed": 2026,
+        "resolucion": "1344x768",
+        "parametros": {
+          "steps": 8,
+          "cfg": 1.0,
+          "shift": 3.1
+        },
+        "segundos": 94.8,
+        "metadatos_png": "limpiados (addendum doc/02 fila 7)",
+        "url_anadida": "15-10-2026, OC1.4 pasada 2b: el adaptador no escribía la URL cuando generó esta lámina; es la de su workflow (workflows/qwen-2512-lightning-tinta.json -> modelo.url)"
+      }
+    },
+    {
+      "id": "slides/slide-02.png",
+      "tipo": "imagen",
+      "etapa": "images",
+      "ruta": "canales/example/videos/2026-10-15_115251_how-does-a-zip-work/slides/slide-02.png",
+      "registro": "adaptador",
+      "existe": true,
+      "bytes": 1699312,
+      "fuente": "generación local (ComfyUI en 127.0.0.1, sin servicios de pago)",
+      "modelo": "Qwen-Image-2512 GGUF Q6_K + LoRA Lightning 8 pasos",
+      "licencia": "Apache-2.0 (Qwen-Image-2512 y Qwen-Image-Lightning) - uso comercial permitido",
+      "url": "https://huggingface.co/Qwen/Qwen-Image-2512 · https://huggingface.co/unsloth/Qwen-Image-2512-GGUF · https://huggingface.co/lightx2v/Qwen-Image-Lightning",
+      "origen": "generado en local con ComfyUI (127.0.0.1)",
+      "detalle": {
+        "workflow": "qwen-2512-lightning-tinta",
+        "pesos": [
+          "unet/qwen-image-2512-Q6_K.gguf",
+          "loras/Qwen-Image-Lightning-8steps-V1.0.safetensors",
+          "text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors",
+          "vae/qwen_image_vae.safetensors"
+        ],
+        "prompt": "pen and ink illustration with graphite pencil hatching and cross-hatching, sepia and charcoal tones on aged parchment, antique museum engraving plate, dramatic chiaroscuro lighting, no text, no watermark, wide 16:9 composition. a single metal zip lying horizontally across the picture, seen straight on, the only object on a plain background, half open: on the left its two strips of fabric tape spread apart in a wide sideways V, the upper strip angling up and the lower strip angling down, each carrying its own separate row of small metal teeth; in the centre, where the two strips meet, sits the slider; on the right of the slider the two strips run together as one closed strip, their teeth locked into each other",
+        "seed": 2026,
+        "resolucion": "1344x768",
+        "parametros": {
+          "steps": 8,
+          "cfg": 1.0,
+          "shift": 3.1
+        },
+        "segundos": 97.7,
+        "metadatos_png": "limpiados (addendum doc/02 fila 7)"
+      }
+    },
+    {
+      "id": "slides/slide-03.png",
+      "tipo": "imagen",
+      "etapa": "images",
+      "ruta": "canales/example/videos/2026-10-15_115251_how-does-a-zip-work/slides/slide-03.png",
+      "registro": "adaptador",
+      "existe": true,
+      "bytes": 1920007,
+      "fuente": "generación local (ComfyUI en 127.0.0.1, sin servicios de pago)",
+      "modelo": "Qwen-Image-2512 GGUF Q6_K + LoRA Lightning 8 pasos",
+      "licencia": "Apache-2.0 (Qwen-Image-2512 y Qwen-Image-Lightning) - uso comercial permitido",
+      "url": "https://huggingface.co/Qwen/Qwen-Image-2512 · https://huggingface.co/unsloth/Qwen-Image-2512-GGUF · https://huggingface.co/lightx2v/Qwen-Image-Lightning",
+      "origen": "generado en local con ComfyUI (127.0.0.1)",
+      "detalle": {
+        "workflow": "qwen-2512-lightning-tinta",
+        "pesos": [
+          "unet/qwen-image-2512-Q6_K.gguf",
+          "loras/Qwen-Image-Lightning-8steps-V1.0.safetensors",
+          "text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors",
+          "vae/qwen_image_vae.safetensors"
+        ],
+        "prompt": "ilustración a plumilla y tinta con sombreado y trama cruzada a lápiz de grafito, tonos sepia y carbón sobre pergamino envejecido, lámina de grabado antiguo de museo, iluminación dramática de claroscuro, sin texto, sin marca de agua, composición panorámica 16:9. Una sola mano baja el cursor de una cremallera medio abierta en la parte delantera de una chaqueta lisa, primer plano, vista de frente: la cremallera tiene un único cursor con un único tirador, y el pulgar y el índice de esa mano pellizcan ese tirador; ningún tirador cuelga del cursor. Por encima del cursor, las dos filas de dientes metálicos se separan.",
+        "seed": 2027,
+        "resolucion": "1344x768",
+        "parametros": {
+          "steps": 8,
+          "cfg": 1.0,
+          "shift": 3.1
+        },
+        "segundos": 90.8,
+        "metadatos_png": "limpiados (addendum doc/02 fila 7)"
+      }
+    },
+    {
+      "id": "subir-al-canal/thumbnail.png",
+      "tipo": "miniatura",
+      "etapa": "thumbnail",
+      "ruta": "canales/example/videos/2026-10-15_115251_how-does-a-zip-work/subir-al-canal/thumbnail.png",
+      "registro": "adaptador",
+      "existe": true,
+      "bytes": 1578234,
+      "fuente": "copia de una lámina del run (slides/slide-02.png), no una generación nueva",
+      "modelo": "Qwen-Image-2512 GGUF Q6_K + LoRA Lightning 8 pasos",
+      "licencia": "Apache-2.0 (Qwen-Image-2512 y Qwen-Image-Lightning) - uso comercial permitido · marca de agua: Video Seal 1.0 (TorchScript y_256b_img) (MIT (código y pesos))",
+      "url": "https://huggingface.co/Qwen/Qwen-Image-2512 · https://huggingface.co/unsloth/Qwen-Image-2512-GGUF · https://huggingface.co/lightx2v/Qwen-Image-Lightning · https://github.com/facebookresearch/videoseal",
+      "origen": "copia de slides/slide-02.png recortada y rotulada como miniatura (Pillow, sin generación)",
+      "detalle": {
+        "workflow": "qwen-2512-lightning-tinta",
+        "pesos": [
+          "unet/qwen-image-2512-Q6_K.gguf",
+          "loras/Qwen-Image-Lightning-8steps-V1.0.safetensors",
+          "text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors",
+          "vae/qwen_image_vae.safetensors"
+        ],
+        "prompt": "pen and ink illustration with graphite pencil hatching and cross-hatching, sepia and charcoal tones on aged parchment, antique museum engraving plate, dramatic chiaroscuro lighting, no text, no watermark, wide 16:9 composition. a single metal zip lying horizontally across the picture, seen straight on, the only object on a plain background, half open: on the left its two strips of fabric tape spread apart in a wide sideways V, the upper strip angling up and the lower strip angling down, each carrying its own separate row of small metal teeth; in the centre, where the two strips meet, sits the slider; on the right of the slider the two strips run together as one closed strip, their teeth locked into each other",
+        "seed": 2026,
+        "marca_ia": {
+          "fichero": "thumbnail.png",
+          "sha256": "64a292de9e7208d9db7c02b26f3d799d2acbd06293e7f9b3f2fecd7efdcd8368",
+          "detectada": true,
+          "capas": {
+            "metadatos": "C2PA firmado con ES256 por el certificado local de esta instalación, sin sello de tiempo",
+            "imagen": "Video Seal 1.0, 256 bits"
+          },
+          "modelos": {
+            "videoseal": {
+              "nombre": "Video Seal 1.0 (TorchScript y_256b_img)",
+              "licencia": "MIT (código y pesos)",
+              "fuente": "https://github.com/facebookresearch/videoseal",
+              "sha256": "5c7a4581c36fc6090aafdcfb3999123bae5172a4847f22e2da4e7fd1a39d1e1b"
+            }
+          },
+          "herramientas": {
+            "torch": "2.13.0+cu130",
+            "audioseal": "0.2.0",
+            "c2pa-python": "0.38.0",
+            "av": "19.0.1"
+          },
+          "comprobacion": {
+            "file": "thumbnail.png",
+            "sha256": "64a292de9e7208d9db7c02b26f3d799d2acbd06293e7f9b3f2fecd7efdcd8368",
+            "device": "cuda",
+            "c2pa": {
+              "supported": true,
+              "manifest": true,
+              "state": "Valid",
+              "failures": [
+                "signingCredential.untrusted"
+              ],
+              "generator": "Lanternist 2.0.0-rc.1",
+              "signer": "Lanternist local signer",
+              "ai": true,
+              "error": null
+            },
+            "image": {
+              "bits": 256,
+              "matches": 256,
+              "p_value": 8.636168555094445e-78,
+              "frames": 1
+            },
+            "audio": null,
+            "seconds": 0.33
+          },
+          "segundos": 1.43,
+          "dispositivo": "cuda",
+          "vram_pico_mb": 352
+        }
+      }
+    },
+    {
+      "id": "audio/slide-01.wav",
+      "tipo": "audio",
+      "etapa": "tts",
+      "ruta": "canales/example/videos/2026-10-15_115251_how-does-a-zip-work/audio/slide-01.wav",
+      "registro": "adaptador",
+      "existe": true,
+      "bytes": 1592316,
+      "fuente": "generación local (orpheus sobre llama.cpp (server) + transformers 5.2.0 (tokenizador) + snac 1.2.1 (decodificador), sin red)",
+      "modelo": "audo/orpheus-3b-0.1-ft (clonado zero-shot)",
+      "licencia": "Llama 3.2 Community License (Orpheus TTS 3B deriva de meta-llama/Llama-3.2-3B-Instruct: Built with Llama; THIRD_PARTY_NOTICES.md, sección 5)",
+      "url": "https://huggingface.co/canopylabs/orpheus-3b-0.1-ft · https://huggingface.co/unsloth/orpheus-3b-0.1-ft-GGUF · https://huggingface.co/audo/orpheus-3b-0.1-ft · https://huggingface.co/hubertsiuzdak/snac_24khz",
+      "origen": "generado en local con orpheus en .venv-voz (sin red, coste 0 €)",
+      "detalle": {
+        "motor": "orpheus",
+        "paquete": "llama.cpp (server) + transformers 5.2.0 (tokenizador) + snac 1.2.1 (decodificador)",
+        "perfil_tonal": "neutro",
+        "receta": "voz-example-en.json",
+        "parametros": {
+          "temperature": 0.6,
+          "top_p": 0.95,
+          "repetition_penalty": 1.1,
+          "_por_que_muestreo": "Los valores que documenta Canopy Labs para Orpheus. Son del motor, no un gusto del canal: Orpheus no tiene mando de énfasis, y la emoción entra por cómo está escrito el texto.",
+          "wpm_esperado": 140.0,
+          "holgura_de_generacion": 1.6,
+          "_por_que_wpm_y_holgura": "No fijan el ritmo: fijan el TECHO de generación de cada segmento, para no pagar entera la divagación de Orpheus. Con 140 y 1,6, la voz puede hablar hasta a 87,5 wpm antes de que se corte. En Kokoro, af_heart leyó la lámina 1 a 163,7 wpm, y el clon suele hablar algo más despacio que su referencia. La cata del ritmo da el habla real; si quedara cerca de 87,5 wpm, este número baja."
+        },
+        "seed": 4004,
+        "language_id": null,
+        "referencia_de_voz": {
+          "variable_entorno": "RUTA_VOZ_EXAMPLE",
+          "opcion": "clip_entero",
+          "id": "exampleref",
+          "offset_segundos": 0.0,
+          "duracion_segundos": 26.6,
+          "nota": "la grabación vive fuera del repo; aquí solo su procedencia, nunca la ruta"
+        },
+        "watermark": "NINGUNO: Orpheus no marca el audio como sintético, igual que Kokoro y al revés que Chatterbox, que traía `perth`. Quien cumple la decisión cerrada 7 es la declaración de contenido de IA de la subida (flag Art. 50), que por eso NO es opcional. **Este motor RETIRA la red de seguridad técnica que el canal tenía cuando clonaba con Chatterbox**, y decirlo aquí es el motivo de que esta identidad se separe.",
+        "segmentacion": {
+          "frases": 4,
+          "max_palabras_por_frase": 20,
+          "silencio_ms": 300,
+          "recorte_bordes": {
+            "umbral_db": -45.0,
+            "margen_ms": 40,
+            "_por_que": "Quita el margen de silencio que el motor deja en cada llamada, para que entre frases solo quede la pausa que se pide. Los 40 ms evitan comerse una «s» inicial o una oclusiva final."
+          }
+        },
+        "texto": "You close one every day, almost without looking... one pull, and it's done. Before it, boots and dresses were often closed with a long row of small buttons, hooks or laces, fastened one at a time... every morning. The zip turned all of that into a single movement.",
+        "sample_rate": 24000,
+        "audio_segundos": 16.6,
+        "segundos": 0.0,
+        "rtf": 0.0,
+        "post_proceso_ffmpeg": null,
+        "reintentos_por_ritmo_implausible": [],
+        "recortes_por_divagacion": [],
+        "incidencias_no_bloqueantes": []
+      }
+    },
+    {
+      "id": "audio/slide-02.wav",
+      "tipo": "audio",
+      "etapa": "tts",
+      "ruta": "canales/example/videos/2026-10-15_115251_how-does-a-zip-work/audio/slide-02.wav",
+      "registro": "adaptador",
+      "existe": true,
+      "bytes": 1594416,
+      "fuente": "generación local (orpheus sobre llama.cpp (server) + transformers 5.2.0 (tokenizador) + snac 1.2.1 (decodificador), sin red)",
+      "modelo": "audo/orpheus-3b-0.1-ft (clonado zero-shot)",
+      "licencia": "Llama 3.2 Community License (Orpheus TTS 3B deriva de meta-llama/Llama-3.2-3B-Instruct: Built with Llama; THIRD_PARTY_NOTICES.md, sección 5)",
+      "url": "https://huggingface.co/canopylabs/orpheus-3b-0.1-ft · https://huggingface.co/unsloth/orpheus-3b-0.1-ft-GGUF · https://huggingface.co/audo/orpheus-3b-0.1-ft · https://huggingface.co/hubertsiuzdak/snac_24khz",
+      "origen": "generado en local con orpheus en .venv-voz (sin red, coste 0 €)",
+      "detalle": {
+        "motor": "orpheus",
+        "paquete": "llama.cpp (server) + transformers 5.2.0 (tokenizador) + snac 1.2.1 (decodificador)",
+        "perfil_tonal": "neutro",
+        "receta": "voz-example-en.json",
+        "parametros": {
+          "temperature": 0.6,
+          "top_p": 0.95,
+          "repetition_penalty": 1.1,
+          "_por_que_muestreo": "Los valores que documenta Canopy Labs para Orpheus. Son del motor, no un gusto del canal: Orpheus no tiene mando de énfasis, y la emoción entra por cómo está escrito el texto.",
+          "wpm_esperado": 140.0,
+          "holgura_de_generacion": 1.6,
+          "_por_que_wpm_y_holgura": "No fijan el ritmo: fijan el TECHO de generación de cada segmento, para no pagar entera la divagación de Orpheus. Con 140 y 1,6, la voz puede hablar hasta a 87,5 wpm antes de que se corte. En Kokoro, af_heart leyó la lámina 1 a 163,7 wpm, y el clon suele hablar algo más despacio que su referencia. La cata del ritmo da el habla real; si quedara cerca de 87,5 wpm, este número baja."
+        },
+        "seed": 4004,
+        "language_id": null,
+        "referencia_de_voz": {
+          "variable_entorno": "RUTA_VOZ_EXAMPLE",
+          "opcion": "clip_entero",
+          "id": "exampleref",
+          "offset_segundos": 0.0,
+          "duracion_segundos": 26.6,
+          "nota": "la grabación vive fuera del repo; aquí solo su procedencia, nunca la ruta"
+        },
+        "watermark": "NINGUNO: Orpheus no marca el audio como sintético, igual que Kokoro y al revés que Chatterbox, que traía `perth`. Quien cumple la decisión cerrada 7 es la declaración de contenido de IA de la subida (flag Art. 50), que por eso NO es opcional. **Este motor RETIRA la red de seguridad técnica que el canal tenía cuando clonaba con Chatterbox**, y decirlo aquí es el motivo de que esta identidad se separe.",
+        "segmentacion": {
+          "frases": 5,
+          "max_palabras_por_frase": 20,
+          "silencio_ms": 300,
+          "recorte_bordes": {
+            "umbral_db": -45.0,
+            "margen_ms": 40,
+            "_por_que": "Quita el margen de silencio que el motor deja en cada llamada, para que entre frases solo quede la pausa que se pide. Los 40 ms evitan comerse una «s» inicial o una oclusiva final."
+          }
+        },
+        "texto": "So how does it work? Each tooth has a small bump on top, and a hollow underneath. The secret is the slider... inside, its channel is shaped like a Y, and it presses the two rows together at an angle, so every bump drops into a hollow on the other side.",
+        "sample_rate": 24000,
+        "audio_segundos": 16.6,
+        "segundos": 0.0,
+        "rtf": 0.0,
+        "post_proceso_ffmpeg": null,
+        "reintentos_por_ritmo_implausible": [],
+        "recortes_por_divagacion": [],
+        "incidencias_no_bloqueantes": []
+      }
+    },
+    {
+      "id": "audio/slide-03.wav",
+      "tipo": "audio",
+      "etapa": "tts",
+      "ruta": "canales/example/videos/2026-10-15_115251_how-does-a-zip-work/audio/slide-03.wav",
+      "registro": "adaptador",
+      "existe": true,
+      "bytes": 1561216,
+      "fuente": "generación local (orpheus sobre llama.cpp (server) + transformers 5.2.0 (tokenizador) + snac 1.2.1 (decodificador), sin red)",
+      "modelo": "audo/orpheus-3b-0.1-ft (clonado zero-shot)",
+      "licencia": "Llama 3.2 Community License (Orpheus TTS 3B deriva de meta-llama/Llama-3.2-3B-Instruct: Built with Llama; THIRD_PARTY_NOTICES.md, sección 5)",
+      "url": "https://huggingface.co/canopylabs/orpheus-3b-0.1-ft · https://huggingface.co/unsloth/orpheus-3b-0.1-ft-GGUF · https://huggingface.co/audo/orpheus-3b-0.1-ft · https://huggingface.co/hubertsiuzdak/snac_24khz",
+      "origen": "generado en local con orpheus en .venv-voz (sin red, coste 0 €)",
+      "detalle": {
+        "motor": "orpheus",
+        "paquete": "llama.cpp (server) + transformers 5.2.0 (tokenizador) + snac 1.2.1 (decodificador)",
+        "perfil_tonal": "neutro",
+        "receta": "voz-example-en.json",
+        "parametros": {
+          "temperature": 0.6,
+          "top_p": 0.95,
+          "repetition_penalty": 1.1,
+          "_por_que_muestreo": "Los valores que documenta Canopy Labs para Orpheus. Son del motor, no un gusto del canal: Orpheus no tiene mando de énfasis, y la emoción entra por cómo está escrito el texto.",
+          "wpm_esperado": 140.0,
+          "holgura_de_generacion": 1.6,
+          "_por_que_wpm_y_holgura": "No fijan el ritmo: fijan el TECHO de generación de cada segmento, para no pagar entera la divagación de Orpheus. Con 140 y 1,6, la voz puede hablar hasta a 87,5 wpm antes de que se corte. En Kokoro, af_heart leyó la lámina 1 a 163,7 wpm, y el clon suele hablar algo más despacio que su referencia. La cata del ritmo da el habla real; si quedara cerca de 87,5 wpm, este número baja."
+        },
+        "seed": 4004,
+        "language_id": null,
+        "referencia_de_voz": {
+          "variable_entorno": "RUTA_VOZ_EXAMPLE",
+          "opcion": "clip_entero",
+          "id": "exampleref",
+          "offset_segundos": 0.0,
+          "duracion_segundos": 26.6,
+          "nota": "la grabación vive fuera del repo; aquí solo su procedencia, nunca la ruta"
+        },
+        "watermark": "NINGUNO: Orpheus no marca el audio como sintético, igual que Kokoro y al revés que Chatterbox, que traía `perth`. Quien cumple la decisión cerrada 7 es la declaración de contenido de IA de la subida (flag Art. 50), que por eso NO es opcional. **Este motor RETIRA la red de seguridad técnica que el canal tenía cuando clonaba con Chatterbox**, y decirlo aquí es el motivo de que esta identidad se separe.",
+        "segmentacion": {
+          "frases": 4,
+          "max_palabras_por_frase": 20,
+          "silencio_ms": 300,
+          "recorte_bordes": {
+            "umbral_db": -45.0,
+            "margen_ms": 40,
+            "_por_que": "Quita el margen de silencio que el motor deja en cada llamada, para que entre frases solo quede la pausa que se pide. Los 40 ms evitan comerse una «s» inicial o una oclusiva final."
+          }
+        },
+        "texto": "Pull it back, and a wedge inside the slider pries the teeth apart again. And if a zip ever splits open behind the slider... it's often the slider itself, worn loose. That's the whole machine... two rows of teeth, and a slider that tells them when to hold, and when to let go.",
+        "sample_rate": 24000,
+        "audio_segundos": 16.3,
+        "segundos": 0.0,
+        "rtf": 0.0,
+        "post_proceso_ffmpeg": null,
+        "reintentos_por_ritmo_implausible": [],
+        "recortes_por_divagacion": [],
+        "incidencias_no_bloqueantes": []
+      }
+    },
+    {
+      "id": "subir-al-canal/final.mp4",
+      "tipo": "video",
+      "etapa": "assembly",
+      "ruta": "canales/example/videos/2026-10-15_115251_how-does-a-zip-work/subir-al-canal/final.mp4",
+      "registro": "adaptador",
+      "existe": true,
+      "bytes": 78454068,
+      "fuente": "derivado de los assets de este run (render local del motor de escena, sin red)",
+      "modelo": "ninguno: render determinista con HyperFrames 0.8.78 en Chrome con WebGPU win64-152.0.7977.30 y FFmpeg 7.1.1-full_build-www.gyan.dev (sin modelo generativo); marca de agua con Video Seal 1.0 (TorchScript y_256b_img) y AudioSeal 0.2.0 (MIT), que marcan el contenido y no lo generan",
+      "licencia": "heredada de los assets de origen (ver derivado_de) · marca de agua: Video Seal 1.0 (TorchScript y_256b_img) (MIT (código y pesos)), AudioSeal 0.2.0, generador de 16 bits (generator_base) (MIT (código y pesos)), AudioSeal 0.2.0, detector de 16 bits (detector_base) (MIT (código y pesos))",
+      "url": "https://github.com/facebookresearch/videoseal · https://github.com/facebookresearch/audioseal",
+      "origen": "motor de escena: composición HTML animada por motor/motor.js sobre los activos, la narración, la música y los efectos del run, fotografiada fotograma a fotograma",
+      "derivado_de": [
+        "activos/img/lamina_01.jpg",
+        "activos/img/lamina_02.jpg",
+        "activos/img/lamina_03.jpg",
+        "audio/slide-01.wav",
+        "audio/slide-02.wav",
+        "audio/slide-03.wav",
+        "biblioteca/fuentes/PatrickHandSC-Regular.ttf",
+        "fuente-de-la-miniatura/Anton-Regular.ttf",
+        "lecho.wav",
+        "slides/slide-01.png",
+        "slides/slide-02.png",
+        "slides/slide-03.png"
+      ],
+      "detalle": {
+        "resolucion": "1920x1080",
+        "fps": 24,
+        "duracion_s": 54.458,
+        "laminas": 3,
+        "planos": 6,
+        "laminas_por_minuto": 3.31,
+        "movimientos": [],
+        "transiciones": [],
+        "cronometraje": {
+          "render_s": 94.6,
+          "factor_tiempo_real": 1.74
+        },
+        "detalle_por_plano": "montaje.json (junto al vídeo)",
+        "motor": "escena",
+        "silencios": {
+          "intro_s": 1.0,
+          "entre_partes_s": 1.0,
+          "cola_s": 2.0
+        },
+        "herramientas": {
+          "ffmpeg": "7.1.1-full_build-www.gyan.dev",
+          "hyperframes": "0.8.78",
+          "chrome": "win64-152.0.7977.30"
+        },
+        "actores": 0,
+        "formato": "laminas",
+        "marca_ia": {
+          "fichero": "final.mp4",
+          "sha256": "19a64c99c33f49c6207be687a1f9fa58a765492d4e4ec197b46320f1c390ab12",
+          "detectada": true,
+          "capas": {
+            "metadatos": "C2PA firmado con ES256 por el certificado local de esta instalación, sin sello de tiempo",
+            "imagen": "Video Seal 1.0, 256 bits",
+            "audio": "AudioSeal 0.2.0, 16 bits"
+          },
+          "modelos": {
+            "videoseal": {
+              "nombre": "Video Seal 1.0 (TorchScript y_256b_img)",
+              "licencia": "MIT (código y pesos)",
+              "fuente": "https://github.com/facebookresearch/videoseal",
+              "sha256": "5c7a4581c36fc6090aafdcfb3999123bae5172a4847f22e2da4e7fd1a39d1e1b"
+            },
+            "audioseal_generador": {
+              "nombre": "AudioSeal 0.2.0, generador de 16 bits (generator_base)",
+              "licencia": "MIT (código y pesos)",
+              "fuente": "https://github.com/facebookresearch/audioseal",
+              "sha256": "7a845b5fbe9364a63a3909d8ab3fe064d13a76ae4c2e983573e08c69b7b51748"
+            },
+            "audioseal_detector": {
+              "nombre": "AudioSeal 0.2.0, detector de 16 bits (detector_base)",
+              "licencia": "MIT (código y pesos)",
+              "fuente": "https://github.com/facebookresearch/audioseal",
+              "sha256": "8a78e8a83584113523e161fc599fcab10fd0e94c04d2eb9d2fa1e9ec91ab69d9"
+            }
+          },
+          "herramientas": {
+            "torch": "2.13.0+cu130",
+            "audioseal": "0.2.0",
+            "c2pa-python": "0.38.0",
+            "av": "19.0.1"
+          },
+          "comprobacion": {
+            "file": "final.mp4",
+            "sha256": "19a64c99c33f49c6207be687a1f9fa58a765492d4e4ec197b46320f1c390ab12",
+            "device": "cuda",
+            "c2pa": {
+              "supported": true,
+              "manifest": true,
+              "state": "Valid",
+              "failures": [
+                "signingCredential.untrusted"
+              ],
+              "generator": "Lanternist 2.0.0-rc.1",
+              "signer": "Lanternist local signer",
+              "ai": true,
+              "error": null
+            },
+            "image": {
+              "bits": 256,
+              "matches": 256,
+              "p_value": 8.636168555094445e-78,
+              "frames": 109
+            },
+            "audio": {
+              "bits": 16,
+              "probability": 1.0,
+              "matches": 16
+            },
+            "seconds": 4.85
+          },
+          "segundos": 24.68,
+          "dispositivo": "cuda",
+          "vram_pico_mb": 4624,
+          "audio": {
+            "frecuencia_hz": 48000,
+            "canales": 2,
+            "snr_db": 26.4
+          }
+        }
+      }
+    },
+    {
+      "id": "lecho.wav",
+      "tipo": "musica",
+      "etapa": "assembly",
+      "ruta": "canales/example/videos/2026-10-15_115251_how-does-a-zip-work/lecho.wav",
+      "registro": "adaptador",
+      "existe": true,
+      "bytes": 10456018,
+      "fuente": "generación local (ACE-Step en ComfyUI); música ORIGINAL, no de biblioteca",
+      "modelo": "ACE-Step v1 3.5B (all-in-one)",
+      "licencia": "Apache-2.0 — uso comercial permitido. VERIFICADO contra la API de HuggingFace el 24-08 (Comfy-Org/ACE-Step_ComfyUI_repackaged, campo cardData.license), no de memoria.",
+      "url": "https://huggingface.co/ACE-Step/ACE-Step-v1-3.5B · https://huggingface.co/Comfy-Org/ACE-Step_ComfyUI_repackaged",
+      "origen": "generado en local con ComfyUI (127.0.0.1); música original, sin Content ID de terceros",
+      "detalle": {
+        "workflow": "ace-step-lecho",
+        "pesos": [
+          "checkpoints/ace_step_v1_3.5b.safetensors"
+        ],
+        "prompt": "instrumental, no vocals, no singing, light documentary underscore, soft piano, plucked strings, gentle and curious, slow tempo, major key, sparse, unobtrusive background, no drums, no percussion loop, no melody hook",
+        "tramos": [
+          {
+            "seed": 2026,
+            "segundos": 45.0
+          },
+          {
+            "seed": 3137,
+            "segundos": 45.0
+          }
+        ],
+        "duracion_s": 54.46,
+        "semilla_base": 2026,
+        "parametros": {
+          "steps": 50,
+          "cfg": 5.0,
+          "shift": 5.0,
+          "tonemap": 1.0,
+          "sampler": "euler",
+          "scheduler": "simple",
+          "letra": "[instrumental]"
+        },
+        "segundos_por_tramo": 45.0,
+        "solape_segundos": 4.0,
+        "sonoridad_por_tramo": null
+      }
+    },
+    {
+      "id": "subir-al-canal/subtitulos.en.srt",
+      "tipo": "subtitulos",
+      "etapa": "assembly",
+      "ruta": "canales/example/videos/2026-10-15_115251_how-does-a-zip-work/subir-al-canal/subtitulos.en.srt",
+      "registro": "adaptador",
+      "existe": true,
+      "bytes": 1847,
+      "fuente": "texto del guion aprobado (slides.json); del audio solo las marcas de tiempo",
+      "modelo": "openai/whisper-small",
+      "licencia": "openai/whisper-small — Apache-2.0 (uso solo para marcas de tiempo, no genera contenido)",
+      "url": "https://huggingface.co/openai/whisper-small",
+      "origen": "alineación en local con .venv-voz, sin red (HF_HUB_OFFLINE=1)",
+      "detalle": {
+        "modelo_alineacion": "openai/whisper-small",
+        "idioma": "en",
+        "ass": null,
+        "quemado": false,
+        "lineas": 28,
+        "texto": "del guion (slides.json); del audio solo se toman los tiempos",
+        "lineas_del_srt": "los cues de la línea de tiempo del motor de escena: una línea por cue, los del karaoke",
+        "por_lamina": [
+          {
+            "lamina": 1,
+            "palabras": 48,
+            "ancladas": 48,
+            "cobertura": 1.0,
+            "colapsadas": 0,
+            "inicio_s": 1.0,
+            "dura_s": 16.583
+          },
+          {
+            "lamina": 2,
+            "palabras": 51,
+            "ancladas": 51,
+            "cobertura": 1.0,
+            "colapsadas": 0,
+            "inicio_s": 18.583,
+            "dura_s": 16.625
+          },
+          {
+            "lamina": 3,
+            "palabras": 53,
+            "ancladas": 53,
+            "cobertura": 1.0,
+            "colapsadas": 0,
+            "inicio_s": 36.208,
+            "dura_s": 16.25
+          }
+        ],
+        "load_seconds": 1.1
+      }
+    },
+    {
+      "id": "biblioteca/fuentes/PatrickHandSC-Regular.ttf",
+      "tipo": "fuente",
+      "etapa": "escena",
+      "ruta": "canales/example/videos/2026-10-15_115251_how-does-a-zip-work/biblioteca/fuentes/PatrickHandSC-Regular.ttf",
+      "registro": "adaptador",
+      "existe": true,
+      "bytes": 167376,
+      "fuente": "Patrick Hand SC Regular, versión 2.001, de Patrick Wagesreiter; bajada del repositorio de Google Fonts (ofl/patrickhandsc) el 05-10-2026",
+      "modelo": "no aplica (biblioteca del estudio, no lo genera ningún modelo)",
+      "licencia": "SIL Open Font License 1.1 (OFL): uso comercial permitido, también incrustada; el texto de la licencia va al lado (OFL-PatrickHandSC.txt)",
+      "url": "https://github.com/google/fonts/tree/main/ofl/patrickhandsc",
+      "origen": "copiado de la biblioteca del estudio (datos/escena/fuentes/PatrickHandSC-Regular.ttf)",
+      "detalle": {
+        "autor": "Copyright 2012 The Patrick Hand Authors (mail@patrickwagesreiter.at)",
+        "sha256": "83eff88cfa3c4e501e25f334c0a1a88eb4d4af1ea9d4c32900edf2fb178244dc",
+        "notas": "La letra de tiza del formato «pizarra» (F7.10, fila 256): la tinta (lib/escena/tinta.py) lee sus contornos para escribir cada letra trazo a trazo. El autor, la versión y la licencia se leyeron de su tabla `name` con fontTools (nameID 0, 5, 13 y 14). Se eligió por sus versalitas a mano, que son las del vídeo de origen.",
+        "desde": "datos/escena/fuentes/PatrickHandSC-Regular.ttf"
+      }
+    },
+    {
+      "id": "fuente-de-la-miniatura/Anton-Regular.ttf",
+      "tipo": "fuente",
+      "etapa": "thumbnail",
+      "ruta": "canales/example/videos/2026-10-15_115251_how-does-a-zip-work/fuente-de-la-miniatura/Anton-Regular.ttf",
+      "registro": "adaptador",
+      "existe": true,
+      "bytes": 170812,
+      "fuente": "Anton Regular, versión 2.116, de Vernon Adams; bajada del repositorio de Google Fonts (ofl/anton/Anton-Regular.ttf, commit cee74d7) el 15-10-2026",
+      "modelo": "no aplica (biblioteca del estudio, no lo genera ningún modelo)",
+      "licencia": "SIL Open Font License 1.1 (OFL): uso comercial permitido, también incrustada; el texto de la licencia va al lado (OFL-Anton.txt)",
+      "url": "https://github.com/google/fonts/tree/cee74d7ca45d66d5c1878c828645c862f2788d2d/ofl/anton",
+      "origen": "copiado de la biblioteca del estudio (datos/escena/fuentes/Anton-Regular.ttf)",
+      "detalle": {
+        "autor": "Copyright 2020 The Anton Project Authors (https://github.com/googlefonts/AntonFont.git); diseño de Vernon Adams",
+        "sha256": "a4ba3a92350ebb031da0cb47630ac49eb265082ca1bc0450442f4a83ab947cab",
+        "notas": "La letra del texto de la miniatura y del nombre y el eslogan del banner del canal de ejemplo (OC1.4): sustituye a Impact, que se leía de la carpeta de fuentes de Windows y no se puede redistribuir. Según su ficha en Google Fonts (DESCRIPTION.en_us.html, leída el 15-10-2026), es «a reworking of a traditional advertising sans serif typeface», con los trazos pensados «for use as bold display font»: una palo seco estrecha y gruesa, como Impact. Tiene versalitas (smcp), que la miniatura no usa. Autor, versión y licencia leídos de su tabla `name` con fontTools (nameID 0, 5, 13 y 14): «Version 2.116».",
+        "desde": "datos/escena/fuentes/Anton-Regular.ttf"
+      }
+    }
+  ],
+  "run_id": "2026-10-15_115251_how-does-a-zip-work",
+  "canal": "example",
+  "titulo": "How Does a Zip Work?",
+  "actualizado": "2026-10-15T22:44:04",
+  "politica": "Decisión cerrada 5: fuente, licencia y URL/origen de cada asset, integrado en las etapas. El archivo publicable va sin metadatos de generación (addendum de doc/02 fila 7); este registro sí declara el modelo real y no se falsea. Los planos con movimiento son transformaciones de las láminas (parámetros en montaje.json), no assets propios.",
+  "conteo": {
+    "cuadra": true,
+    "archivos_medios": 15,
+    "entradas": 15,
+    "por_tipo": {
+      "audio": 3,
+      "fuente": 2,
+      "imagen": 6,
+      "miniatura": 1,
+      "musica": 1,
+      "subtitulos": 1,
+      "video": 1
+    },
+    "sin_registrar": [],
+    "sin_archivo": [],
+    "licencias_por_cerrar": [],
+    "intermedios_de_montaje": 79,
+    "archivos_no_medios": 14,
+    "auditado": "2026-10-15T22:44:04"
+  }
+}

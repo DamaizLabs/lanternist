@@ -1,0 +1,30 @@
+{
+  "_comentario": "Perfil de autoridad de ejemplo: un tema donde las cifras son el producto (precios, presupuestos, poblaciones, récords). No es de ningún canal. Para un canal real, se copia con el id de su nicho (`perfil.json → nicho.id`) y se ajusta cada clave a su tema. Es la capa del motor: el canal solo dice qué nicho usa, y sus fichas verificadas viven en canales/<id>/datos/fuentes/.",
+  "nicho": "ejemplo-con-cifras",
+  "descripcion": "Ejemplo de un tema que vive de cifras: cada vídeo explica una cantidad (un precio, un presupuesto, una población) y de dónde sale.",
+  "creado": "2026-10-24",
+  "proveedores": ["crossref", "openalex", "openlibrary", "wikidata", "wikipedia", "documento"],
+  "_nota_proveedores": "Los seis existen en lib/fuentes/proveedores/ y responden sin clave. Crossref y OpenAlex dan los artículos; Open Library, los libros; Wikidata, los datos estructurados de una entidad. Wikipedia entra como ÍNDICE de fuentes y no como fuente: su tipo de referencia es indice_de_fuentes y no está en la jerarquía. 'documento' resuelve el ORIGEN de una cifra, que no tiene DOI: un informe o la nota de una oficina estadística, por su URL (`url:https://…`). Lo descarga una vez, lee su texto (HTML o PDF) y guarda el sha256 de sus bytes.",
+  "cifras": {"exige_frase_confirmada": true, "mapa": {"minimo_videos": 3, "minimo_canales": 2}, "redondeo": {"error_maximo_pct": 5}},
+  "_nota_cifras": "El bloque que hace que el verificador exija cifras confirmadas; un tema sin cifras no lo lleva. EL MAPA: los vídeos del tema que se miraron para saber de qué hablar (`inspiracion`), al menos `minimo_videos` vídeos distintos de al menos `minimo_canales` canales distintos por channel_id, porque lo que sale de un solo canal es analizarlo a él. No se guarda ninguna transcripción. LAS CIFRAS: cada una con su frase exacta en su origen, que el código busca en el documento, y la confirmación del usuario con su huella. EL REDONDEO: el valor va como lo da el documento y, si se narra redondeado, la cifra lo declara en `se_dice`; el código comprueba que el redondeo es correcto y que no se aleja del valor más de `redondeo.error_maximo_pct`. Ninguna clave de este bloque tiene valor por defecto: si falta una, la validación lo dice.",
+  "jerarquia": ["fuente_primaria", "academica_revisada", "libro_academico", "institucional", "libro", "facsimil", "identificador_de_entidad"],
+  "_nota_jerarquia": "Ordenada de más a menos autoridad PARA ESTE TEMA. Una cifra pesa más en el documento que la publica que en cualquier artículo que la cite, y por eso fuente_primaria va arriba. 'identificador_de_entidad' (Wikidata) va al final: identifica algo, no respalda una afirmación sobre ello.",
+  "exige_identificador": true,
+  "_nota_identificador": "Una cita que no resuelve no existe. En un tema de cifras, el riesgo es la cifra redonda que circula sin origen.",
+  "lista_negra": [
+    "agregadores sin autor",
+    "contenido generado por IA",
+    "blogs sin autoría",
+    "fuentes que venden un producto relacionado con la cifra que dan",
+    "wikis como FUENTE de una afirmación (sí valen como índice de fuentes: ver _nota_proveedores)"
+  ],
+  "campos_obligatorios": ["periodo_documentado", "ambito", "certeza", "evidencia", "tratamiento_editorial"],
+  "_nota_campos": "'periodo_documentado' es EL AÑO DE LA CIFRA: una cantidad es de un año concreto, y contarla sin él es la forma más común de equivocarse. 'ambito' es el lugar o el mercado al que se refiere.",
+  "regla_de_titulo": "El título hace la pregunta que el vídeo responde, con una cifra verificada; nunca promete una ganancia ni predice con fecha.",
+  "consultas_semilla": [
+    "household budget survey methodology",
+    "consumer price index basket weights",
+    "population census undercount estimate"
+  ],
+  "_nota_consultas": "Punto de partida para las búsquedas, NO una bibliografía: cada resultado hay que verificarlo con --verificar antes de que entre en una ficha."
+}

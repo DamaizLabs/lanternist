@@ -1,0 +1,32 @@
+{
+  "title": "How Does a Zip Work?",
+  "description": "A zip closes in one pull, and it does it with only two parts: two rows of teeth and a slider. This video looks at the problem it solved, what is inside the slider, and why a zip sometimes stops closing.",
+  "tags": [
+    "how does a zip work",
+    "how a zipper works",
+    "zip slider",
+    "everyday inventions",
+    "how things work"
+  ],
+  "thumbnail_lamina": 2,
+  "thumbnail_text": "IT'S ALL IN THE SLIDER",
+  "slides": [
+    {
+      "slide_number": 1,
+      "narration": "You close one every day, almost without looking... one pull, and it's done. Before it, boots and dresses were often closed with a long row of small buttons, hooks or laces, fastened one at a time... every morning. The zip turned all of that into a single movement.",
+      "image_prompt": "a tall old-fashioned boot fastened with a long row of small round buttons up its side, standing alone on a plain wooden table, seen straight on from the side, the whole boot in frame"
+    },
+    {
+      "slide_number": 2,
+      "narration": "So how does it work? Each tooth has a small bump on top, and a hollow underneath. The secret is the slider... inside, its channel is shaped like a Y, and it presses the two rows together at an angle, so every bump drops into a hollow on the other side.",
+      "image_prompt": "a single metal zip lying horizontally across the picture, seen straight on, the only object on a plain background, half open: on the left its two strips of fabric tape spread apart in a wide sideways V, the upper strip angling up and the lower strip angling down, each carrying its own separate row of small metal teeth; in the centre, where the two strips meet, sits the slider; on the right of the slider the two strips run together as one closed strip, their teeth locked into each other"
+    },
+    {
+      "slide_number": 3,
+      "narration": "Pull it back, and a wedge inside the slider pries the teeth apart again. And if a zip ever splits open behind the slider... it's often the slider itself, worn loose. That's the whole machine... two rows of teeth, and a slider that tells them when to hold, and when to let go.",
+      "image_prompt": "Una sola mano baja el cursor de una cremallera medio abierta en la parte delantera de una chaqueta lisa, primer plano, vista de frente: la cremallera tiene un único cursor con un único tirador, y el pulgar y el índice de esa mano pellizcan ese tirador; ningún tirador cuelga del cursor. Por encima del cursor, las dos filas de dientes metálicos se separan.",
+      "prefijo_estilo": "ilustración a plumilla y tinta con sombreado y trama cruzada a lápiz de grafito, tonos sepia y carbón sobre pergamino envejecido, lámina de grabado antiguo de museo, iluminación dramática de claroscuro, sin texto, sin marca de agua, composición panorámica 16:9.",
+      "seed": 2027
+    }
+  ]
+}

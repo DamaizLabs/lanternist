@@ -1,0 +1,25 @@
+{
+  "_comentario": "Perfil de autoridad de ejemplo: un tema de divulgación con fuentes académicas y sin cifras que confirmar (historia, ciencia, arte). No es de ningún canal. Para un canal real, se copia con el id de su nicho (`perfil.json → nicho.id`) y se ajusta cada clave a su tema. Es la capa del motor: el canal solo dice qué nicho usa, y sus fichas verificadas viven en canales/<id>/datos/fuentes/.",
+  "nicho": "ejemplo-sin-cifras",
+  "descripcion": "Ejemplo de un tema de divulgación con fuentes académicas: cada vídeo cuenta un hecho y se apoya en las obras que lo documentan.",
+  "creado": "2026-10-24",
+  "proveedores": ["crossref", "openalex", "openlibrary", "archive", "wikidata", "wikipedia"],
+  "_nota_proveedores": "Los seis responden sin clave. Wikipedia entra como ÍNDICE de fuentes, no como fuente de autoridad: su tipo de referencia es indice_de_fuentes y no está en la jerarquía, así que una ficha que la citara como fuente saltaría en la validación. Los identificadores que cita (ISBN y DOI) sí los resuelve el módulo. Internet Archive ('archive') da el documento escaneado.",
+  "jerarquia": ["fuente_primaria", "facsimil", "academica_revisada", "libro_academico", "libro", "institucional", "identificador_de_entidad"],
+  "_nota_jerarquia": "Ordenada de más a menos autoridad PARA ESTE TEMA. Un documento de época pesa más que un artículo reciente que lo comenta, y por eso 'facsimil' (Internet Archive) va tan arriba: no es una referencia al documento, es el documento. En otro tema el orden sería distinto, y eso es lo que este fichero existe para declarar.",
+  "exige_identificador": true,
+  "lista_negra": [
+    "agregadores sin autor",
+    "contenido generado por IA",
+    "blogs sin autoría",
+    "wikis como FUENTE de una afirmación (sí valen como índice de fuentes: ver _nota_proveedores)"
+  ],
+  "campos_obligatorios": ["periodo_documentado", "ambito", "certeza", "evidencia", "tratamiento_editorial"],
+  "_nota_campos": "'periodo_documentado' obliga a fechar cada hecho: nada entra como «antiguo» o «medieval» por defecto.",
+  "regla_de_titulo": "El título usa el lenguaje del espectador; el contenido nunca afirma una fecha ni un hecho que las fuentes no respaldan.",
+  "consultas_semilla": [
+    "history of everyday objects material culture",
+    "invention patent history primary sources"
+  ],
+  "_nota_consultas": "Punto de partida para las búsquedas, NO una bibliografía: cada resultado hay que verificarlo con --verificar antes de que entre en una ficha."
+}

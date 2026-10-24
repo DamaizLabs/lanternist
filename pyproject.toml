@@ -1,0 +1,36 @@
+# Fuente única de la versión del producto (ver doc/versionado.md).
+# No es un paquete instalable: el pipeline se ejecuta desde el repositorio.
+[project]
+name = "lanternist"
+version = "2.0.0-rc.1"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+# Solo las pruebas de Lanternist. Sin esto, `pytest -q` desde la raíz recoge también las de ComfyUI cuando el instalador
+# lo deja en `herramientas/` (OC1.7), que piden su propio entorno.
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+# Los notebooks quedan fuera del gate, y no por comodidad: un notebook es código EXPLORATORIO y
+# desechable, a menudo de otra máquina, con las convenciones de ese entorno (imports agrupados,
+# celdas cortas y sueltas). El gate existe para el código de producción de `lib/`. El único que hubo,
+# el del cinemagraph en Kaggle, se retiró con su generador en F6.7.
+#
+# Y los informes de `progress/` quedan fuera por un motivo distinto y más fuerte: **ruff formatea los
+# bloques de código dentro del markdown**, y esos bloques son **citas de cómo era el código en la fecha
+# del informe**. Reformatear una cita la falsea — `progress/review_F2.12.md` es el caso real que lo
+# destapó, con un comentario alineado que ruff quería mover. Un informe fechado no se reescribe: por eso
+# el addendum de `doc/02` existe.
+extend-exclude = ["*.ipynb", "progress/*.md"]
+
+[tool.ruff.lint]
+# Núcleo pragmático: errores reales e imports; sin pedantería estilística sobre el código importado del fork
+select = ["E", "F", "W", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+# Cadenas largas de prompts y filtros ffmpeg: son datos, no se trocean
+"lib/config.py" = ["E501"]
+# Los dibujos SVG de un canal del motor de escena (F6.3): cada dibujo es una cadena de datos, no se trocea
+"canales/*/escena/dibujos.py" = ["E501"]

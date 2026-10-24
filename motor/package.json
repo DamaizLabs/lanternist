@@ -1,0 +1,13 @@
+{
+  "name": "lanternist-motor",
+  "private": true,
+  "description": "El motor de escena de Lanternist: HyperFrames y GSAP fijados a una versión exacta para que el render no dependa de lo que npx descargue ese día. GSAP se instala aquí y no se copia al repositorio: su licencia no permite redistribuirlo.",
+  "license": "MIT",
+  "engines": {
+    "node": "24.19.0"
+  },
+  "dependencies": {
+    "gsap": "3.14.2",
+    "hyperframes": "0.8.78"
+  }
+}
