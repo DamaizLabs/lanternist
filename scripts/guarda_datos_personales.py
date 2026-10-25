@@ -21,8 +21,9 @@ con la que se publica el motor. En cualquier otro fichero, o con otro texto, la 
 cadenas personales. En el repositorio público, donde ese fichero no existe, corre solo con los genéricos.
 
 **Qué recorre.** Sobre git, lo versionado y lo nuevo que git no ignora, filtrado por la lista blanca
-(`exportacion/lista-blanca.txt`); donde no hay lista blanca (el repositorio público), todo. Sobre una carpeta, todos sus
-ficheros salvo `.git`, las dependencias, los entornos y las cachés: los mismos que mira la guarda de licencias.
+(`exportacion/lista-blanca.txt`); donde no hay lista blanca (el repositorio público), todo lo versionado, y nada de
+lo que aún no tiene commit: los runs de quien usa el motor guardan la carpeta de su usuario. Sobre una carpeta, todos
+sus ficheros salvo `.git`, las dependencias, los entornos y las cachés: los mismos que mira la guarda de licencias.
 
 **Qué no comprueba.** Los binarios (fuentes e imágenes): lo que llevan dentro es de su autor, y su procedencia la vigila
 la guarda de licencias. El texto en UTF-16 sí se lee, con BOM o sin él: es lo que escribe `>` en PowerShell 5. Tampoco
@@ -92,13 +93,14 @@ def en_la_lista_blanca(rel: str, lista: tuple[list[str], list[str]]) -> bool:
 
 
 def ficheros_de_git(raiz: Path, lista: tuple[list[str], list[str]] | None) -> list[str]:
-    """Lo versionado y lo nuevo que git no ignora (rutas relativas), filtrado por la lista blanca si la hay."""
-    salida = subprocess.run(
-        ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
-        cwd=raiz,
-        capture_output=True,
-        check=True,
-    ).stdout.decode("utf-8")
+    """Rutas relativas. Con la lista blanca (la fábrica), lo versionado y lo nuevo que git no ignora, filtrado por
+    ella: lo nuevo se caza antes de su commit. Sin ella (el repositorio público), solo lo versionado, como la guarda
+    de licencias: lo que produce quien usa el motor, como el estado de un run con la carpeta de su usuario, no viaja
+    mientras no haga commit."""
+    orden = ["git", "ls-files", "-z", "--cached"]
+    if lista is not None:
+        orden += ["--others", "--exclude-standard"]
+    salida = subprocess.run(orden, cwd=raiz, capture_output=True, check=True).stdout.decode("utf-8")
     rutas = sorted({r for r in salida.split("\0") if r and (raiz / r).is_file()})
     return [r for r in rutas if lista is None or en_la_lista_blanca(r, lista)]
 

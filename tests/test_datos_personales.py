@@ -78,7 +78,7 @@ def _con(raiz: Path, texto: str, rel: str = "lib/modulo.py") -> list[str]:
 
 # ------------------------------------------------------------------------------------------ la buena
 def _lo_que_viaja() -> list[str]:
-    """En la fábrica, lo que nombra la lista blanca. En el repositorio público, todo: lo de git o, en una exportación
+    """En la fábrica, lo que nombra la lista blanca. En el repositorio público, todo lo versionado o, en una exportación
     que aún no es un repositorio, lo que hay en la carpeta."""
     if HAY_LISTA:
         return gd.ficheros_de_git(RAIZ, gd.lee_lista_blanca())
@@ -164,6 +164,19 @@ def test_sobre_git_solo_cuenta_la_lista_blanca_y_tambien_lo_nuevo(tmp_path):
     ficheros = gd.ficheros_de_git(tmp_path, gd.lee_lista_blanca(tmp_path))
     assert ficheros == ["lib/a.py", "lib/nuevo.py"]
     assert len(gd.hallazgos(tmp_path, ficheros, [])) == 2
+
+
+def test_en_el_repositorio_publico_lo_que_no_tiene_commit_no_cuenta(tmp_path):
+    """Sin lista blanca (el repositorio público), solo lo versionado: el estado del primer run de quien instala, con la
+    carpeta de su usuario, no pone la guarda en rojo hasta que lo mete en git (hallazgo del clon limpio, fila 328)."""
+    rel = "canales/example/datos/estado/un-run.json"
+    (tmp_path / rel).parent.mkdir(parents=True)
+    (tmp_path / rel).write_text('{"output_dir": "C:' + "\\\\Users\\\\" + 'alguien\\\\lanternist"}\n', encoding="utf-8")
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    assert gd.ficheros_de_git(tmp_path, None) == []
+    subprocess.run(["git", "add", "-A"], cwd=tmp_path, check=True)  # control: camino del commit, ya cuenta
+    assert gd.ficheros_de_git(tmp_path, None) == [rel]
+    assert len(gd.hallazgos(tmp_path, [rel], [])) == 1
 
 
 # ------------------------------------------------------------------------------------------ los controles
@@ -304,11 +317,13 @@ def test_control_la_excepcion_no_tapa_los_genericos(tmp_path):
 
 
 @pytest.mark.skipif(not ENTRADAS, reason="sin cadenas personales: esto es el repositorio público")
-def test_el_license_de_verdad_pasa_solo_por_su_excepcion():
-    """El titular del LICENSE es la marca con la que se publica, y contiene una cadena personal: sin la excepción
-    decidida, la guarda lo pararía. Así se sabe que la excepción es lo que lo deja pasar, y no que no lo mire."""
-    assert gd.hallazgos(RAIZ, ["LICENSE"], gd.cadenas_personales(), gd.se_permite()) == []
-    assert gd.hallazgos(RAIZ, ["LICENSE"], gd.cadenas_personales(), {}) != []
+@pytest.mark.parametrize("rel", ["LICENSE", ".github/ISSUE_TEMPLATE/config.yml"])
+def test_lo_que_nombra_la_marca_pasa_solo_por_su_excepcion(rel):
+    """El titular del LICENSE y la URL del repositorio llevan la marca con la que se publica, que es una cadena
+    personal: sin la excepción decidida, la guarda los pararía. Así se sabe que la excepción es lo que los deja pasar,
+    y no que no los mire."""
+    assert gd.hallazgos(RAIZ, [rel], gd.cadenas_personales(), gd.se_permite()) == []
+    assert gd.hallazgos(RAIZ, [rel], gd.cadenas_personales(), {}) != []
 
 
 # ------------------------------------------------------------------------------------------ falla cerrada

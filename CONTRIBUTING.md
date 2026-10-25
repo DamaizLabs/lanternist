@@ -71,7 +71,8 @@ attach screenshots you took yourself.
 
    - The test suite runs against the example channel. The tests that need the graphics card or WebGPU are skipped when
      they are not set up.
-   - The personal-data guard fails on a key, a YouTube channel id, an email or a Windows user folder in any file.
+   - The personal-data guard fails on a key, a YouTube channel id, an email or a Windows user folder in any file in
+     git, so run it after `git add`. The state of your own runs keeps your Windows user folder: do not add it.
    - The license guard fails on a file without a known license, such as an image or a font with no record of where it
      came from.
    - The skills check fails when a skill names a command, a path or a format that does not exist.
