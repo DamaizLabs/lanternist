@@ -66,7 +66,7 @@ falta, pregúntaselo antes**: en una instalación de cero son sobre todo `entorn
 | `pesos` | los modelos de imagen, música y ampliación, en la carpeta de ComfyUI | **69,6 GB** | según su conexión |
 | `voz` | llama.cpp, Orpheus, Kokoro y el alineador | 5,6 GB | según su conexión |
 | `escena` | HyperFrames, los efectos de sonido, el Chrome con WebGPU y SAM | 1,1 GB | ~1 min |
-| `marca` | los modelos de la marca de IA (Video Seal y AudioSeal) | 0,3 GB | segundos |
+| `marca` | los modelos de la marca de IA (Video Seal, AudioSeal y la señal TrustMark) | 0,4 GB | segundos |
 | `voz-del-canal` | el clip de voz del canal de ejemplo, con Kokoro en la GPU | nada | ~20 s |
 | `comprueba` | `pipeline.py --check` | nada | ~10 s |
 

@@ -59,7 +59,25 @@ def test_estan_todos_los_pesos_de_los_workflows_y_el_de_esrgan():
 
 def test_los_pesos_de_la_marca_salen_de_la_lista_y_su_sha256_vive_en_un_solo_sitio():
     marca = {f["id"]: f for f in FICHEROS if f["paso"] == "marca"}
-    assert set(marca) == set(marca_ia.MODELOS) == {"videoseal", "audioseal_generador", "audioseal_detector"}
+    assert (
+        set(marca)
+        == set(marca_ia.MODELOS)
+        == {
+            "videoseal",
+            "audioseal_generador",
+            "audioseal_detector",
+            "trustmark_config",
+            "trustmark_codificador",
+            "trustmark_decodificador",
+        }
+    )
+    # TrustMark comprueba el md5 de sus ficheros por su nombre: tienen que llegar con el original.
+    for clave, nombre in (
+        ("trustmark_config", "trustmark_Q.yaml"),
+        ("trustmark_codificador", "encoder_Q.ckpt"),
+        ("trustmark_decodificador", "decoder_Q.ckpt"),
+    ):
+        assert Path(marca[clave]["destino"]).name == nombre == marca[clave]["url"].rsplit("/", 1)[1]
     for clave, modelo in marca_ia.MODELOS.items():
         assert modelo["sha256"] == marca[clave]["sha256"] and modelo["url"] == marca[clave]["url"]
     codigo = (RAIZ / "lib" / "marca_ia.py").read_text(encoding="utf-8")
@@ -212,11 +230,19 @@ def test_un_entorno_con_su_marca_no_se_rehace_y_uno_con_requisitos_cambiados_si(
     instala.python_de(entorno).parent.mkdir(parents=True)
     instala.python_de(entorno).write_text("")
     receta = [["-r", str(requisitos)]]
-    ordenes = []
-    monkeypatch.setattr(instala, "corre", lambda orden, cwd=None, que="": ordenes.append(orden))
+    ordenes, entornos = [], []
+    monkeypatch.setenv("UNA_VARIABLE_DE_QUIEN_INSTALA", "sigue")
+
+    def corre(orden, cwd=None, que="", env=None):
+        ordenes.append(orden)
+        entornos.append(env)
+
+    monkeypatch.setattr(instala, "corre", corre)
     assert not instala.entorno_hecho(entorno, receta)
     instala.crea_entorno(entorno, receta)
     assert instala.entorno_hecho(entorno, receta) and len(ordenes) == 1, "una orden de pip y su marca"
+    # pip va con PYTHONUTF8, que TrustMark necesita para construirse en Windows, sin perder el entorno heredado.
+    assert entornos[0]["PYTHONUTF8"] == "1" and entornos[0]["UNA_VARIABLE_DE_QUIEN_INSTALA"] == "sigue"
     # Control: si cambian los requisitos, la marca ya no vale y pip se repite.
     requisitos.write_text("paquete==2.0\n")
     assert not instala.entorno_hecho(entorno, receta)
@@ -227,7 +253,7 @@ def test_un_entorno_que_ya_existe_con_otro_python_no_se_toca(aislado, monkeypatc
     instala.python_de(entorno).parent.mkdir(parents=True)
     instala.python_de(entorno).write_text("")
     ordenes = []
-    monkeypatch.setattr(instala, "corre", lambda orden, cwd=None, que="": ordenes.append(orden))
+    monkeypatch.setattr(instala, "corre", lambda orden, cwd=None, que="", env=None: ordenes.append(orden))
     (entorno / "pyvenv.cfg").write_text("home = C:\\Python314\nversion = 3.14.4\n")
     with pytest.raises(instala.ErrorDeInstalacion, match="es de Python 3.14.4"):
         instala.crea_entorno(entorno, [["paquete"]])

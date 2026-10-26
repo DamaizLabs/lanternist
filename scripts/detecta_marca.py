@@ -2,12 +2,15 @@ r"""El detector gratuito de la marca de IA de Lanternist (OC1.5; medida 2.1 del 
 
     .venv\Scripts\python scripts\detecta_marca.py <fichero> [--report salida.json] [--cpu]
 
-Busca en un vídeo, una imagen o un audio las tres capas de la marca: el manifiesto C2PA, la marca de agua de Video Seal
-y la de AudioSeal. Imprime una línea por capa y un veredicto, en inglés llano. Corre en local y sin red, en la GPU si la
-hay o en la CPU (`--cpu` la fuerza). Con `--report`, deja el resultado firmado con la clave local de esta instalación:
-el sha256 del fichero, el detector, la hora UTC, los resultados y el veredicto (sub-medida 2.1.2).
+Busca en un vídeo, una imagen o un audio las capas de la marca: el manifiesto C2PA, la marca de agua de Video Seal, la
+señal de TrustMark, que dice qué detector usar, y la marca de AudioSeal. Imprime una línea por capa y un veredicto, en
+inglés llano. Corre en local y sin red, en la GPU si la hay o en la CPU (`--cpu` la fuerza). Con `--report`, deja el
+resultado firmado con la clave local de esta instalación: el sha256 del fichero, el detector, la hora UTC, los
+resultados y el veredicto (sub-medida 2.1.2).
 
-Código de salida: 0 si encuentra la marca de Lanternist en alguna capa, 1 si no, y 2 si no ha podido mirar.
+Código de salida: 0 si encuentra la marca de Lanternist en alguna capa, 1 si no, y 2 si no ha podido mirar: un fallo,
+o un fichero en el que no hay ninguna capa que mirar (sin imagen ni sonido y de un tipo que no admite C2PA, como un
+`.srt`).
 """
 
 from __future__ import annotations
@@ -40,6 +43,8 @@ def main(argv: list[str] | None = None) -> int:
     print(marca_ia.veredicto(resultado))
     if args.report:
         print(f"Signed report: {args.report}")
+    if marca_ia.sin_mirar(resultado):
+        return 2
     return 0 if marca_ia.de_lanternist(resultado) else 1
 
 

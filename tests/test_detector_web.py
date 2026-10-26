@@ -8,7 +8,8 @@ Cada prueba lleva su control, para que sepa fallar:
 - el tope: lo que lo pasa se niega sin leer el cuerpo; lo que cabe, entra;
 - la carpeta temporal: se borra al acabar, vaya bien, falle el detector o no se pueda leer el fichero;
 - un fichero que no es un medio se niega con el motivo de ffprobe, sin llegar al detector;
-- un fallo del detector es «not checked», nunca «not marked»;
+- un fallo del detector es «not checked», nunca «not marked», y también un fichero sin ninguna capa que mirar (un
+  `.srt`), que sí trae su veredicto;
 - una detección cada vez (la GPU de 8 GB no se reparte);
 - el nombre del fichero no sale de su carpeta;
 - solo escucha en 127.0.0.1;
@@ -246,6 +247,32 @@ def test_si_el_detector_falla_es_not_checked_y_nunca_not_marked(srv, png):
     srv["visto"]["codigo"] = 0
     estado, datos = _detecta(srv["s"], png)
     assert estado == 200 and datos["marked"] is True
+
+
+def test_un_fichero_sin_ninguna_capa_que_mirar_es_not_checked_con_su_veredicto(srv):
+    """Un `.srt` pasa ffprobe, pero no tiene imagen ni sonido y no admite C2PA: la página lo da como no comprobado."""
+    srv["visto"]["deteccion"] = {
+        "file": "subtitulos.en.srt",
+        "sha256": "c" * 64,
+        "c2pa": {"supported": False, "manifest": False},
+        "image": None,
+        "signpost": None,
+        "audio": None,
+    }
+    srt = b"1\n00:00:00,000 --> 00:00:01,000\nHello\n"
+    estado, datos = _detecta(srv["s"], srt, nombre="subtitulos.en.srt")
+    assert estado == 200 and datos["marked"] is False and datos["checked"] is False
+    assert datos["lines"][-1].startswith("Verdict: NOT CHECKED") and srv["visto"]["llamadas"] == 1
+    # Control: con una capa que mirar, «not marked».
+    srv["visto"]["deteccion"] = SIN_MARCA
+    estado, datos = _detecta(srv["s"], srt, nombre="subtitulos.en.srt")
+    assert datos["checked"] is True and datos["lines"][-1].startswith("Verdict: NOT MARKED")
+
+
+def test_la_pagina_pinta_el_not_checked_como_no_comprobado(srv):
+    respuesta, datos = _pide(srv["s"], "GET", f"/?token={srv['s'].token}")
+    html = datos.decode("utf-8")
+    assert 'data.marked ? "marked" : data.checked ? "notmarked" : "notchecked"' in html and ".notchecked {" in html
 
 
 def test_una_deteccion_cada_vez(srv, png):

@@ -1053,7 +1053,7 @@ def stage_thumbnail(run_id: str):
     informe(veredicto, Path(run_dir) / "miniatura.json")
     print(
         f"  marca de IA: C2PA {marca['comprobacion']['c2pa']['state']} · Video Seal "
-        f"{marca['comprobacion']['image']['matches']}/256 bits · {marca['segundos']} s"
+        f"{marca['comprobacion']['image']['matches']}/256 bits · señal {marca_ia.SENAL} · {marca['segundos']} s"
     )
 
     run_state.update_stage(run_id, "thumbnail", "complete", thumb_path)

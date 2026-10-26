@@ -1,16 +1,19 @@
-"""La marca de IA legible por máquina (OC1.5): el mensaje, el umbral, el veredicto, el cliente y una prueba de verdad.
+"""La marca de IA legible por máquina (OC1.5 y OC1.12): el mensaje, la señal, el umbral, el veredicto, el cliente y una
+prueba de verdad.
 
 Lo que se prueba, cada cosa con su control:
 
-- Las funciones puras: los bits del mensaje, el umbral de 167 de 256 bits (166 no basta) y los veredictos de un
-  fichero marcado, de uno sin marcar y de los mixtos (el C2PA perdido o roto con la marca de agua presente, la marca
-  de AudioSeal de otro).
+- Las funciones puras: los bits del mensaje y los de la señal (el 59 en 40 bits), el umbral de 167 de 256 bits (166 no
+  basta) y los veredictos de un fichero marcado, de uno sin marcar y de los mixtos (el C2PA perdido o roto con la marca
+  de agua presente, la marca de AudioSeal de otro, la señal sola o con otro número) y de uno sin ninguna capa que
+  mirar, que es «not checked».
 - El cliente con un lanzador falso: el trabajo que escribe, el error del trabajador, la autocomprobación que no
   encuentra la marca (y entonces no queda el fichero), el `.venv-escena` que falta, el cerrojo de la GPU y la bajada de
   los pesos con su sha256.
 - La guarda de la subida (`exige_marcado`) y `--set-thumbnail`.
-- **De verdad**, en CPU y sin cerrojo: un clip sintético de 3 s marcado y detectado; el mismo clip sin marcar da «no
-  marcado»; el C2PA sale «Valid» con `signingCredential.untrusted` y, con un byte cambiado, «Invalid»; y el informe
+- **De verdad**, en CPU y sin cerrojo: un clip sintético de 3 s marcado y detectado, con la señal en todos sus
+  fotogramas y las tres marcas de agua declaradas en el manifiesto; el mismo clip sin marcar da «no marcado» y no lleva
+  la señal; el C2PA sale «Valid» con `signingCredential.untrusted` y, con un byte cambiado, «Invalid»; y el informe
   firmado se verifica con la clave pública de su cadena. Se salta si faltan `.venv-escena`, sus paquetes o los pesos.
 
 La etapa `render` y la miniatura con la marca están en `tests/escena/test_etapas.py` y
@@ -45,9 +48,11 @@ MARCADO = {
         "generator": "Lanternist 2.0.0-rc.1",
         "signer": "Lanternist local signer",
         "ai": True,
+        "watermarks": ["Video Seal 1.0 …", "TrustMark 0.9.2 … signpost 59 …", "AudioSeal 0.2.0 …"],
         "error": None,
     },
     "image": {"bits": 256, "matches": 256, "p_value": 8.6e-78, "frames": 109},
+    "signpost": {"frames": 109, "lanternist_frames": 109, "lanternist_identifiers": [59], "other_identifiers": []},
     "audio": {"bits": 16, "probability": 1.0, "matches": 16},
 }
 SIN_MARCA = {
@@ -55,7 +60,17 @@ SIN_MARCA = {
     "sha256": "b" * 64,
     "c2pa": {"supported": True, "manifest": False},
     "image": {"bits": 256, "matches": 117, "p_value": 0.92, "frames": 109},
+    "signpost": {"frames": 109, "lanternist_frames": 0, "lanternist_identifiers": [], "other_identifiers": []},
     "audio": {"bits": 16, "probability": 0.006, "matches": 7},
+}
+# Un `.srt`: ni imagen ni sonido, y su tipo no admite C2PA.
+SIN_CAPAS = {
+    "file": "subtitulos.en.srt",
+    "sha256": "c" * 64,
+    "c2pa": {"supported": False, "manifest": False},
+    "image": None,
+    "signpost": None,
+    "audio": None,
 }
 
 
@@ -74,6 +89,17 @@ def test_los_bits_del_mensaje_son_los_del_sha256_de_la_frase():
             marca_ia.bits_del_mensaje(n)
 
 
+def test_la_senal_es_el_59_en_40_bits_del_mas_significativo_al_menos():
+    bits = marca_ia.bits_de_la_senal()
+    assert bits == "0" * 34 + "111011" and len(bits) == marca_ia.BITS_SENAL == 40 and int(bits, 2) == 59
+    assert marca_ia.SENAL == 59 and marca_ia.SENAL in marca_ia.SENALES_DE_LANTERNIST
+    # Control: otro número da otros bits, y lo que no cabe en 40 bits no se acepta.
+    assert marca_ia.bits_de_la_senal(58) != bits and int(marca_ia.bits_de_la_senal(58), 2) == 58
+    for n in (-1, 2**40):
+        with pytest.raises(ValueError):
+            marca_ia.bits_de_la_senal(n)
+
+
 def test_el_umbral_de_imagen_es_167_de_256_y_166_no_basta():
     assert marca_ia.p_valor(167, 256) < 1e-6 <= marca_ia.p_valor(166, 256)
     assert marca_ia.p_valor(167, 256) == pytest.approx(6.2e-7, rel=0.01)
@@ -87,11 +113,14 @@ def test_el_umbral_de_imagen_es_167_de_256_y_166_no_basta():
 def test_el_veredicto_de_un_fichero_marcado_da_una_linea_por_capa():
     texto = marca_ia.veredicto(MARCADO)
     lineas = texto.splitlines()
-    assert lineas[0].startswith("File: final.mp4") and len(lineas) == 5
+    assert lineas[0].startswith("File: final.mp4") and len(lineas) == 6
     assert lineas[1].startswith("C2PA metadata: signed by Lanternist 2.0.0-rc.1") and "untrusted" in lineas[1]
+    assert lineas[1].endswith("It declares 3 invisible watermarks (c2pa.watermarked.unbound).")
     assert lineas[2].startswith("Image watermark (Video Seal): FOUND, 256 of 256")
-    assert lineas[3].startswith("Audio watermark (AudioSeal): FOUND")
-    assert lineas[4].startswith("Verdict: MARKED") and "missing or broken" not in lineas[4]
+    assert lineas[3].startswith("Signpost watermark (TrustMark): FOUND in 109 of 109 frames")
+    assert lineas[4].startswith("Audio watermark (AudioSeal): FOUND")
+    assert lineas[5].startswith("Verdict: MARKED") and "missing or broken" not in lineas[5]
+    assert "signpost watermark" in lineas[5]
     assert marca_ia.de_lanternist(MARCADO) and marca_ia.autocomprobacion(MARCADO) == []
 
 
@@ -99,10 +128,11 @@ def test_control_el_veredicto_de_un_fichero_sin_marcar_dice_que_eso_no_prueba_na
     texto = marca_ia.veredicto(SIN_MARCA)
     assert "C2PA metadata: none in this file" in texto
     assert "Image watermark (Video Seal): not found, 117 of 256" in texto and "needs 167" in texto
+    assert "Signpost watermark (TrustMark): not found in 109 frames." in texto
     assert "Audio watermark (AudioSeal): not found" in texto
     assert texto.splitlines()[-1].startswith("Verdict: NOT MARKED") and "does not prove" in texto
-    assert not marca_ia.de_lanternist(SIN_MARCA)
-    assert len(marca_ia.autocomprobacion(SIN_MARCA)) == 3
+    assert not marca_ia.de_lanternist(SIN_MARCA) and not marca_ia.sin_mirar(SIN_MARCA)
+    assert len(marca_ia.autocomprobacion(SIN_MARCA)) == 4
 
 
 def test_el_c2pa_perdido_con_la_marca_de_agua_presente_sigue_siendo_de_lanternist():
@@ -133,10 +163,70 @@ def test_lo_que_el_fichero_no_tiene_no_se_mira():
     texto = marca_ia.veredicto(imagen)
     assert "C2PA metadata: not checked" in texto and "Audio watermark (AudioSeal): not checked" in texto
     assert "missing or broken" not in texto, "un formato sin C2PA no lo ha perdido"
-    solo_audio = _con(MARCADO, image=None)
+    solo_audio = _con(MARCADO, image=None, signpost=None)
     assert "Image watermark (Video Seal): not checked" in marca_ia.veredicto(solo_audio)
+    assert "Signpost watermark (TrustMark): not checked" in marca_ia.veredicto(solo_audio)
     # La autocomprobación de una imagen no pide audio.
     assert marca_ia.autocomprobacion(_con(MARCADO, audio=None)) == []
+
+
+def test_la_senal_sola_basta_y_dice_a_que_entrada_de_c2pa_apunta():
+    """Tras una edición fuerte puede quedar solo la señal: es una capa de Lanternist, y su línea dice qué detector
+    usar."""
+    senal = {"frames": 109, "lanternist_frames": 3, "lanternist_identifiers": [59], "other_identifiers": [12]}
+    solo_senal = _con(SIN_MARCA, signpost=senal)
+    texto = marca_ia.veredicto(solo_senal)
+    assert marca_ia.senal_de_lanternist(solo_senal) and marca_ia.de_lanternist(solo_senal)
+    assert "Signpost watermark (TrustMark): FOUND in 3 of 109 frames. It carries the number 59" in texto
+    assert "C2PA soft-binding algorithm list" in texto and "Lanternist's detector" in texto
+    assert texto.splitlines()[-1].startswith("Verdict: MARKED") and "(signpost watermark)" in texto
+    # En una imagen, un solo «fotograma».
+    imagen = {"frames": 1, "lanternist_frames": 1, "lanternist_identifiers": [59], "other_identifiers": []}
+    assert "Signpost watermark (TrustMark): FOUND in the image." in marca_ia.veredicto(_con(SIN_MARCA, signpost=imagen))
+    # Control: un código válido con otro número (otra señal, o una lectura falsa) no es la señal de Lanternist, y la
+    # línea no lo afirma.
+    otro = _con(
+        SIN_MARCA,
+        signpost={**senal, "lanternist_frames": 0, "lanternist_identifiers": [], "other_identifiers": [12, 77]},
+    )
+    assert not marca_ia.senal_de_lanternist(otro) and not marca_ia.de_lanternist(otro)
+    assert "Signpost watermark (TrustMark): not Lanternist's. It reads other numbers (12, 77)" in marca_ia.veredicto(
+        otro
+    )
+
+
+def test_la_autocomprobacion_pide_la_senal_con_el_numero_de_hoy(monkeypatch):
+    sin_senal = _con(MARCADO, signpost={**MARCADO["signpost"], "lanternist_frames": 0, "lanternist_identifiers": []})
+    faltan = marca_ia.autocomprobacion(sin_senal)
+    assert len(faltan) == 1 and faltan[0].startswith("señal de TrustMark con el número 59 (0 de 109")
+    # Un número viejo de Lanternist (si C2PA asigna otro, el 59 se sigue leyendo) es la marca de Lanternist, pero lo
+    # recién marcado tiene que llevar el de hoy.
+    monkeypatch.setattr(marca_ia, "SENALES_DE_LANTERNIST", frozenset({58, 59}))
+    viejo = _con(MARCADO, signpost={**MARCADO["signpost"], "lanternist_identifiers": [58]})
+    assert marca_ia.de_lanternist(viejo) and "señal de TrustMark" in marca_ia.autocomprobacion(viejo)[0]
+    # Control: con el 59, no falta nada.
+    assert marca_ia.autocomprobacion(MARCADO) == []
+
+
+def test_un_fichero_sin_ninguna_capa_que_mirar_es_not_checked_y_sale_con_el_2(monkeypatch, capsys):
+    """Un `.srt`: ni imagen ni sonido, y no admite C2PA. «Not marked» diría que se miró y no hay marca (deuda de
+    OC1.13)."""
+    texto = marca_ia.veredicto(SIN_CAPAS)
+    assert marca_ia.sin_mirar(SIN_CAPAS) and not marca_ia.de_lanternist(SIN_CAPAS)
+    assert texto.splitlines()[-1].startswith("Verdict: NOT CHECKED") and "NOT MARKED" not in texto
+    sys.path.insert(0, str(config.BASE_DIR / "scripts"))
+    import detecta_marca
+
+    monkeypatch.setattr(marca_ia, "detecta", lambda *a, **k: SIN_CAPAS)
+    assert detecta_marca.main(["subtitulos.en.srt"]) == 2 and "Verdict: NOT CHECKED" in capsys.readouterr().out
+    # Control: basta una capa que mirar para que sea «not marked». Un audio, que no admite C2PA en este caso…
+    solo_audio = _con(SIN_CAPAS, audio=SIN_MARCA["audio"])
+    assert not marca_ia.sin_mirar(solo_audio) and "Verdict: NOT MARKED" in marca_ia.veredicto(solo_audio)
+    # …o un fichero que admite C2PA aunque no tenga imagen ni sonido.
+    con_c2pa = _con(SIN_CAPAS, c2pa={"supported": True, "manifest": False})
+    assert not marca_ia.sin_mirar(con_c2pa)
+    monkeypatch.setattr(marca_ia, "detecta", lambda *a, **k: con_c2pa)
+    assert detecta_marca.main(["subtitulos.en.srt"]) == 1
 
 
 def test_un_manifiesto_de_otra_herramienta_no_es_el_de_lanternist():
@@ -192,15 +282,19 @@ def test_el_trabajo_va_bien_formado_y_el_registro_dice_lo_que_se_comprobo(client
     assert set(job["pesos"]) == set(marca_ia.MODELOS)
     for clave, peso in job["pesos"].items():
         assert (
-            Path(peso["ruta"]).parent == marca_ia.dir_de_pesos() and peso["sha256"] == marca_ia.MODELOS[clave]["sha256"]
+            Path(peso["ruta"]).is_relative_to(marca_ia.dir_de_pesos())
+            and peso["sha256"] == marca_ia.MODELOS[clave]["sha256"]
         )
     assert registro["detectada"] is True and registro["sha256"] == marca_ia.sha256_de(c["destino"])
     assert registro["fichero"] == "final.mp4" and set(registro["modelos"]) == set(marca_ia.MODELOS)
     assert registro["modelos"]["videoseal"]["licencia"].startswith("MIT")
+    assert registro["modelos"]["trustmark_codificador"]["licencia"].startswith("MIT")
+    assert "el número 59 de la lista de soft binding de C2PA" in registro["capas"]["senal"]
     assert registro["comprobacion"]["c2pa"]["state"] == "Valid"
-    # La miniatura: solo Video Seal.
+    # La miniatura: Video Seal y la señal, sin AudioSeal.
     imagen = marca_ia.marca_imagen(c["origen"], c["destino"], trabajo=c["trabajo"], lanza=c["lanzador"]())
-    assert c["visto"]["job"]["op"] == "imagen" and set(imagen["modelos"]) == {"videoseal"}
+    assert c["visto"]["job"]["op"] == "imagen" and set(imagen["modelos"]) == {"videoseal", *marca_ia.MODELOS_SENAL}
+    assert set(imagen["capas"]) == {"metadatos", "imagen", "senal"}
 
 
 def test_si_el_trabajador_falla_se_dice_con_su_log_y_no_se_reintenta(cliente):
@@ -211,7 +305,7 @@ def test_si_el_trabajador_falla_se_dice_con_su_log_y_no_se_reintenta(cliente):
         llamadas.append(1)
         return c["lanzador"](codigo=1, log="Traceback ... CUDA out of memory")(*a, **k)
 
-    with pytest.raises(marca_ia.ErrorDeMarca, match="falló \\(código 1\\)") as error:
+    with pytest.raises(marca_ia.ErrorDeMarca, match="the AI-mark worker failed \\(code 1\\)") as error:
         marca_ia.marca_video(c["origen"], c["destino"], trabajo=c["trabajo"], lanza=falla)
     assert "CUDA out of memory" in str(error.value) and llamadas == [1], "un intento, sin reintentos"
     assert not c["destino"].exists(), "lo que dejó a medias no se queda"
@@ -232,9 +326,9 @@ def test_si_la_autocomprobacion_no_encuentra_la_marca_no_queda_el_fichero(client
 def test_sin_venv_escena_se_dice_antes_de_bajar_nada(cliente, monkeypatch, tmp_path):
     monkeypatch.setattr(config, "ESCENA_PYTHON", str(tmp_path / "no-esta" / "python.exe"))
     monkeypatch.setattr(marca_ia, "_baja", lambda clave: pytest.fail(f"no se baja nada sin .venv-escena ({clave})"))
-    with pytest.raises(marca_ia.ErrorDeMarca, match="no está .venv-escena"):
+    with pytest.raises(marca_ia.ErrorDeMarca, match=".venv-escena is missing"):
         marca_ia.marca_video(cliente["origen"], cliente["destino"], trabajo=cliente["trabajo"])
-    with pytest.raises(marca_ia.ErrorDeMarca, match="no está .venv-escena"):
+    with pytest.raises(marca_ia.ErrorDeMarca, match=".venv-escena is missing"):
         marca_ia.detecta(cliente["origen"], trabajo=cliente["trabajo"])
 
 
@@ -301,7 +395,7 @@ def test_si_falla_la_marca_en_su_sitio_tampoco_queda_el_fichero_sin_marcar(clien
     c = cliente
     miniatura = c["origen"].with_name("thumbnail.png")
     miniatura.write_bytes(b"miniatura sin marca")
-    with pytest.raises(marca_ia.ErrorDeMarca, match="falló"):
+    with pytest.raises(marca_ia.ErrorDeMarca, match="failed"):
         marca_ia.marca_imagen(miniatura, miniatura, trabajo=c["trabajo"], lanza=c["lanzador"](codigo=1, escribe=False))
     assert not miniatura.exists()
     # Control: si va bien, se queda, marcada.
@@ -322,7 +416,7 @@ def test_una_descarga_cortada_no_deja_el_parcial(tmp_path, monkeypatch):
             raise http.client.IncompleteRead(b"a medias")
 
     monkeypatch.setattr(marca_ia.urllib.request, "urlopen", lambda url, timeout: Cortada())
-    with pytest.raises(marca_ia.ErrorDeMarca, match="no se pudo bajar"):
+    with pytest.raises(marca_ia.ErrorDeMarca, match="could not download"):
         marca_ia.asegura_pesos()
     assert not any((tmp_path / "torch").rglob("*.part")), "el parcial se borra"
 
@@ -345,6 +439,18 @@ def test_un_fallo_inesperado_del_detector_no_se_da_por_no_marcado(monkeypatch, c
     assert detecta_marca.main(["cualquiera.mp4"]) == 1
 
 
+def test_lo_que_el_detector_dice_al_fallar_va_en_ingles(cliente, tmp_path):
+    """La página y el terminal del detector son públicos y están en inglés: sus errores también (deuda de OC1.13)."""
+    with pytest.raises(marca_ia.ErrorDeMarca) as no_esta:
+        marca_ia.detecta(tmp_path / "no-existe.mp4", trabajo=cliente["trabajo"])
+    with pytest.raises(marca_ia.ErrorDeMarca) as falla:
+        marca_ia.detecta(cliente["origen"], trabajo=cliente["trabajo"], lanza=cliente["lanzador"](codigo=1))
+    assert str(no_esta.value).startswith("the file does not exist")
+    assert str(falla.value).startswith("the AI-mark worker failed (code 1). It is not retried.")
+    for error in (no_esta, falla):
+        assert not set("áéíóúñ¿") & set(str(error.value).split("Log:")[0]), str(error.value)
+
+
 def test_los_pesos_van_donde_los_busca_torch_hub():
     torch = pytest.importorskip("torch")
     assert marca_ia.dir_de_pesos() == Path(torch.hub.get_dir()) / "checkpoints" / "lanternist"
@@ -356,7 +462,7 @@ def test_un_peso_que_llega_con_otro_sha256_no_se_queda(tmp_path, monkeypatch):
     modelo = {**marca_ia.MODELOS["videoseal"], "sha256": hashlib.sha256(b"otra cosa").hexdigest(), "mb": 0}
     monkeypatch.setattr(marca_ia, "MODELOS", {"videoseal": modelo})
     monkeypatch.setattr(marca_ia.urllib.request, "urlopen", lambda url, timeout: io.BytesIO(contenido))
-    with pytest.raises(marca_ia.ErrorDeMarca, match="otro sha256"):
+    with pytest.raises(marca_ia.ErrorDeMarca, match="another sha256"):
         marca_ia.asegura_pesos()
     assert not any((tmp_path / "torch").rglob("*.jit*")), "ni el peso ni su parcial"
     # Control: con su sha256 de verdad, se queda, y la segunda vez no se baja otra vez.
@@ -418,11 +524,11 @@ def _falta_para_la_prueba_real() -> str | None:
     if shutil.which("ffmpeg") is None:
         return "no está ffmpeg"
     # Por sus metadatos, sin importarlos: importar audioseal carga torch.
-    nombres = ("audioseal", "c2pa-python", "av", "cryptography")
+    nombres = ("audioseal", "trustmark", "c2pa-python", "av", "cryptography")
     mira = f"from importlib.metadata import version as v; [v(p) for p in {nombres!r}]"
     paquetes = subprocess.run([config.ESCENA_PYTHON, "-c", mira], capture_output=True, timeout=120)
     if paquetes.returncode != 0:
-        return ".venv-escena no tiene audioseal, c2pa-python, av o cryptography"
+        return ".venv-escena no tiene audioseal, trustmark, c2pa-python, av o cryptography"
     if marca_ia.pesos_que_faltan():
         return f"faltan los pesos de la marca en {marca_ia.dir_de_pesos()} (se bajan en la primera marca)"
     return None
@@ -454,7 +560,7 @@ def de_verdad(tmp_path_factory):
     parche.undo()
 
 
-def test_de_verdad_el_clip_marcado_lleva_las_tres_capas(de_verdad):
+def test_de_verdad_el_clip_marcado_lleva_las_cuatro_capas(de_verdad):
     registro = de_verdad["registro"]
     assert registro["detectada"] is True and registro["dispositivo"] == "cpu"
     assert registro["sha256"] == marca_ia.sha256_de(de_verdad["marcado"])
@@ -462,7 +568,11 @@ def test_de_verdad_el_clip_marcado_lleva_las_tres_capas(de_verdad):
     assert c2pa["state"] == "Valid" and c2pa["failures"] == ["signingCredential.untrusted"]
     assert c2pa["generator"] == f"Lanternist {marca_ia.version()}" and c2pa["ai"] is True
     assert c2pa["signer"] == "Lanternist local signer"
+    # Las tres marcas de agua, declaradas con `c2pa.watermarked.unbound`, sin que la firma deje de ser válida.
+    assert len(c2pa["watermarks"]) == 3 and "signpost 59" in c2pa["watermarks"][1]
     assert registro["comprobacion"]["image"]["matches"] >= marca_ia.UMBRAL_IMAGEN
+    senal = registro["comprobacion"]["signpost"]
+    assert senal["lanternist_identifiers"] == [59] and senal["lanternist_frames"] == senal["frames"] > 0
     assert registro["comprobacion"]["audio"] == {"bits": 16, "probability": pytest.approx(1.0, abs=0.05), "matches": 16}
     assert (de_verdad["carpeta"] / "claves" / "clave.pem").is_file(), "el certificado se crea donde dice la config"
     assert not list(de_verdad["trabajo"].glob("*sin-firma*")) and not list(de_verdad["trabajo"].glob("*.wav"))
@@ -477,6 +587,8 @@ def test_de_verdad_el_detector_encuentra_la_marca_y_no_la_inventa(de_verdad):
     assert not marca_ia.de_lanternist(limpio) and "Verdict: NOT MARKED" in marca_ia.veredicto(limpio)
     assert limpio["c2pa"] == {"supported": True, "manifest": False}
     assert limpio["image"]["matches"] < marca_ia.UMBRAL_IMAGEN and not marca_ia.audio_de_lanternist(limpio)
+    assert limpio["signpost"]["lanternist_frames"] == 0 and not marca_ia.senal_de_lanternist(limpio)
+    assert marcado["signpost"]["lanternist_identifiers"] == [59]
     # Un tono puro sin marca hace responder al detector de AudioSeal (medido: 0,62 con este seno de 440 Hz). Lo que
     # evita la falsa atribución es el mensaje: sus 16 bits no son los de Lanternist.
     assert limpio["audio"]["matches"] < marca_ia.BITS_AUDIO
@@ -506,6 +618,8 @@ def test_de_verdad_la_miniatura_se_marca_y_el_informe_se_verifica(de_verdad):
         registro["comprobacion"]["image"]["matches"] >= marca_ia.UMBRAL_IMAGEN
         and registro["comprobacion"]["audio"] is None
     )
+    assert registro["comprobacion"]["signpost"]["lanternist_identifiers"] == [59]
+    assert len(registro["comprobacion"]["c2pa"]["watermarks"]) == 2, "Video Seal y la señal, sin AudioSeal"
     assert Image.open(imagen).size == (1280, 720) and imagen.read_bytes() != original
     informe = carpeta / "informe.json"
     resultado = marca_ia.detecta(imagen, informe=informe, cpu=True, trabajo=de_verdad["trabajo"])

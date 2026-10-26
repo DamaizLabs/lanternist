@@ -882,7 +882,8 @@ def apunta_la_marca(run_dir: str | Path, miniatura: str | Path, marca: dict) -> 
     if modelos:
         licencia += " · marca de agua: " + ", ".join(f"{m.get('nombre')} ({m.get('licencia')})" for m in modelos)
     urls = [u for u in str(entrada.get("url") or "").split(" · ") if u]
-    urls += [m["fuente"] for m in modelos if m.get("fuente") and m["fuente"] not in urls]
+    # Sin repetir: los tres ficheros de TrustMark comparten su fuente (revisión de OC1.12, hallazgo 2).
+    urls = list(dict.fromkeys(urls + [m["fuente"] for m in modelos if m.get("fuente")]))
     _sustituye_en_el_registro(
         run, {**entrada, "licencia": licencia, "url": " · ".join(urls) or None, "marca_ia": dict(marca)}
     )

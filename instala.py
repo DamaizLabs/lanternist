@@ -345,11 +345,16 @@ def crea_entorno(entorno: Path, receta: list[list[str]], cwd: Path = RAIZ) -> No
                 f"{entorno.name} ya existe y es de Python {version}, y Lanternist lo crea con Python {esperada}: "
                 f"bórralo o cámbiale el nombre, y repite. El instalador no borra un entorno que no creó él"
             )
+    # Con PYTHONUTF8: TrustMark solo publica su código fuente, y su `setup.py` lee un texto sin decir su codificación,
+    # así que en un Windows en cp1252 falla al construirlo (medido el 26-10-2026). El resto del entorno es el de quien
+    # instala.
+    entorno_pip = {**os.environ, "PYTHONUTF8": "1"}
     for argumentos in receta:
         corre(
             [python_de(entorno), "-m", "pip", "install", "--disable-pip-version-check", *argumentos],
             cwd,
             f"pip en {entorno.name}",
+            entorno_pip,
         )
     (entorno / MARCA_DE_ENTORNO).write_text(json.dumps(huella_de_receta(receta, cwd), indent=2), encoding="utf-8")
 
@@ -667,7 +672,8 @@ def paso_escena(solo_mira: bool) -> list[str]:
 
 
 def paso_marca(solo_mira: bool) -> list[str]:
-    """Los tres pesos de la marca de IA (Video Seal y AudioSeal), donde los busca `lib/marca_ia.py`."""
+    """Los ficheros de la marca de IA (Video Seal, AudioSeal y la señal de TrustMark), donde los busca
+    `lib/marca_ia.py`."""
     return asegura(ficheros_del_paso("marca"), solo_mira)
 
 
@@ -722,7 +728,7 @@ PASOS = {
     "pesos": (paso_pesos, "los pesos de imagen, música y Real-ESRGAN, unos 70 GB, en ComfyUI"),
     "voz": (paso_voz, "llama.cpp, Orpheus (3,5 GB) y Kokoro, SNAC y whisper en la caché de Hugging Face"),
     "escena": (paso_escena, "HyperFrames y GSAP, los efectos, el Chrome con WebGPU y SAM 2.1"),
-    "marca": (paso_marca, "los tres pesos de la marca de IA (unos 320 MB)"),
+    "marca": (paso_marca, "los modelos de la marca de IA: Video Seal, AudioSeal y TrustMark (unos 390 MB)"),
     "voz-del-canal": (paso_voz_del_canal, "el clip de voz que clona Orpheus para el canal activo"),
     "comprueba": (paso_comprueba, "pipeline.py --check"),
 }
