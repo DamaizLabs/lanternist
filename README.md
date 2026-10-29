@@ -6,6 +6,10 @@ You bring a topic and your YouTube channel. Claude Code writes each script with 
 Lanternist makes the video on your graphics card: the illustrations, the voice, the music and the 1080p render. What it
 makes stays on your PC until you upload it ([what goes out](#what-goes-out-of-your-pc)).
 
+Lanternist is the open production engine of [Nichebend Studio](https://www.damaizlabs.com/portfolio/automatizar-videos-con-ia/),
+by [DamaizLabs](https://www.damaizlabs.com/). Nichebend Studio adds a niche-bending engine, which proposes the niche
+and the format of a channel. That engine is not open source.
+
 ![A frame of the example episode, made end to end by Lanternist](docs/formats/laminas.png)
 
 *A frame of the example episode that ships with Lanternist: «How Does a Zip Work?», 54 seconds, in the «láminas»
