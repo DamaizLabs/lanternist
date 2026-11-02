@@ -273,7 +273,8 @@ ESCALAS = {
     "billion": 10**9, "billions": 10**9,
     "trillion": 10**12, "trillions": 10**12,
 }  # fmt: skip
-_COMPROBABLES = {"million", "millions", "billion", "billions", "trillion", "trillions"}
+# Las escalas que el gate exige respaldar son las que la voz junta a su cifra: una sola lista para las dos.
+_COMPROBABLES = _Canon.ESCALAS
 # Las monedas que se oyen detrás de un número. «dollars» ya la junta el canonizador cuando el número va
 # con palabras; aquí se recoge también detrás de dígitos y de una escala («4.1 billion dollars»), y su
 # código de tres letras («5 USD»), que antes se quedaba en un número sin unidad y solo daba aviso.
@@ -384,7 +385,9 @@ def cantidades(texto: str) -> list[Cantidad]:
     i = 0
     while i < len(p):
         w = p[i]
-        dicha = _Canon._cifra(p, i)
+        # La gramática de la voz no conoce «zero», así que «zero point three seven percent» salía como «3» y «7 %»,
+        # un verde falso del gate 1 (fila 335). Aquí es un número dicho, y puede llevar su decimal y su unidad.
+        dicha = ("0", i + 1) if w == "zero" else _Canon._cifra(p, i)
         if dicha is not None:
             canonica, j = dicha
         elif _Canon._ORDINAL_EN_DIGITOS.fullmatch(w):

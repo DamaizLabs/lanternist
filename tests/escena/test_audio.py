@@ -375,3 +375,24 @@ def test_control_con_el_control_de_musica_mezcla_el_lecho_sale_corto(tmp_path):
         check=True,
     )
     assert audio.get_audio_duration(str(corto)) < 5.5
+
+
+def test_una_sonoridad_lejos_del_objetivo_avisa_y_dice_si_fue_el_techo(capsys):
+    """El caso del estudio: −15,09 LUFS con el objetivo en −14, porque el techo bajó la ganancia (fila 335)."""
+    cfg = _cfg_del_estudio()
+    veredicto = musica.verifica_sonoridad({"lufs": -15.09}, cfg, ganancia_bajada_db=1.2)
+    assert veredicto["cumple"] is False
+    salida = capsys.readouterr().out
+    assert "AVISO" in salida and "-15.09" in salida and "bajó la ganancia 1.2 dB" in salida
+
+
+def test_control_el_video_de_ejemplo_no_avisa(capsys):
+    """−13,97 LUFS, lo que midió el episodio de ejemplo: dentro del margen y sin aviso."""
+    assert musica.verifica_sonoridad({"lufs": -13.97}, _cfg_del_estudio())["cumple"] is True
+    assert "AVISO" not in capsys.readouterr().out
+
+
+def test_la_normalizacion_final_apunta_la_sonoridad(tmp_path):
+    medido = audio.normaliza_video(_video_bajo(tmp_path / "bajo.mp4"), tmp_path / "final.mp4", _cfg_del_estudio())
+    assert medido["sonoridad"]["medido_lufs"] == medido["lufs"]
+    assert medido["sonoridad"]["cumple"] == (abs(medido["lufs"] - medido["sonoridad"]["objetivo_lufs"]) <= 0.5)

@@ -389,6 +389,18 @@ def test_compone_el_lenguaje_y_el_motor_conocen_las_mismas_direcciones_umbrales_
     assert tuple(d["curvas"]) == escena.CURVAS
 
 
+def test_encuadre_conoce_las_mismas_curvas_que_el_motor_y_dan_lo_mismo():
+    """`lib/escena/encuadre.py → EASE` es la copia en Python de `Motor.EASE`: le faltaban `acelera` y `frena`, que el
+    formato «láminas» usa, y una cámara con ellas reventaba al corregir el encuadre (fila 335)."""
+    from lib.escena import encuadre, escena
+
+    pasos = [0, 0.1, 0.3, 0.5, 0.8, 1]
+    d = _evalua(f"return Object.fromEntries(Object.entries(Motor.EASE).map(([k, f]) => [k, {pasos}.map(f)]));")
+    assert tuple(encuadre.EASE) == escena.CURVAS
+    for curva, valores in d.items():
+        assert [encuadre.EASE[curva](p) for p in pasos] == pytest.approx(valores), curva
+
+
 def test_acelera_y_frena_son_el_ease_in_y_el_ease_out_del_motor_de_laminas():
     """`lib/motion.py → _easing_expr`: ease_in = p², ease_out = 1 − (1 − p)²."""
     d = _evalua("return [0, 0.3, 0.5, 0.8, 1].map((p) => [Motor.EASE.acelera(p), Motor.EASE.frena(p)]);")

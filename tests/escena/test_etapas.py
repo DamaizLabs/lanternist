@@ -2,7 +2,8 @@
 
 Lo que se prueba, cada cosa con su control negativo:
 
-- `alinea`: el `.srt` son los cues de la línea de tiempo (una sola fuente), y no gasta GPU si falta algo.
+- `alinea`: el `.srt` son los cues de la línea de tiempo (una sola fuente), y no gasta GPU si falta algo. Una lámina
+  mal alineada se reintenta con otro troceo en un solo lanzamiento, y queda apuntado (OC2.4).
 - De extremo a extremo hasta la composición: alinea → activos → escena (con un `snapshot` sin Chrome) → compone →
   las seis comprobaciones, con la procedencia de todo lo que entra en el vídeo.
 - `render` escribe `montaje.json` con su contrato y se niega si lo que se revisó ha cambiado.
@@ -21,7 +22,7 @@ import shutil
 from pathlib import Path
 
 import pytest
-from utiles_escena import LAMINAS_PRUEBA
+from utiles_escena import LAMINAS_PRUEBA, NARRACION_1, NARRACION_2, marcas_uniformes
 from utiles_pipeline import (
     FUENTE_PRUEBA,
     canal_de_prueba,
@@ -128,6 +129,127 @@ def test_sin_pausas_declaradas_el_episodio_para_antes_de_todo(tmp_path, gpu):
     with pytest.raises(ErrorDeEpisodio, match="pausas.entre_partes_s"):
         _episodio(tmp_path, perfil)
     assert gpu["gpu"] == 0 and gpu["whisper"] == 0
+
+
+# ------------------------------------------------------------------------------------------ el reintento (OC2.4)
+def _whisper_por_troceo(monkeypatch, marcas: dict) -> list:
+    """Un whisper falso que oye, de cada lámina, lo que dice `marcas[(id, troceo)]`, y escribe su resultado donde el de
+    verdad. Devuelve cada lanzamiento como la lista de (id, troceo) de sus ítems."""
+    lanzamientos = []
+
+    def alinea(items, trabajo, cfg):
+        lanzamientos.append([(i["id"], i.get("chunk_length_s", alineador.TROCEO_S)) for i in items])
+        datos = {"load_seconds": 1.0, "items": []}
+        for i in items:
+            troceo = i.get("chunk_length_s", alineador.TROCEO_S)
+            datos["items"].append({**i, "chunk_length_s": troceo, "marcas": marcas[(i["id"], troceo)]})
+        Path(trabajo).mkdir(parents=True, exist_ok=True)
+        (Path(trabajo) / "alineacion-resultado.json").write_text(json.dumps(datos), encoding="utf-8")
+        return datos
+
+    monkeypatch.setattr(alineador, "alinea", alinea)
+    return lanzamientos
+
+
+BIEN_1, BIEN_2 = marcas_uniformes(NARRACION_1), marcas_uniformes(NARRACION_2)
+# La lámina 2 con media frase que whisper no oye con 30 s, como la lámina 5 de la fila 282
+SALTA_2 = marcas_uniformes(NARRACION_2, quita=range(4, 12))
+
+
+def test_una_lamina_que_ancla_poco_se_reintenta_y_se_queda_el_troceo_que_menos_aprieta(tmp_path, gpu, monkeypatch):
+    ep = _episodio(tmp_path)
+    lanzamientos = _whisper_por_troceo(monkeypatch, {
+        ("slide-01", 30): BIEN_1, ("slide-02", 30): SALTA_2,
+        ("slide-02", 25): marcas_uniformes(NARRACION_2, quita=[5]), ("slide-02", 20): BIEN_2,
+    })  # fmt: skip
+    hecho = etapas.alinea(ep)
+    assert lanzamientos == [[("slide-01", 30), ("slide-02", 30)], [("slide-02", 25), ("slide-02", 20)]], (
+        "un lanzamiento por pasada, y en el segundo solo la lámina mala, con los dos troceos"
+    )
+    assert gpu["gpu"] == 1, "la GPU se mira una vez, antes de la primera pasada"
+    resultado = json.loads(config.alineacion_del_run(ep.run_dir).read_text(encoding="utf-8"))
+    assert resultado["items"][1]["marcas"] == BIEN_2 and resultado["items"][1]["chunk_length_s"] == 20
+    assert resultado["items"][0]["marcas"] == BIEN_1, "la lámina buena no se toca"
+    assert [p["cobertura"] for p in ep.linea().por_lamina] == [1.0, 1.0], "la línea de tiempo lee el troceo elegido"
+    (reintento,) = resultado["reintentos"]
+    assert reintento["lamina"] == 2 and reintento["elegido_s"] == 20 and "ancla 10 de 18" in reintento["motivo"]
+    assert {t: m["ancladas"] for t, m in reintento["troceos"].items()} == {"30": 10, "25": 17, "20": 18}
+    registro = json.loads((ep.run_dir / provenance.SUBTITLE_RECORDS_FILENAME).read_text(encoding="utf-8"))[0]
+    assert registro["reintentos"] == resultado["reintentos"] == hecho["reintentos"], "va al registro de subtítulos"
+    primera = json.loads((config.alineacion_del_run(ep.run_dir).parent / "reintento" / "primera-pasada.json").read_text(
+        encoding="utf-8"))  # fmt: skip
+    assert primera["items"][1]["marcas"] == SALTA_2, "la primera pasada se guarda al lado"
+
+
+def test_entre_dos_troceos_que_anclan_igual_gana_el_que_menos_mueve_el_reparto(tmp_path, gpu, monkeypatch):
+    """Con 25 s, cada marca se solapa con la siguiente y el reparto mueve 17 palabras; con 20 s, ninguna. Las dos
+    anclan las 18: si solo contaran las palabras sin marca, empatarían y ganaría 25 s, el primero."""
+    ep = _episodio(tmp_path)
+    _whisper_por_troceo(monkeypatch, {
+        ("slide-01", 30): BIEN_1, ("slide-02", 30): SALTA_2,
+        ("slide-02", 25): marcas_uniformes(NARRACION_2, dura=0.6), ("slide-02", 20): BIEN_2,
+    })  # fmt: skip
+    (reintento,) = etapas.alinea(ep)["reintentos"]
+    assert reintento["troceos"]["25"]["ancladas"] == reintento["troceos"]["20"]["ancladas"] == 18
+    assert (reintento["troceos"]["25"]["colapsadas"], reintento["troceos"]["20"]["colapsadas"]) == (17, 0)
+    assert reintento["elegido_s"] == 20
+
+
+def test_whisper_que_oye_mas_palabras_que_el_guion_tambien_se_reintenta(tmp_path, gpu, monkeypatch):
+    """Una frase repetida (fila 255): ancla todas las palabras, pero oye 31 donde el guion dice 25."""
+    ep = _episodio(tmp_path)
+    repite = marcas_uniformes(NARRACION_1 + " Bo laughed and ran after her.", paso=0.3, dura=0.25)
+    _whisper_por_troceo(monkeypatch, {
+        ("slide-01", 30): repite, ("slide-02", 30): BIEN_2, ("slide-01", 25): repite, ("slide-01", 20): BIEN_1,
+    })  # fmt: skip
+    (reintento,) = etapas.alinea(ep)["reintentos"]
+    assert (
+        reintento["motivo"] == "whisper oye 6 palabra(s) más que el guion (31 marcas)" and reintento["elegido_s"] == 20
+    )
+
+
+def test_un_porcentaje_con_la_unidad_aparte_no_es_oir_de_mas():
+    """El caso real de `tests/test_voz_recorte.py`: el guion dice «92.3%» y whisper oye «92.3» y «percent.». Ancla las
+    11 palabras con 12 marcas, y unidas la cantidad y su unidad son 11 (revisión de OC2.4, recomendación 1)."""
+    from lib.alineacion import texto_para_pintar
+    from lib.escena.linea_tiempo import anclaje
+
+    palabras = texto_para_pintar("In the United States and Canada, the renewal rate was 92.3%.", "en").split()
+    oido = "In the United States and Canada, the renewal rate was 92.3 percent."
+    medida = anclaje(palabras, marcas_uniformes(oido))
+    assert (medida["palabras"], medida["marcas"], medida["cobertura"], medida["de_mas"]) == (11, 12, 1.0, 0)
+    assert etapas._motivo_de_reintento(medida) is None
+    # Control: una palabra repetida de verdad sí es oír de más
+    medida = anclaje(palabras, marcas_uniformes(oido.replace("rate", "rate rate")))
+    assert etapas._motivo_de_reintento(medida) == "whisper oye 1 palabra(s) más que el guion (13 marcas)"
+
+
+def test_CONTROL_si_ningun_troceo_mejora_se_queda_el_de_30_s(tmp_path, gpu, monkeypatch):
+    ep = _episodio(tmp_path)
+    _whisper_por_troceo(monkeypatch, {
+        ("slide-01", 30): BIEN_1, ("slide-02", 30): SALTA_2, ("slide-02", 25): SALTA_2,
+        ("slide-02", 20): marcas_uniformes(NARRACION_2, quita=range(2, 14)),
+    })  # fmt: skip
+    (reintento,) = etapas.alinea(ep)["reintentos"]
+    assert reintento["elegido_s"] == 30, "a igualdad gana el primero: el troceo de siempre"
+    resultado = json.loads(config.alineacion_del_run(ep.run_dir).read_text(encoding="utf-8"))
+    assert resultado["items"][1]["marcas"] == SALTA_2 and resultado["items"][1]["chunk_length_s"] == 30
+    assert not (config.alineacion_del_run(ep.run_dir).parent / "reintento" / "primera-pasada.json").exists()
+    assert ep.linea().por_lamina[1]["ancladas"] == 10, "y la comprobación karaoke la seguirá avisando"
+
+
+def test_CONTROL_una_alineacion_buena_no_se_reintenta_ni_se_reescribe(tmp_path, gpu, monkeypatch):
+    ep = _episodio(tmp_path)
+    lanzamientos = _whisper_por_troceo(monkeypatch, {("slide-01", 30): BIEN_1, ("slide-02", 30): BIEN_2})
+    # Lo que dejó una pasada anterior con reintento no se queda colgado
+    viejo = config.alineacion_del_run(ep.run_dir).parent / "reintento"
+    viejo.mkdir(parents=True)
+    hecho = etapas.alinea(ep)
+    assert len(lanzamientos) == 1 and hecho["reintentos"] == [] and not viejo.exists()
+    resultado = json.loads(config.alineacion_del_run(ep.run_dir).read_text(encoding="utf-8"))
+    assert "reintentos" not in resultado, "el resultado es el del alineador, sin reescribir"
+    registro = json.loads((ep.run_dir / provenance.SUBTITLE_RECORDS_FILENAME).read_text(encoding="utf-8"))[0]
+    assert registro["reintentos"] == [], "el registro dice que se miró y no hizo falta"
 
 
 # ------------------------------------------------------------------------------------------ de extremo a extremo

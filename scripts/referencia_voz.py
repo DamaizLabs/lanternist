@@ -77,7 +77,7 @@ da un clon inestable, y eso solo se descubre escuchando el vídeo montado.
 
 ## Cruce de venvs, que es por lo que este archivo se ejecuta dos veces
 
-Kokoro vive en `.venv-voz` (torch 2.6.0+cu126, `setuptools<81`), y `lib/config.py` necesita
+Kokoro vive en `.venv-voz` (torch 2.13.0+cu130 y sus dependencias), y `lib/config.py` necesita
 `python-dotenv`, que **no está** en ese venv. Así que la primera pasada corre en el `.venv` del
 pipeline —resuelve el canal, la receta y la ruta—, escribe el trabajo en JSON y se relanza a sí
 misma con `.venv-voz\Scripts\python.exe --sintetiza`, que es la única que importa el motor. Es el

@@ -4,7 +4,7 @@
   "canal": "example",
   "motor": "orpheus",
   "modelo": {
-    "paquete": "llama.cpp (server) + transformers 5.2.0 (tokenizador) + snac 1.2.1 (decodificador)",
+    "paquete": "llama.cpp (server) + transformers 5.21.0 (tokenizador) + snac 1.2.1 (decodificador)",
     "repo_id": "audo/orpheus-3b-0.1-ft",
     "decodificador": "hubertsiuzdak/snac_24khz",
     "licencia": "Llama 3.2 Community License (Orpheus TTS 3B deriva de meta-llama/Llama-3.2-3B-Instruct: Built with Llama; THIRD_PARTY_NOTICES.md, sección 5)",

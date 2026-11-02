@@ -182,13 +182,15 @@ def huella_de_carpeta(carpeta: str | Path, *, sin: Sequence[str]) -> str:
     """Un sha256 de todos los ficheros de una carpeta: cambia si cambia, se añade o se quita cualquiera de ellos.
 
     Recorre los ficheros en orden de su ruta relativa y mezcla la ruta y el contenido de cada uno. `sin`: nombres de
-    carpeta que no cuentan (una caché).
+    carpeta que no cuentan (una caché). El contenido se lee con fin de línea LF: git con `core.autocrlf` cambia LF por
+    CRLF sin cambiar el guion, y eso no puede negar el render (fila 335).
     """
     carpeta = Path(carpeta)
     h = hashlib.sha256()
     for f in sorted(p for p in carpeta.rglob("*") if p.is_file() and not set(p.relative_to(carpeta).parts) & set(sin)):
         relativa = f.relative_to(carpeta).as_posix()
-        h.update(relativa.encode("utf-8") + b"\0" + hashlib.sha256(f.read_bytes()).digest())
+        contenido = f.read_bytes().replace(b"\r\n", b"\n")
+        h.update(relativa.encode("utf-8") + b"\0" + hashlib.sha256(contenido).digest())
     return h.hexdigest()
 
 

@@ -49,7 +49,7 @@ REQUISITOS_COMFYUI = RAIZ / "datos" / "comfyui-requisitos.txt"
 ENV = RAIZ / ".env"
 ENV_EJEMPLO = RAIZ / ".env.example"
 VERSION_PYTHON = (3, 12)
-INDICE_CU126 = "https://download.pytorch.org/whl/cu126"
+# El índice de CUDA 13.0 de PyTorch, el de los tres entornos con torch: la voz, la escena y ComfyUI (OC2.5).
 INDICE_CU130 = "https://download.pytorch.org/whl/cu130"
 # Lo que deja cada entorno al terminar: las órdenes de pip y el sha256 de sus requisitos. Si cambian, se repite pip.
 MARCA_DE_ENTORNO = "instalado-por-lanternist.json"
@@ -59,7 +59,7 @@ AGENTE = "lanternist-instala"
 ENTORNOS = {
     ".venv": [["-r", "requirements.txt"]],
     ".venv-voz": [
-        ["-r", "spikes/requirements-voz.txt", "--extra-index-url", INDICE_CU126],
+        ["-r", "spikes/requirements-voz.txt", "--extra-index-url", INDICE_CU130],
         ["--no-deps", "snac==1.2.1"],
     ],
     # Primero torch y torchvision de CUDA: si no, spandrel trae el torch de CPU de PyPI (la trampa de su cabecera).
@@ -345,16 +345,11 @@ def crea_entorno(entorno: Path, receta: list[list[str]], cwd: Path = RAIZ) -> No
                 f"{entorno.name} ya existe y es de Python {version}, y Lanternist lo crea con Python {esperada}: "
                 f"bórralo o cámbiale el nombre, y repite. El instalador no borra un entorno que no creó él"
             )
-    # Con PYTHONUTF8: TrustMark solo publica su código fuente, y su `setup.py` lee un texto sin decir su codificación,
-    # así que en un Windows en cp1252 falla al construirlo (medido el 26-10-2026). El resto del entorno es el de quien
-    # instala.
-    entorno_pip = {**os.environ, "PYTHONUTF8": "1"}
     for argumentos in receta:
         corre(
             [python_de(entorno), "-m", "pip", "install", "--disable-pip-version-check", *argumentos],
             cwd,
             f"pip en {entorno.name}",
-            entorno_pip,
         )
     (entorno / MARCA_DE_ENTORNO).write_text(json.dumps(huella_de_receta(receta, cwd), indent=2), encoding="utf-8")
 
@@ -415,11 +410,13 @@ def _librerias_dxc() -> tuple[Path, Path]:
 # ---------------------------------------------------------------------------------------------------------------
 # Los pasos. Cada uno recibe `solo_mira` y devuelve lo que faltaba; sin `solo_mira`, además lo instala
 # ---------------------------------------------------------------------------------------------------------------
-# Lo más hondo que crean los entornos dentro de la carpeta de Lanternist, medido el 24-10-2026 (OC1.7): una DLL de
-# numpy en `.venv-voz` (123 caracteres) y una licencia dentro de torch en el entorno de ComfyUI (218). Windows no carga
-# una DLL de una ruta de más de 259 caracteres aunque las rutas largas estén activas: ComfyUI no arrancaba en una
-# carpeta de 194. Y sin las rutas largas activas, pip no puede escribir la licencia de torch.
-HONDURA_DE_LAS_DLL = 123
+# Lo más hondo que crean los entornos dentro de la carpeta de Lanternist: una DLL de numpy en el entorno de ComfyUI
+# (113 caracteres, `herramientas\ComfyUI\.venv\…\numpy.libs`) y una licencia dentro de torch en ese mismo entorno (218).
+# Medido el 24-10-2026 (OC1.7) y otra vez el 26-10-2026, con el `.venv-voz` de OC2.5, cuya DLL más honda ya mide 98:
+# la de 123 era la del numpy 1.26, que ya no está. Windows no carga una DLL de una ruta de más de 259 caracteres
+# aunque las rutas largas estén activas: ComfyUI no arrancaba en una carpeta de 194. Y sin las rutas largas activas,
+# pip no puede escribir la licencia de torch.
+HONDURA_DE_LAS_DLL = 113
 HONDURA_MAXIMA = 218
 MAX_PATH = 259
 ACTIVA_RUTAS_LARGAS = (
@@ -672,8 +669,7 @@ def paso_escena(solo_mira: bool) -> list[str]:
 
 
 def paso_marca(solo_mira: bool) -> list[str]:
-    """Los ficheros de la marca de IA (Video Seal, AudioSeal y la señal de TrustMark), donde los busca
-    `lib/marca_ia.py`."""
+    """Los tres pesos de la marca de IA (Video Seal y AudioSeal), donde los busca `lib/marca_ia.py`."""
     return asegura(ficheros_del_paso("marca"), solo_mira)
 
 
@@ -728,7 +724,7 @@ PASOS = {
     "pesos": (paso_pesos, "los pesos de imagen, música y Real-ESRGAN, unos 70 GB, en ComfyUI"),
     "voz": (paso_voz, "llama.cpp, Orpheus (3,5 GB) y Kokoro, SNAC y whisper en la caché de Hugging Face"),
     "escena": (paso_escena, "HyperFrames y GSAP, los efectos, el Chrome con WebGPU y SAM 2.1"),
-    "marca": (paso_marca, "los modelos de la marca de IA: Video Seal, AudioSeal y TrustMark (unos 390 MB)"),
+    "marca": (paso_marca, "los tres pesos de la marca de IA: Video Seal y AudioSeal (unos 320 MB)"),
     "voz-del-canal": (paso_voz_del_canal, "el clip de voz que clona Orpheus para el canal activo"),
     "comprueba": (paso_comprueba, "pipeline.py --check"),
 }

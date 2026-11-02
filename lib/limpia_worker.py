@@ -1,7 +1,7 @@
 """Calla lo que suena FUERA de las palabras — se ejecuta con el intérprete de `.venv-voz` (06-09).
 
 Mismo patrón que `lib/voice_worker.py` y `lib/alineador_worker.py`, y por el mismo motivo:
-`torchaudio` vive en `.venv-voz`, no en el `.venv` del pipeline. `lib/limpia_voz.py` lanza este
+`torch` y `soundfile` viven en `.venv-voz`, no en el `.venv` del pipeline. `lib/limpia_voz.py` lanza este
 archivo como subproceso, le pasa un trabajo en JSON y recoge el resultado en otro.
 
 **De dónde sale.** Tras cuatro vueltas de audio: «siguen habiendo ruidos en las pausas entre
@@ -304,7 +304,8 @@ def _de_que_regla(tramo: dict) -> str:
 
 
 def main() -> int:
-    import torchaudio
+    import soundfile
+    import torch
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--trabajo", required=True)
@@ -318,10 +319,12 @@ def main() -> int:
 
     for item in job["items"]:
         ruta = Path(item["audio"])
-        wav, sr = torchaudio.load(str(ruta))
-        plano = wav[0] if wav.dim() > 1 else wav
+        # Como `torchaudio.load` y `torchaudio.save` hasta la 2.6, que leían y escribían con soundfile: desde la 2.9
+        # piden TorchCodec y las DLL de FFmpeg (OC2.5). El primer canal, en float32, y un WAV en coma flotante.
+        datos, sr = soundfile.read(str(ruta), dtype="float32", always_2d=True)
+        plano = torch.from_numpy(datos).t()[0]
         limpio, callados = limpia(plano, sr, item["marcas"], ajustes, item.get("sobrantes"))
-        torchaudio.save(str(ruta), limpio.unsqueeze(0), sr)
+        soundfile.write(str(ruta), limpio.numpy(), sr, subtype="FLOAT")
         segundos = sum(c["hasta"] - c["desde"] for c in callados if c["callado"])
         salida["items"].append(
             {

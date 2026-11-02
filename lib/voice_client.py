@@ -28,8 +28,8 @@ Invariantes que este módulo hace cumplir por código, no por confianza:
   `.env`) nombra un perfil de `perfiles_tonales`. Añadir el registro grave de F2.2b es añadir
   una entrada a ese objeto de la receta — **sin tocar este archivo**; el formato admitido está
   en `_extension_perfiles` de la propia receta.
-- **Cruce de venvs explícito.** Los motores de voz pinean torch 2.6.0+cu126, incompatible con
-  el `.venv` del pipeline (torch 2.13): la generación
+- **Cruce de venvs explícito.** Los motores de voz viven en `.venv-voz`, con el torch de CUDA
+  (2.13.0+cu130) y sus dependencias, que el `.venv` del pipeline no lleva: la generación
   ocurre en `lib/voice_worker.py`, lanzado como **subproceso** con
   `.venv-voz\Scripts\python.exe`. Este archivo no importa torch ni ningún motor.
 - **Generación EN SERIE** (invariante de los 8 GB de la 3060 Ti): un `generate` en vuelo, un
@@ -913,7 +913,7 @@ def _run_worker(job: dict) -> dict:
     if not python.exists():
         raise VoiceError(
             f"No existe el intérprete del venv de voz: {python}. Se crea con "
-            "`py -3.12 -m venv .venv-voz` + `spikes/requirements-voz.txt` (torch 2.6.0+cu126, setuptools<81)."
+            "`py -3.12 instala.py --paso entornos` (la receta está en la cabecera de `spikes/requirements-voz.txt`)."
         )
     if not VOICE_WORKER.exists():
         raise VoiceError(f"Falta el generador de voz: {VOICE_WORKER}")

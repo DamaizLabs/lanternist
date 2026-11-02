@@ -558,6 +558,9 @@ def test_un_perfil_sin_bloque_cifras_no_exige_nada():
         ("500 yen and 20 yuan", [("500", "jpy", False), ("20", "cny", False)]),
         ("up 3 percentage points", [("3", "pp", False)]),
         ("one percentage point", [("1", "pp", False)]),
+        # El verde falso de un guion del estudio: se leía «3» y «7 %» (fila 335).
+        ("zero point three seven percent", [("0.37", "pct", False)]),
+        ("zero percent", [("0", "pct", False)]),
     ],
 )
 def test_las_cantidades_se_leen_en_digitos_y_con_palabras(texto, esperado):
@@ -611,6 +614,19 @@ def test_el_gate_deja_pasar_las_cifras_confirmadas_y_las_cuentas_escritas(tmp_pa
     )
     assert fallos == []
     assert any("2024" in a for a in avisos), "los años van como aviso"
+
+
+def test_un_numero_sin_unidad_que_casa_con_una_cifra_con_unidad_da_aviso(tmp_path):
+    """«three questions» casaba con el 3 % de la ficha en silencio (fila 335). Puede ser la cifra dicha sin su unidad,
+    así que no es un fallo; pero alguien tiene que mirarlo."""
+    fallos, avisos = _gate(tmp_path, ["It took three point four seconds to load."])
+    assert fallos == []
+    assert any("«three point four»" in a and "3.4%" in a for a in avisos), avisos
+
+
+def test_CONTROL_la_cifra_dicha_con_su_unidad_no_da_ese_aviso(tmp_path):
+    _, avisos = _gate(tmp_path, ["Prices rose three point four percent in a year."])
+    assert not any("solo por el número" in a for a in avisos), avisos
 
 
 def test_CONTROL_un_guion_de_economia_con_una_cifra_que_no_esta_en_la_ficha_falla(tmp_path):

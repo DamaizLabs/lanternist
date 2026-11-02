@@ -2,7 +2,7 @@
 # No es un paquete instalable: el pipeline se ejecuta desde el repositorio.
 [project]
 name = "lanternist"
-version = "2.0.0-rc.1"
+version = "0.1.0"
 requires-python = ">=3.12"
 
 [tool.pytest.ini_options]

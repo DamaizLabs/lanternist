@@ -256,7 +256,6 @@ def test_un_fichero_sin_ninguna_capa_que_mirar_es_not_checked_con_su_veredicto(s
         "sha256": "c" * 64,
         "c2pa": {"supported": False, "manifest": False},
         "image": None,
-        "signpost": None,
         "audio": None,
     }
     srt = b"1\n00:00:00,000 --> 00:00:01,000\nHello\n"

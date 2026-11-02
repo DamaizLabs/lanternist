@@ -178,6 +178,7 @@ def normaliza_video(entrada: str | Path, destino: str | Path, cfg: Mapping) -> d
     medido["techo"] = musica.verifica_techo(medido, cfg)
     medido["techo"]["pasadas"] = pasada
     medido["techo"]["ganancia_bajada_db"] = round(margen, 2)
+    medido["sonoridad"] = musica.verifica_sonoridad(medido, cfg, ganancia_bajada_db=round(margen, 2))
     return medido
 
 

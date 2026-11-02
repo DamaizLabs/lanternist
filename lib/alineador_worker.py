@@ -28,8 +28,20 @@ Formato del trabajo:
       "modelo": "openai/whisper-small",
       "device": "cuda",
       "chunk_length_s": 30,
-      "items": [{"id": "slide-01", "audio": "<ruta wav>"}]
+      "items": [
+        {"id": "slide-01", "audio": "<ruta wav>"},
+        {"id": "slide-05", "audio": "<ruta wav>", "chunk_length_s": 25}
+      ]
     }
+
+**El troceo de un ítem** (OC2.4): un ítem puede traer su propio `chunk_length_s`, que gana al del trabajo. Así la etapa
+`alinea` reintenta una lámina mal alineada con 25 y 20 s en el MISMO lanzamiento, con el modelo cargado una vez. El
+resultado de cada ítem dice con qué troceo salió.
+
+**Las marcas pegadas** (OC2.4): whisper parte a veces una palabra en dos trozos, « 38» y «.4%.», y el segundo no
+empieza por espacio porque continúa la palabra. Aquí se quita ese espacio al guardar el texto, así que el trozo que
+continúa lleva `"pegada": true`. No se une aquí, porque el obrero no importa nada del repositorio: la une el lanzador
+(`lib/alineador.py → une_pegadas`) con la misma unión del recorte de la voz.
 """
 
 import argparse
@@ -79,23 +91,30 @@ def main() -> int:
         if not Path(audio).exists():
             raise SystemExit(f"[FAIL] no existe el audio a alinear: {audio}")
         t0 = time.perf_counter()
-        salida = asr(audio, return_timestamps="word")
-        # Un trozo sin marca de inicio no sirve para nada: se descarta aquí y no aguas abajo
-        marcas = [
-            {"texto": trozo["text"].strip(), "desde": trozo["timestamp"][0], "hasta": trozo["timestamp"][1]}
-            for trozo in salida.get("chunks", [])
-            if trozo.get("timestamp") and trozo["timestamp"][0] is not None and trozo["timestamp"][1] is not None
-        ]
+        # Sin troceo propio, la llamada de siempre: el del trabajo, con el que se creó el pipeline
+        troceo = item.get("chunk_length_s")
+        salida = asr(audio, return_timestamps="word", **({"chunk_length_s": troceo} if troceo else {}))
+        marcas = []
+        for trozo in salida.get("chunks", []):
+            # Un trozo sin marca de inicio no sirve para nada: se descarta aquí y no aguas abajo
+            if not trozo.get("timestamp") or trozo["timestamp"][0] is None or trozo["timestamp"][1] is None:
+                continue
+            marca = {"texto": trozo["text"].strip(), "desde": trozo["timestamp"][0], "hasta": trozo["timestamp"][1]}
+            if marcas and trozo["text"] and not trozo["text"][0].isspace():
+                marca["pegada"] = True  # continúa la palabra de la marca anterior
+            marcas.append(marca)
         resultado["items"].append(
             {
                 "id": item["id"],
                 "audio": audio,
+                "chunk_length_s": troceo or job.get("chunk_length_s", 30),
                 "marcas": marcas,
                 "transcripcion": (salida.get("text") or "").strip(),
                 "seconds": round(time.perf_counter() - t0, 1),
             }
         )
-        print(f"  [{numero}/{len(job['items'])}] {item['id']}: {len(marcas)} palabra(s) marcadas", flush=True)
+        con = f" con {troceo} s" if troceo else ""
+        print(f"  [{numero}/{len(job['items'])}] {item['id']}{con}: {len(marcas)} palabra(s) marcadas", flush=True)
         # Se vuelca en cada vuelta: si el proceso muere, lo alineado queda contabilizado
         destino.write_text(json.dumps(resultado, indent=2, ensure_ascii=False), encoding="utf-8")
 

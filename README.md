@@ -127,9 +127,10 @@ promises:
 ## AI marking
 
 Every video and thumbnail that Lanternist makes carries **two machine-readable marks** that say it was made with AI:
-signed metadata (C2PA) and an invisible watermark in the picture and in the sound. A second watermark in the picture,
-a TrustMark signpost, tells other detectors which detector to use. They are always on, and the upload refuses a file
-without them. The EU AI Act asks for this (Article 50(2)), also from open-source tools.
+signed metadata (C2PA) and an invisible watermark in the picture and in the sound. They are always on, and the upload
+refuses a file without them. The EU AI Act asks for this (Article 50(2)), also from open-source tools. Files made from
+26 October 2026 and before version 0.1.0 also carry a TrustMark watermark with the number 59: ignore it, it
+is not Lanternist's ([why](docs/ai-marking.md)).
 
 - **To check a file**, double-click `detector.cmd` and drag the file onto the page that opens. It runs on your PC and
   uploads nothing. From a terminal: `.venv\Scripts\python scripts\detecta_marca.py <file>`.

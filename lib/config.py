@@ -566,8 +566,8 @@ MODELO_IMAGEN = _del_canal("imagen.modelo", "MODELO_IMAGEN", tipo=str)
 IMAGE_SEED = _del_canal("imagen.seed", "SEED_IMAGEN", tipo=int)
 
 # --- Adaptador de voz local (F2.2; motores kokoro + orpheus desde el 07-09) ---
-# El stack de voz vive en un venv APARTE porque es incompatible con el del pipeline:
-# `.venv-voz` pinea torch 2.6.0+cu126 y el `.venv` del pipeline va con torch 2.13. El
+# El stack de voz vive en un venv APARTE: `.venv-voz` lleva el torch de CUDA (2.13.0+cu130), Kokoro,
+# Orpheus y whisper (`spikes/requirements-voz.txt`), y el pipeline no importa nada de eso. El
 # adaptador lo cruza invocando `lib/voice_worker.py` como subproceso con ese intérprete;
 # en el `.venv` del pipeline no se instala nada de voz.
 VOICE_PYTHON = os.getenv("PYTHON_VOZ", str(BASE_DIR / ".venv-voz" / "Scripts" / "python.exe"))

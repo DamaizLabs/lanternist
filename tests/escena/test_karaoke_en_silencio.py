@@ -331,3 +331,61 @@ def test_CONTROL_con_dos_tramos_que_dicen_la_misma_cifra_no_se_elige():
     assert _casa_las_cifras(palabras, marcas, elegida, {0}) == {0: (0.0, 0.3)}
     # Y si la marca no tiene vecinas que acoten el tramo y la cifra se dice dos veces, no se toca nada.
     assert _casa_las_cifras(["seven", "seven"], _marcas_de(("7", 0.3)), {}, {0}) == {}
+
+
+# ------------------------------------------------------------------ la cantidad y su unidad (OC2.4, deuda 8)
+# Whisper escribe la unidad aparte («92.3» y «percent») y el guion, pegada («92.3%»), o al revés. Las dos se unen
+# como en el recorte de la voz (`RecortadorPorTexto._une_cantidades`).
+UNIDAD = "Prices rose by 92.3% in a decade."
+OIDO_UNIDAD = _marcas_de(("Prices", 0.4), ("rose", 0.3), ("by", 0.2), ("92.3", 0.9), ("percent", 0.5), ("in", 0.2),
+                         ("a", 0.1), ("decade.", 0.6))  # fmt: skip
+
+
+def test_la_cifra_con_su_unidad_aparte_dura_hasta_que_acaba_la_unidad():
+    alineado, _ = tiempos_de_palabras(UNIDAD.split(), OIDO_UNIDAD)
+    cifra = alineado[3]
+    assert cifra["anclada"] and cifra["desde"] == pytest.approx(0.9)
+    assert cifra["hasta"] == pytest.approx(2.3), "«92.3%» se enciende con «92.3» y sigue mientras suena «percent»"
+    assert alineado[4]["desde"] == pytest.approx(2.3), "«in» sigue con su marca"
+
+
+def test_CONTROL_otra_cifra_con_su_unidad_no_se_estira():
+    oido = [dict(m, texto="92.4") if m["texto"] == "92.3" else m for m in OIDO_UNIDAD]
+    alineado, _ = tiempos_de_palabras(UNIDAD.split(), oido)
+    assert (alineado[3]["desde"], alineado[3]["hasta"]) != pytest.approx((0.9, 2.3)), "92,4 no es 92,3: no se une"
+
+
+def test_la_unidad_escrita_aparte_en_el_guion_reparte_la_marca_de_whisper():
+    palabras = "Prices rose by 92.3 percent in a decade.".split()
+    oido = _marcas_de(("Prices", 0.4), ("rose", 0.3), ("by", 0.2), ("92.3%", 1.4), ("in", 0.2), ("a", 0.1),
+                      ("decade.", 0.6))  # fmt: skip
+    alineado, _ = tiempos_de_palabras(palabras, oido)
+    assert [p["anclada"] for p in alineado[3:5]] == [True, True], "«92.3» y «percent» dicen la marca «92.3%»"
+    assert (alineado[3]["desde"], alineado[3]["hasta"], alineado[4]["hasta"]) == pytest.approx((0.9, 1.6, 2.3))
+    # Control: con otra cifra oída, la marca no se reparte y «92.3» se queda sin la suya
+    otra = [dict(m, texto="92.4%") if m["texto"] == "92.3%" else m for m in oido]
+    alineado, _ = tiempos_de_palabras(palabras, otra)
+    assert alineado[3]["anclada"] is False
+
+
+def test_CONTROL_la_cantidad_partida_igual_en_el_guion_y_en_whisper_sigue_palabra_a_palabra():
+    """«92.3 percent» en los dos lados: cada palabra ya tiene su marca y no se reparte (revisión de OC2.4, bloqueo 1).
+    Repartida a partes iguales, «percent» se encendería en 1,6 s, cuando «92.3» suena hasta 1,8 s."""
+    palabras = "Prices rose by 92.3 percent in a decade.".split()
+    alineado, _ = tiempos_de_palabras(palabras, OIDO_UNIDAD)
+    assert [t for p in alineado[3:5] for t in (p["desde"], p["hasta"])] == pytest.approx([0.9, 1.8, 1.8, 2.3])
+
+
+def test_una_cifra_que_whisper_parte_en_dos_trozos_llega_unida_del_alineador():
+    """« 38» y «.4%.»: el alineador los une (`une_pegadas`) y la palabra dura las dos marcas; sin unir, solo una."""
+    from lib.alineador import une_pegadas
+
+    palabras = "a rise of about 38.4%. Then more.".split()
+    crudas = _marcas_de(("a", 0.1), ("rise", 0.3), ("of", 0.1), ("about", 0.4), ("38", 0.5), (".4%.", 0.9),
+                        ("Then", 0.3), ("more.", 0.4))  # fmt: skip
+    crudas[5]["pegada"] = True
+    alineado, _ = tiempos_de_palabras(palabras, une_pegadas(crudas))
+    assert (alineado[4]["desde"], alineado[4]["hasta"]) == pytest.approx((0.9, 2.3))
+    # Control: sin unir, la cifra se queda con el segundo trozo y se enciende tarde, con «38» ya dicho
+    alineado, _ = tiempos_de_palabras(palabras, crudas)
+    assert alineado[4]["desde"] > 0.9 + 0.3

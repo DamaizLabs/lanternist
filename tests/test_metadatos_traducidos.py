@@ -436,6 +436,17 @@ def test_rehacer_el_leeme_anade_el_espanol_sin_api_ni_estado(subido, run, capsys
     assert "[AVISO] la descripción original" not in capsys.readouterr().out
 
 
+def test_rehacer_el_leeme_guarda_una_copia_del_anterior(subido, run):
+    """El LEEME de antes enseña lo que se subió: reescribirlo sin copia lo perdía (fila 335)."""
+    pipeline, _, _ = subido
+    antes = (run / "subir-al-canal" / "LEEME.html").read_text(encoding="utf-8")
+    assert not list((run / "subir-al-canal").glob("LEEME.antes-*.html"))  # control: antes de rehacerlo no hay copia
+    assert pipeline.rehace_guia(RUN_ID) is True
+    copias = list((run / "subir-al-canal").glob("LEEME.antes-*.html"))
+    assert len(copias) == 1 and copias[0].read_text(encoding="utf-8") == antes
+    assert (run / "subir-al-canal" / "LEEME.html").read_text(encoding="utf-8") != antes
+
+
 def test_control_rehacer_avisa_si_la_inglesa_ya_no_es_la_que_se_subio(subido, run, capsys):
     """Si el run cambió después de subir, el LEEME rehecho enseñaría otra descripción: se dice."""
     pipeline, _, _ = subido

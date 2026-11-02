@@ -8,9 +8,11 @@ Cada una con su control: el caso limpio pasa.
 
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -60,7 +62,7 @@ def test_la_cli_va_con_la_guarda_y_sin_credenciales(monkeypatch, tmp_path):
         visto.update(args=args, env=kw["env"])
         return subprocess.CompletedProcess(args, 0, stdout="{}", stderr="")
 
-    monkeypatch.setattr(render.subprocess, "run", falso_run)
+    monkeypatch.setattr(render, "_corre_vigilado", falso_run)
     render._cli(["lint", "--json", str(tmp_path)], tmp_path, tmp_path / "log", "lint", timeout=5)
     assert visto["args"][1:3] == ["--require", str(config.MOTOR_ESCENA_GUARDA)]
     assert visto["env"]["HYPERFRAMES_BROWSER_PATH"].endswith("chrome.exe")
@@ -138,6 +140,19 @@ def test_llama_server_en_la_gpu_para_el_render_aunque_sobre_memoria(monkeypatch)
     monkeypatch.setattr(render, "memoria_libre_gpu_mb", lambda: LIBRE_EN_REPOSO_MB)
     with pytest.raises(render.ErrorDeRender, match="llama-server"):
         render.exige_gpu_libre()
+
+
+def test_sin_LLAMA_SERVER_en_el_env_se_le_reconoce_por_el_nombre_del_ejecutable(monkeypatch):
+    """Sin la ruta en el `.env`, el render solo lo cazaba por el umbral de memoria, y el aviso perdía el motivo."""
+    monkeypatch.setattr(config, "LLAMA_SERVER", Path("(falta LLAMA_SERVER en el .env)"))
+    monkeypatch.setattr(render, "procesos_de_gpu", lambda: [*ESCRITORIO, LLAMA_SERVER_VISTO])
+    # Con memoria de sobra: el aviso del umbral también nombra a llama-server, y aquí solo cuenta el nombre.
+    monkeypatch.setattr(render, "memoria_libre_gpu_mb", lambda: LIBRE_EN_REPOSO_MB)
+    with pytest.raises(render.ErrorDeRender, match="otro trabajo del estudio.*llama-server"):
+        render.exige_gpu_libre()
+    # Control: otro ejecutable con «llama» en la ruta no es un llama-server.
+    monkeypatch.setattr(render, "procesos_de_gpu", lambda: [*ESCRITORIO, r"X:\llama-server\otro.exe"])
+    assert render.trabajos_de_gpu_en_marcha() == []
 
 
 def test_comfyui_en_la_gpu_para_el_render_si_nvidia_smi_lo_da_con_su_ruta(monkeypatch):
@@ -261,3 +276,114 @@ def test_soltar_el_cerrojo_de_otro_no_lo_suelta(tmp_path):
     render.toma_cerrojo(cerrojo, os.getpid(), "obrero de escena: el de verdad")
     render.suelta_cerrojo(cerrojo, os.getpid() + 1)
     assert cerrojo.exists()
+
+
+# ------------------------------------------------------------------------- el árbol vigilado (OC2.5, deuda 2)
+# El Python que hace de etapa: lanza con `_corre_vigilado` un node que lanza un nieto, y se queda esperando. Con
+# «sin-job», el mismo código sin el Job Object: el control negativo.
+ETAPA = """
+import sys
+sys.path.insert(0, sys.argv[1])
+from lib.escena import render
+if sys.argv[4] == "sin-job":
+    render._job_que_mata_al_cerrar = lambda pid: None
+render._corre_vigilado([sys.argv[2], "-e", sys.argv[3], sys.argv[5]], timeout=600)
+"""
+# El sustituto de la CLI: node lanza otro node (como lanza Chrome), apunta los dos pid y espera.
+HIJO = """
+const espera = ["-e", "setInterval(() => {}, 1000)"];
+const nieto = require("child_process").spawn(process.execPath, espera, {stdio: "ignore"});
+require("fs").writeFileSync(process.argv[1], JSON.stringify({hijo: process.pid, nieto: nieto.pid}));
+setInterval(() => {}, 1000);
+"""
+_SINCRONIZA_Y_MATA = 0x00100000 | 0x1000 | 0x0001  # SYNCHRONIZE | QUERY_LIMITED_INFORMATION | TERMINATE
+
+
+def _kernel32():
+    import ctypes
+
+    k = ctypes.WinDLL("kernel32", use_last_error=True)
+    k.OpenProcess.restype = ctypes.c_void_p
+    k.OpenProcess.argtypes = [ctypes.c_uint32, ctypes.c_int, ctypes.c_uint32]
+    k.WaitForSingleObject.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
+    k.TerminateProcess.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
+    k.CloseHandle.argtypes = [ctypes.c_void_p]
+    return k
+
+
+def _arbol_tras_matar_a_la_etapa(tmp_path: Path, modo: str) -> dict[str, bool]:
+    """Lanza la etapa, la mata con `taskkill /F` y dice, 5 s después, qué procesos de su árbol siguen vivos.
+
+    **Solo se toca lo que creó la prueba**: los pid los apuntan el hijo y el nieto, y se abren sus asas antes de matar
+    a la etapa. Con el asa abierta, el pid no puede pasar a otro proceso, así que se mira y se mata a ese proceso y no
+    a otro que hubiera heredado el número. Lo que sobreviva (el control negativo) se mata por su asa al final.
+    """
+    from utiles_escena import node
+
+    k = _kernel32()
+    pids = tmp_path / f"pids-{modo}.json"
+    etapa = subprocess.Popen(
+        [sys.executable, "-c", ETAPA, str(config.BASE_DIR), node(), HIJO, modo, str(pids)],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    asas = {}
+    try:
+        for _ in range(300):
+            try:
+                apuntados = json.loads(pids.read_text(encoding="utf-8"))
+                break
+            except (OSError, ValueError):
+                assert etapa.poll() is None, "la etapa acabó antes de lanzar el árbol"
+                time.sleep(0.1)
+        else:
+            pytest.fail("el hijo no apuntó los pid en 30 s")
+        asas = {quien: k.OpenProcess(_SINCRONIZA_Y_MATA, False, pid) for quien, pid in apuntados.items()}
+        assert all(asas.values()), f"no se pudo abrir el árbol recién lanzado: {apuntados}"
+        subprocess.run(["taskkill", "/F", "/PID", str(etapa.pid)], capture_output=True, check=True)
+        etapa.wait(timeout=30)
+        # WaitForSingleObject da 0 si el proceso acabó y 258 si sigue vivo al cabo del plazo.
+        return {quien: k.WaitForSingleObject(asa, 5000) != 0 for quien, asa in asas.items()}
+    finally:
+        for asa in asas.values():
+            if asa:
+                k.TerminateProcess(asa, 1)
+                k.CloseHandle(asa)
+        if etapa.poll() is None:
+            etapa.kill()
+
+
+@pytest.mark.skipif(os.name != "nt", reason="el Job Object es de Windows, y Lanternist solo corre en Windows")
+def test_si_la_etapa_muere_su_node_y_lo_que_lanzo_mueren_con_ella(tmp_path):
+    """Deuda 2: con `HYPERFRAMES_RENDER_DETACHED=1`, nada vigilaba a node ni a Chrome si moría la etapa de Python."""
+    from utiles_escena import node
+
+    if node() is None:
+        pytest.skip("no hay node (lo instala fnm, ver .node-version)")
+    assert _arbol_tras_matar_a_la_etapa(tmp_path, "con-job") == {"hijo": False, "nieto": False}
+
+
+@pytest.mark.skipif(os.name != "nt", reason="el Job Object es de Windows, y Lanternist solo corre en Windows")
+def test_control_sin_el_job_el_node_y_lo_que_lanzo_sobreviven_a_la_etapa(tmp_path):
+    from utiles_escena import node
+
+    if node() is None:
+        pytest.skip("no hay node (lo instala fnm, ver .node-version)")
+    assert _arbol_tras_matar_a_la_etapa(tmp_path, "sin-job") == {"hijo": True, "nieto": True}
+
+
+@pytest.mark.skipif(os.name != "nt", reason="el Job Object es de Windows, y Lanternist solo corre en Windows")
+def test_un_timeout_mata_el_arbol_entero_y_no_espera_a_los_nietos(tmp_path):
+    """`subprocess.run` solo mataba a node y esperaba las tuberías, que un nieto vivo mantiene abiertas."""
+    nieto = tmp_path / "nieto.pid"
+    codigo = (
+        "import subprocess, sys, time\n"
+        "p = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(120)'])\n"
+        f"open(r'{nieto}', 'w').write(str(p.pid))\n"
+        "time.sleep(120)\n"
+    )
+    inicio = time.monotonic()
+    with pytest.raises(subprocess.TimeoutExpired):
+        render._corre_vigilado([sys.executable, "-c", codigo], timeout=5, text=True)
+    assert time.monotonic() - inicio < 30, "esperó al nieto"
+    assert not render.proceso_vivo(int(nieto.read_text(encoding="utf-8")))

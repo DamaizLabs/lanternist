@@ -2,11 +2,13 @@ r"""El detector gratuito de la marca de IA de Lanternist (OC1.5; medida 2.1 del 
 
     .venv\Scripts\python scripts\detecta_marca.py <fichero> [--report salida.json] [--cpu]
 
-Busca en un vídeo, una imagen o un audio las capas de la marca: el manifiesto C2PA, la marca de agua de Video Seal, la
-señal de TrustMark, que dice qué detector usar, y la marca de AudioSeal. Imprime una línea por capa y un veredicto, en
-inglés llano. Corre en local y sin red, en la GPU si la hay o en la CPU (`--cpu` la fuerza). Con `--report`, deja el
-resultado firmado con la clave local de esta instalación: el sha256 del fichero, el detector, la hora UTC, los
-resultados y el veredicto (sub-medida 2.1.2).
+Busca en un vídeo, una imagen o un audio las tres capas de la marca: el manifiesto C2PA, la marca de agua de Video Seal
+y la de AudioSeal. Imprime una línea por capa y un veredicto, en inglés llano. Corre en local y sin red, en la GPU si la
+hay o en la CPU (`--cpu` la fuerza). Con `--report`, deja el resultado firmado con la clave local de esta instalación:
+el sha256 del fichero, el detector, la hora UTC, los resultados y el veredicto (sub-medida 2.1.2).
+
+No lee la señal de TrustMark con el 59 que llevan los ficheros marcados entre OC1.12 y OC2.6: el 59 no es de
+Lanternist (filas 341 y 342). Esos ficheros se siguen dando por marcados por las otras tres capas.
 
 Código de salida: 0 si encuentra la marca de Lanternist en alguna capa, 1 si no, y 2 si no ha podido mirar: un fallo,
 o un fichero en el que no hay ninguna capa que mirar (sin imagen ni sonido y de un tipo que no admite C2PA, como un

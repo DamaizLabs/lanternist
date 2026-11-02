@@ -9,10 +9,13 @@ Cada `final.mp4` y cada miniatura salen con las dos capas que pide la Sección 1
   (`signingCredential.untrusted`): el certificado no es de una CA de la lista de C2PA.
 - **Marca de agua imperceptible**: Video Seal 1.0 en la imagen del vídeo y en la miniatura (256 bits) y AudioSeal 0.2.0
   en el audio (16 bits). El mensaje es el mismo siempre: los bits del sha256 de `MENSAJE`.
-- **La señal** (OC1.12, medida 3.4 c del Código): una marca de agua más en la imagen, de TrustMark, que no dice «IA»
-  sino qué detector usar: lleva el número de la entrada de Lanternist en la lista de algoritmos de C2PA (`SENAL`).
 
 Y un detector gratuito y local (`scripts/detecta_marca.py`), que da una línea por capa y un veredicto.
+
+**La señal de TrustMark ya no existe** (OC2.6, filas 341 y 342). Entre OC1.12 y OC2.6 cada imagen llevó además una marca
+de TrustMark con el número 59, el que se pidió a la lista de C2PA. C2PA no aceptó la entrada, así que el 59 no es de
+Lanternist y se puede dar a otro algoritmo. Por eso ni se escribe ni se lee: si el detector la leyera, un fichero de
+otro con el 59 saldría como de Lanternist. Lo marcado en esas fechas se sigue detectando por las otras capas.
 
 **Dos procesos, como el obrero de escena** (`lib/escena/obrero.py`): este módulo corre en `.venv` y lanza
 `lib/marca_ia_worker.py` con el intérprete de `.venv-escena`, que tiene torch, AudioSeal, c2pa-python y PyAV. El
@@ -54,27 +57,13 @@ ACCION_IA = "http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMe
 # inserted into the digital content without creating a soft binding»). `c2pa.watermarked` está obsoleta.
 ACCION_MARCA_DE_AGUA = "c2pa.watermarked.unbound"
 GENERADOR = "Lanternist"
-
-# La señal (OC1.12; medida 3.4 c del Código, la interoperabilidad): una marca de agua de TrustMark 0.9.2 (Adobe; MIT el
-# código y los pesos), variante Q y esquema BCH_SUPER, que lleva un número de la lista de algoritmos de *soft binding*
-# de C2PA (github.com/c2pa-org/softbinding-algorithm-list): el de la entrada de Lanternist, que dice qué detector usar.
-# Es el modo *signpost* de `adobe/trustmark → c2pa/README.md`. El dato son 40 bits: el número en binario sin signo, del
-# bit más significativo al menos.
-# **59 es provisional.** C2PA asigna el número al aceptar el pull request de la entrada; hoy el 55 lo piden dos PR
-# abiertos y el 56-57 otro, así que el 59 es el que se pide. Si C2PA asigna otro, se cambia `SENAL` y el 59 se queda en
-# `SENALES_DE_LANTERNIST`: el detector tiene que seguir leyendo lo que ya se marcó con él (medida 2.1.4).
-SENAL = 59
-SENALES_DE_LANTERNIST = frozenset({59})
-BITS_SENAL = 40
 # Lo que dice el detector en su informe firmado.
 DETECTOR = "lanternist-ai-mark-detector"
 
 # Los pesos de la marca de agua: los baja el instalador (`instala.py`, paso `marca`) y, si faltan, el primer uso, a
 # `dir_de_pesos()`. Su sha256 se comprueba al bajarlos y al cargarlos. Código y pesos, MIT (comprobado en su fuente:
-# `progress/comparacion_OC1.5.md` y, los de TrustMark, `progress/plan_OC1.12.md`). Los de TrustMark llevan su nombre
-# original, porque el paquete comprueba su md5 por el nombre. Su URL, su sha256 y su licencia viven en la lista fija de
-# descargas (`datos/descargas.json`, las entradas del paso `marca`), y se leen de ahí para que cada sha256 esté en un
-# solo sitio.
+# `progress/comparacion_OC1.5.md`). Su URL, su sha256 y su licencia viven en la lista fija de descargas
+# (`datos/descargas.json`, las entradas del paso `marca`), y se leen de ahí para que cada sha256 esté en un solo sitio.
 DESCARGAS = Path(__file__).resolve().parent.parent / "datos" / "descargas.json"
 
 
@@ -108,14 +97,6 @@ def bits_del_mensaje(n: int) -> list[int]:
     return [(byte >> (7 - i)) & 1 for byte in resumen for i in range(8)][:n]
 
 
-def bits_de_la_senal(numero: int = SENAL) -> str:
-    """El dato de la señal como lo pide TrustMark (`MODE="binary"`): `numero` en 40 bits, del más significativo al
-    menos. El 59 es `0…0111011`."""
-    if not 0 <= numero < 2**BITS_SENAL:
-        raise ValueError(f"la señal tiene {BITS_SENAL} bits y {numero} no cabe")
-    return format(numero, f"0{BITS_SENAL}b")
-
-
 def p_valor(aciertos: int, n: int) -> float:
     """La probabilidad de acertar `aciertos` bits o más de `n` por azar (binomial con p = 0,5)."""
     return sum(math.comb(n, k) for k in range(aciertos, n + 1)) / 2**n
@@ -138,10 +119,9 @@ def json_canonico(datos: dict) -> bytes:
 #   {"file", "sha256", "device", "seconds",
 #    "c2pa": {"supported", "manifest", "state", "failures", "generator", "signer", "ai", "watermarks", "error"},
 #    "image": {"bits", "matches", "p_value", "frames"} o None si el fichero no tiene imagen,
-#    "signpost": {"frames", "lanternist_frames", "lanternist_identifiers", "other_identifiers"} o None sin imagen,
 #    "audio": {"probability", "matches", "bits"} o None si no tiene sonido}
-# `c2pa.watermarks` son las marcas de agua que declara el manifiesto, y `signpost`, lo que TrustMark lee en los mismos
-# fotogramas que Video Seal: cuántos dan un número de Lanternist, cuáles, y los otros números que ha leído.
+# `c2pa.watermarks` son las marcas de agua que declara el manifiesto. Un resultado de antes de OC2.6 puede traer también
+# `signpost`, lo que leía la señal de TrustMark: nada de este módulo lo lee (fila 342).
 def imagen_de_lanternist(resultado: dict) -> bool:
     imagen = resultado.get("image") or {}
     return int(imagen.get("matches") or 0) >= UMBRAL_IMAGEN
@@ -166,20 +146,9 @@ def c2pa_de_lanternist(resultado: dict) -> bool:
     )
 
 
-def senal_de_lanternist(resultado: dict) -> bool:
-    """La señal está si al menos un fotograma da exactamente un número de Lanternist: un código válido con otro
-    número es otra señal, o una lectura falsa, y no cuenta."""
-    return int((resultado.get("signpost") or {}).get("lanternist_frames") or 0) >= 1
-
-
 def de_lanternist(resultado: dict) -> bool:
     """¿Lleva el fichero alguna de las marcas de Lanternist? Basta una capa: las otras se pierden por el camino."""
-    return (
-        c2pa_de_lanternist(resultado)
-        or imagen_de_lanternist(resultado)
-        or senal_de_lanternist(resultado)
-        or audio_de_lanternist(resultado)
-    )
+    return c2pa_de_lanternist(resultado) or imagen_de_lanternist(resultado) or audio_de_lanternist(resultado)
 
 
 def sin_mirar(resultado: dict) -> bool:
@@ -195,8 +164,8 @@ def sin_mirar(resultado: dict) -> bool:
 def autocomprobacion(resultado: dict) -> list[str]:
     """Lo que falta en un fichero que Lanternist acaba de marcar: las capas que se esperan y no aparecen.
 
-    Recién marcado y firmado, el fichero tiene que llevarlas TODAS: el manifiesto C2PA válido, la marca de imagen, la
-    señal con el número de hoy (`SENAL`) y, si tiene sonido, la marca de audio. Vacío si está todo.
+    Recién marcado y firmado, el fichero tiene que llevarlas TODAS: el manifiesto C2PA válido, la marca de imagen y, si
+    tiene sonido, la de audio. Vacío si está todo.
     """
     faltan = []
     c2pa = resultado.get("c2pa") or {}
@@ -204,12 +173,6 @@ def autocomprobacion(resultado: dict) -> list[str]:
         faltan.append(f"C2PA (estado {c2pa.get('state')}, fallos {c2pa.get('failures')}, error {c2pa.get('error')})")
     if not imagen_de_lanternist(resultado):
         faltan.append(f"marca de imagen ({(resultado.get('image') or {}).get('matches')} de {BITS_IMAGEN} bits)")
-    senal = resultado.get("signpost") or {}
-    if SENAL not in (senal.get("lanternist_identifiers") or []):
-        faltan.append(
-            f"señal de TrustMark con el número {SENAL} ({senal.get('lanternist_frames')} de {senal.get('frames')} "
-            f"fotogramas; otros números: {senal.get('other_identifiers')})"
-        )
     if resultado.get("audio") is not None and not audio_de_lanternist(resultado):
         audio = resultado["audio"]
         faltan.append(f"marca de audio (probabilidad {audio.get('probability')}, {audio.get('matches')} de 16 bits)")
@@ -257,28 +220,6 @@ def _linea_imagen(imagen: dict | None) -> str:
     )
 
 
-def _linea_senal(senal: dict | None) -> str:
-    if senal is None:
-        return "Signpost watermark (TrustMark): not checked (no image in this file)."
-    leidos, n = int(senal["lanternist_frames"]), int(senal["frames"])
-    if leidos:
-        donde = f"in {leidos} of {n} frames" if n > 1 else "in the image"
-        numeros = ", ".join(str(x) for x in senal["lanternist_identifiers"])
-        return (
-            f"Signpost watermark (TrustMark): FOUND {donde}. It carries the number {numeros}, which points to "
-            "Lanternist's entry in the C2PA soft-binding algorithm list: check this file with Lanternist's detector."
-        )
-    otros = ", ".join(str(x) for x in senal.get("other_identifiers") or [])
-    if otros:
-        # Como en el audio: un código válido con otro número puede salir por azar en un fotograma sin marca, así que
-        # no se afirma que haya otra marca.
-        return (
-            f"Signpost watermark (TrustMark): not Lanternist's. It reads other numbers ({otros}): another TrustMark "
-            "mark, or a false reading."
-        )
-    return f"Signpost watermark (TrustMark): not found {f'in {n} frames' if n > 1 else 'in the image'}."
-
-
 def _linea_audio(audio: dict | None) -> str:
     if audio is None:
         return "Audio watermark (AudioSeal): not checked (no audio in this file)."
@@ -301,7 +242,6 @@ def veredicto(resultado: dict) -> str:
         f"File: {resultado.get('file')} (sha256 {str(resultado.get('sha256'))[:16]}…)",
         _linea_c2pa(resultado.get("c2pa") or {}),
         _linea_imagen(resultado.get("image")),
-        _linea_senal(resultado.get("signpost")),
         _linea_audio(resultado.get("audio")),
     ]
     marcas = [
@@ -309,7 +249,6 @@ def veredicto(resultado: dict) -> str:
         for nombre, hay in (
             ("C2PA metadata", c2pa_de_lanternist(resultado)),
             ("image watermark", imagen_de_lanternist(resultado)),
-            ("signpost watermark", senal_de_lanternist(resultado)),
             ("audio watermark", audio_de_lanternist(resultado)),
         )
         if hay
@@ -540,29 +479,22 @@ def _marca(op: str, origen, destino, *, cpu: bool, trabajo, lanza, capas: dict[s
     }
 
 
-# La señal, en el registro: qué es y a qué entrada de la lista de C2PA apunta. Sus tres ficheros, en `MODELOS`.
-CAPA_SENAL = f"TrustMark 0.9.2, variante Q, esquema BCH_SUPER: el número {SENAL} de la lista de soft binding de C2PA"
-MODELOS_SENAL = ("trustmark_config", "trustmark_codificador", "trustmark_decodificador")
-
-
 def marca_video(origen, destino, *, cpu: bool = False, trabajo=None, lanza=None) -> dict:
-    """Marca la imagen (Video Seal y la señal de TrustMark) y el audio (AudioSeal) de `origen`, lo firma con C2PA en
-    `destino` y lo comprueba.
+    """Marca la imagen (Video Seal) y el audio (AudioSeal) de `origen`, lo firma con C2PA en `destino` y lo comprueba.
 
     Devuelve el registro que va a `montaje.json → marca_ia` y de ahí a `assets.json`. `cpu` es para las pruebas: en
     producción el marcado va en la GPU, con su cerrojo. `lanza` sustituye al lanzador real en las pruebas sin GPU.
     """
-    capas = {"imagen": "Video Seal 1.0, 256 bits", "senal": CAPA_SENAL, "audio": "AudioSeal 0.2.0, 16 bits"}
-    modelos = ("videoseal", *MODELOS_SENAL, "audioseal_generador", "audioseal_detector")
+    capas = {"imagen": "Video Seal 1.0, 256 bits", "audio": "AudioSeal 0.2.0, 16 bits"}
+    modelos = ("videoseal", "audioseal_generador", "audioseal_detector")
     return _marca("video", origen, destino, cpu=cpu, trabajo=trabajo, lanza=lanza, capas=capas, modelos=modelos)
 
 
 def marca_imagen(origen, destino, *, cpu: bool = False, trabajo=None, lanza=None) -> dict:
-    """Marca una imagen (la miniatura) con Video Seal y la señal de TrustMark, la firma con C2PA en `destino` y lo
-    comprueba. `origen` y `destino` pueden ser el mismo fichero."""
-    capas = {"imagen": "Video Seal 1.0, 256 bits", "senal": CAPA_SENAL}
-    modelos = ("videoseal", *MODELOS_SENAL)
-    return _marca("imagen", origen, destino, cpu=cpu, trabajo=trabajo, lanza=lanza, capas=capas, modelos=modelos)
+    """Marca una imagen (la miniatura) con Video Seal, la firma con C2PA en `destino` y lo comprueba. `origen` y
+    `destino` pueden ser el mismo fichero."""
+    capas = {"imagen": "Video Seal 1.0, 256 bits"}
+    return _marca("imagen", origen, destino, cpu=cpu, trabajo=trabajo, lanza=lanza, capas=capas, modelos=("videoseal",))
 
 
 def _gpu_ocupada() -> bool:
@@ -580,7 +512,7 @@ def _gpu_ocupada() -> bool:
 
 
 def detecta(ruta, *, informe=None, cpu: bool = False, trabajo=None, lanza=None) -> dict:
-    """Busca las cuatro capas en `ruta` y devuelve el resultado (ver el esquema junto a `imagen_de_lanternist`).
+    """Busca las tres capas en `ruta` y devuelve el resultado (ver el esquema junto a `imagen_de_lanternist`).
 
     Corre en la GPU si la hay y si no en CPU (`cpu` la evita), sin cerrojo: lee poco y no se queda en la tarjeta. Con
     `informe`, el trabajador escribe ahí el resultado firmado que pide la sub-medida 2.1.2 del Código.

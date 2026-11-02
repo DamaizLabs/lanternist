@@ -64,6 +64,8 @@ EASE = {
     "entra": lambda p: p * p * p,
     "rebote": _rebote,
     "elastico": _elastico,
+    "acelera": lambda p: p * p,
+    "frena": lambda p: 1 - (1 - p) * (1 - p),
 }
 
 

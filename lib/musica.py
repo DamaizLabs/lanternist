@@ -481,6 +481,41 @@ TOLERANCIA_PICO_DB = 0.3
 PICO_INACEPTABLE_DBTP = -0.1
 
 
+# Cuánto puede separarse la sonoridad del objetivo sin avisar. El vídeo de ejemplo sale a -13,97 con el objetivo en
+# -14; un episodio del estudio salió a -15,09 porque el techo bajó la ganancia por un solo pico, y nadie lo dijo.
+TOLERANCIA_LUFS = 0.5
+
+
+def verifica_sonoridad(medido: dict, cfg: dict, *, ganancia_bajada_db: float = 0.0) -> dict:
+    """Cruza la sonoridad MEDIDA del vídeo con el objetivo del estudio, y avisa si se separa (fila 335).
+
+    No para: un vídeo algo más bajo se puede publicar, pero quien lo produce tiene que saberlo antes, y saber si fue
+    el techo el que bajó la ganancia.
+    """
+    objetivo = float(cfg["objetivo_lufs"])
+    lufs = medido.get("lufs")
+    if lufs is None:
+        return {"objetivo_lufs": objetivo, "medido_lufs": None, "cumple": None, "detalle": "no se pudo medir"}
+    resultado = {
+        "objetivo_lufs": objetivo,
+        "medido_lufs": lufs,
+        "tolerancia_lu": TOLERANCIA_LUFS,
+        "cumple": abs(lufs - objetivo) <= TOLERANCIA_LUFS,
+    }
+    if not resultado["cumple"]:
+        causa = (
+            f" El techo bajó la ganancia {ganancia_bajada_db} dB para no pasar del pico."
+            if ganancia_bajada_db > 0
+            else ""
+        )
+        print(
+            f"  [MUSICA] AVISO: el vídeo sale a {lufs} LUFS y el objetivo es {objetivo} "
+            f"({round(lufs - objetivo, 2):+} LU, tolerancia {TOLERANCIA_LUFS}).{causa} Escúchalo antes de subirlo.",
+            flush=True,
+        )
+    return resultado
+
+
 def verifica_techo(medido: dict, cfg: dict) -> dict:
     """Cruza el pico MEDIDO con el objetivo declarado, y lo deja escrito.
 

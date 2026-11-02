@@ -610,6 +610,7 @@ def comprueba_cantidades(indice: int, narracion: str, respaldo: RespaldoDeCifras
     """Cada cantidad de la narración de una lámina tiene que estar en las fichas del guion (spec §3.8)."""
     dichas = fuentes_cifras.cantidades(sin_etiquetas(narracion))
     sueltas: list[str] = []
+    solo_por_el_numero: list[str] = []
     for dicha in dichas:
         if dicha.unidad == fuentes_cifras.ILEGIBLE:
             resultado.falla(
@@ -617,7 +618,12 @@ def comprueba_cantidades(indice: int, narracion: str, respaldo: RespaldoDeCifras
                 "cantidad: escríbela como se dirá («$4.1 billion», «seven percent»), que es también como la lee la voz"
             )
             continue
-        if any(dicha.casa_con(cantidad) for _, cantidad in respaldo.cifras):
+        casadas = [cantidad for _, cantidad in respaldo.cifras if dicha.casa_con(cantidad)]
+        if casadas:
+            # Sin unidad casa con la cifra (es «$387» dicho como «about three hundred eighty-seven»), pero también
+            # casaba «three questions» con el 3 %, y en silencio (fila 335): lo mira quien aprueba el guion.
+            if dicha.unidad is None and all(c.unidad is not None for c in casadas):
+                solo_por_el_numero.append(f"«{dicha.texto}» (con «{casadas[0].texto}»)")
             continue
         # ¿Es el resultado de una cuenta, o uno de sus datos?
         cuenta = next((c for c in respaldo.cuentas if c["dicho"] is not None and dicha.casa_con(c["dicho"])), None)
@@ -656,6 +662,12 @@ def comprueba_cantidades(indice: int, narracion: str, respaldo: RespaldoDeCifras
         resultado.avisa(
             f"slide {indice}: números sin unidad que el gate 1 no exige en la ficha (años, recuentos): "
             + ", ".join(f"«{s}»" for s in dict.fromkeys(sueltas))
+        )
+    if solo_por_el_numero:
+        resultado.avisa(
+            f"slide {indice}: casan con una cifra de la ficha solo por el número, sin su unidad: "
+            + ", ".join(dict.fromkeys(solo_por_el_numero))
+            + ". Si hablan de esa cifra, está respaldada; si no, no lo está"
         )
 
 

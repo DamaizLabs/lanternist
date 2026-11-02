@@ -180,24 +180,34 @@ def _casa_las_cifras(palabras: list[str], marcas: list[dict], elegida: dict[int,
     palabras que hay entre su vecina anterior y su siguiente ya emparejadas, el tramo que dice esa cifra. **Solo si es
     uno**: con dos candidatos no se elige. Y una palabra que ya tenía esa marca y casa sola se queda como estaba.
     Devuelve {palabra: (desde, hasta)}, el trozo de la marca que le toca a cada una, a partes iguales.
+
+    **La cantidad y su unidad, unidas a los dos lados** (OC2.4), como en el recorte de la voz
+    (`RecortadorPorTexto._une_cantidades`): whisper escribe «92.3» y «percent» en dos marcas, y el guion «92.3%» o
+    «92.3 percent». Lo oído se une en una cifra, «92p3pct», que va del inicio de su primera marca al final de la
+    última; y cada tramo del guion se une igual antes de compararlo. Una palabra partida en dos trozos («38» y
+    «.4%.») ya llega unida del alineador (`lib/alineador.py → une_pegadas`).
     """
+    une = RecortadorPorTexto._une_cantidades
     norma = [RecortadorPorTexto._normaliza(p) for p in palabras]
+    # Lo oído como fichas (cifra, (primera marca, última marca)): `_une_cantidades` lleva la marca de la primera a la
+    # última cuando une, así que con índices dice qué marcas forman cada cifra.
+    oidas = une([(n, (j, j)) for j, m in enumerate(marcas) if (n := RecortadorPorTexto._normaliza(m["texto"]))])
     tiempos: dict[int, tuple[float, float]] = {}
-    for j, marca in enumerate(marcas):
-        oido = RecortadorPorTexto._normaliza(marca["texto"])
-        if not any(c.isdigit() for c in oido) or _duracion(marca) < MARCA_NULA_S:
+    for oido, (j0, j1) in oidas:
+        desde, hasta = float(marcas[j0]["desde"]), float(marcas[j1]["hasta"])
+        if not any(c.isdigit() for c in oido) or hasta - desde < MARCA_NULA_S:
             continue
-        atadas = sorted(w for w, k in elegida.items() if k == j)
-        lo = max((w + 1 for w, k in elegida.items() if k < j), default=0)
-        hi = min((w for w, k in elegida.items() if k > j), default=len(palabras))
+        atadas = sorted(w for w, k in elegida.items() if j0 <= k <= j1)
+        lo = max((w + 1 for w, k in elegida.items() if k < j0), default=0)
+        hi = min((w for w, k in elegida.items() if k > j1), default=len(palabras))
         if atadas and not (lo <= atadas[0] and atadas[-1] < hi):
             continue
         canon = RecortadorPorTexto._canon([oido])
         candidatos = []
         for s in range(lo, hi):
             for e in range(s + 1, min(hi, s + RecortadorPorTexto.PALABRAS_POR_CIFRA) + 1):
-                tramo = norma[s:e]
-                if e - s > 1 and not RecortadorPorTexto._cabe_en_una_cifra(tramo):
+                tramo = [p for p, _ in une([(w, None) for w in norma[s:e]])]
+                if len(tramo) > 1 and not RecortadorPorTexto._cabe_en_una_cifra(tramo):
                     break
                 detras = norma[e] if e < len(norma) else ""
                 if RecortadorPorTexto._casan(RecortadorPorTexto._canon(tramo), canon, detras):
@@ -207,14 +217,15 @@ def _casa_las_cifras(palabras: list[str], marcas: list[dict], elegida: dict[int,
         if len(candidatos) != 1:
             continue
         s, e = candidatos[0]
-        if e - s == 1 and atadas == [s]:
+        # Cada palabra del tramo ya tiene, en orden, una marca de la cifra: se quedan como estaban. Es «197» con su
+        # marca, y también «92.3 percent» dicho y oído igual, que repartido encendería «percent» antes de sonar.
+        if atadas == list(range(s, e)) and [elegida[w] for w in atadas] == list(range(j0, j1 + 1)):
             continue
-        desde, hasta = float(marca["desde"]), float(marca["hasta"])
         paso = (hasta - desde) / (e - s)
         for k, w in enumerate(range(s, e)):
-            elegida[w] = j
+            elegida[w] = j0
             tiempos[w] = (desde + paso * k, desde + paso * (k + 1))
-        libres.discard(j)
+        libres.difference_update(range(j0, j1 + 1))
     return tiempos
 
 
@@ -304,6 +315,37 @@ def tiempos_de_palabras(palabras: list[str], marcas: list[dict]) -> tuple[list[d
     # Las de marca real con una pausa delante; si además son cortas, el reparto no las toca.
     conserva = {i for i in reales if i > 0 and alineado[i]["desde"] - alineado[i - 1]["hasta"] >= HUECO_DE_PAUSA_S}
     return alineado, _reparte_colapsadas(alineado, conserva)
+
+
+def anclaje(palabras: list[str], marcas: list[dict]) -> dict:
+    """Cuánto ancla el alineador en una lámina: sus palabras, las marcas que oyó whisper, las ancladas a una propia,
+    las que el reparto tuvo que mover y las que whisper oye de más.
+
+    Son las mismas cuentas que `LineaDeTiempo.por_lamina` (`ancladas`, `cobertura` y `colapsadas`), sin armar el
+    episodio: con ellas la etapa `alinea` decide si reintenta una lámina con otro troceo y cuál se queda (OC2.4). Una
+    lámina en la que no se ancla nada (sin marcas, o ninguna que case) tiene 0 ancladas, no un error: es la que más
+    necesita el reintento.
+
+    `de_mas` compara lo oído con el guion después de unir cada cantidad a su unidad en los dos lados, como el recorte
+    de la voz (`RecortadorPorTexto._une_cantidades`): «92.3» y «percent» son una palabra, como «92.3%» en el guion.
+    Sin unir, una lámina con un porcentaje bien anclada parecería oír de más y se reintentaría.
+    """
+    try:
+        alineado, colapsadas = tiempos_de_palabras(palabras, marcas)
+        ancladas = sum(p["anclada"] for p in alineado)
+    except alineacion.AlineacionError:
+        ancladas, colapsadas = 0, 0
+    une, normaliza = RecortadorPorTexto._une_cantidades, RecortadorPorTexto._normaliza
+    oidas = une([(n, None) for m in marcas if (n := normaliza(m["texto"]))])
+    pedidas = une([(n, None) for p in palabras if (n := normaliza(p))])
+    return {
+        "palabras": len(palabras),
+        "marcas": len(marcas),
+        "ancladas": ancladas,
+        "cobertura": round(ancladas / len(palabras), 4) if palabras else None,
+        "colapsadas": colapsadas,
+        "de_mas": max(0, len(oidas) - len(pedidas)),
+    }
 
 
 # ------------------------------------------------------------------------------------------ piezas

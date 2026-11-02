@@ -34,9 +34,8 @@ pytest==9.1.1
 # (tests/test_limpia_voz.py, test_voz_respaldo.py, test_voz_respiracion.py, test_voz_se_comio_texto.py y
 # tests/escena/test_obrero.py). El pipeline no lo importa en este venv: la voz corre en .venv-voz y el obrero en
 # .venv-escena. Sin declararlo, un venv reconstruido desde este fichero saltaba esas pruebas en silencio (medido el
-# 01-10-2026, fila 225). Dos cosas que saber: aquí es la 2.13.0 y la voz de verdad corre con la 2.6.0 de .venv-voz,
-# así que estas pruebas no ven la versión de producción; y en Windows PyPI da el torch de CPU, que basta para ellas
-# (el instalado hoy es el cu126).
+# 01-10-2026, fila 225). Dos cosas que saber: desde OC2.5 es la misma versión con que corre la voz de verdad (la
+# 2.13.0 de .venv-voz, la de CUDA 13.0); y en Windows PyPI da el torch de CPU, que basta para ellas.
 torch==2.13.0
 # El linter ES el gate de pre-commit (.claude/hooks/pre-commit-gate.ps1): sin declararlo, un venv
 # reconstruido desde este fichero se quedaba sin lint y el hook se lo saltaba en silencio, que es lo

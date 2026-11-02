@@ -1,8 +1,8 @@
 """Generador de voz — el ÚNICO archivo que se ejecuta con el intérprete de `.venv-voz`.
 
-Existe para resolver un cruce de entornos que no tiene atajo: el pipeline vive en `.venv`
-(torch 2.13) y los motores de voz pinean torch 2.6.0+cu126 con `setuptools<81`. En vez de
-degradar el venv del pipeline, `lib/voice_client.py` lanza este archivo como **subproceso**
+Existe para resolver un cruce de entornos: el pipeline vive en `.venv` y los motores de voz, con
+el torch de CUDA (2.13.0+cu130) y sus dependencias, en `.venv-voz`. En vez de meterlos en el venv
+del pipeline, `lib/voice_client.py` lanza este archivo como **subproceso**
 con `.venv-voz\\Scripts\\python.exe`, le pasa un trabajo en JSON y recoge el resultado en otro.
 
 **Tres motores, misma interfaz** (F2.16, 25-08; Orpheus entra el 07-09). La receta declara
@@ -825,10 +825,20 @@ class RecortadorPorTexto:
         """
         pedidas = [cls._normaliza(p) for p in texto.split() if not p.startswith("<")]
         pedidas = [p for p, _ in cls._une_cantidades([(p, None) for p in pedidas if p])]
-        # **Un trozo que empieza sin espacio continúa la palabra del anterior** (episodio 2, 07-10). Con
-        # marcas palabra a palabra, whisper parte «38.4%.» en « 38» y «.4%.»: la frase completa sale bien escrita,
-        # pero el emparejador veía «38» y «4pct» y no casaba la cifra, que era la última palabra de 7 incidencias.
-        # Cada palabra nueva de whisper empieza por un espacio; lo que no lo lleva es el resto de la misma.
+        oidas = [(cls._normaliza(t), marca) for t, marca in cls._une_trozos(chunks) if cls._normaliza(t)]
+        trozos = [{"text": p, "timestamp": marca} for p, marca in cls._une_cantidades(oidas)]
+        return pedidas, trozos
+
+    @staticmethod
+    def _une_trozos(chunks: list[dict]) -> list[tuple[str, tuple]]:
+        """Los trozos de whisper como palabras: (texto tal cual, (desde, hasta)), con el resto de cada palabra unido.
+
+        **Un trozo que empieza sin espacio continúa la palabra del anterior** (episodio 2, 07-10). Con marcas palabra a
+        palabra, whisper parte «38.4%.» en « 38» y «.4%.»: la frase completa sale bien escrita, pero el emparejador
+        veía «38» y «4pct» y no casaba la cifra, que era la última palabra de 7 incidencias. Cada palabra nueva de
+        whisper empieza por un espacio; lo que no lo lleva es el resto de la misma. La usa también el alineador del
+        karaoke (`lib/alineador.py → une_pegadas`, OC2.4).
+        """
         crudos: list[tuple[str, tuple]] = []
         for t in chunks:
             if not t.get("timestamp") or t["timestamp"][1] is None:
@@ -839,9 +849,7 @@ class RecortadorPorTexto:
                 crudos[-1] = (anterior + texto_trozo, (marca[0], t["timestamp"][1]))
             else:
                 crudos.append((texto_trozo, t["timestamp"]))
-        oidas = [(cls._normaliza(t), marca) for t, marca in crudos if cls._normaliza(t)]
-        trozos = [{"text": p, "timestamp": marca} for p, marca in cls._une_cantidades(oidas)]
-        return pedidas, trozos
+        return crudos
 
     @classmethod
     def _cabe_en_una_cifra(cls, palabras: list[str]) -> bool:
@@ -1610,10 +1618,30 @@ def _bajo_el_techo(audio):
     return audio * factor, factor
 
 
+def _lee_wav(ruta: Path):
+    """Un WAV como lo leía `torchaudio.load` hasta la 2.6: float32 y con la forma [canal, tiempo].
+
+    Desde la 2.9, `torchaudio.load` y `torchaudio.save` leen y escriben con TorchCodec, que en Windows pide las DLL de
+    FFmpeg. En el `.venv-voz` de la 2.6 lo hacían con soundfile, su único backend (`list_audio_backends()`), y eso es
+    lo que se hace aquí, con las mismas opciones: las mismas muestras y el mismo tipo de WAV (OC2.5).
+    """
+    import soundfile
+    import torch
+
+    datos, sr = soundfile.read(str(ruta), dtype="float32", always_2d=True)
+    return torch.from_numpy(datos).t(), sr
+
+
+def _guarda_wav(ruta: Path, audio, sr: int) -> None:
+    """Un tensor [canal, tiempo] en float32, como lo escribía `torchaudio.save`: un WAV en coma flotante de 32 bits."""
+    import soundfile
+
+    soundfile.write(str(ruta), audio.t().numpy(), sr, subtype="FLOAT")
+
+
 def synthesize(engine, job: dict, item: dict) -> dict:
     """Genera un archivo de audio concatenando sus segmentos EN SERIE."""
     import torch
-    import torchaudio
 
     silence_samples = int(engine.sr * job.get("silencio_entre_frases_ms", 0) / 1000)
     recorte = job.get("recorte_bordes")
@@ -1660,7 +1688,7 @@ def synthesize(engine, job: dict, item: dict) -> dict:
     }
     if crudo.exists() and crudo.stat().st_size > 0 and firma.exists():
         if json.loads(firma.read_text(encoding="utf-8")) == ahora:
-            wav_crudo, sr_crudo = torchaudio.load(str(crudo))
+            wav_crudo, sr_crudo = _lee_wav(crudo)
             print(f"      {crudo.name}: se reutiliza el audio crudo, solo post-proceso", flush=True)
             return _post_proceso(wav_crudo, sr_crudo, out, job, started, len(item["segmentos"]), [], [], [])
         print(f"      {crudo.name}: el guion o la receta cambiaron, se vuelve a generar", flush=True)
@@ -1695,7 +1723,7 @@ def synthesize(engine, job: dict, item: dict) -> dict:
         chunks.append(wav)
         print(f"      segmento {numero}/{len(item['segmentos'])} listo", flush=True)
     crudo.parent.mkdir(parents=True, exist_ok=True)
-    torchaudio.save(str(crudo), torch.cat(chunks, dim=-1), engine.sr)
+    _guarda_wav(crudo, torch.cat(chunks, dim=-1), engine.sr)
     firma.write_text(json.dumps(ahora, indent=2, ensure_ascii=False), encoding="utf-8")
     return _post_proceso(
         torch.cat(chunks, dim=-1),
@@ -1726,15 +1754,13 @@ def _post_proceso(
     Va aparte para que se pueda repetir sobre el crudo sin volver a generar: es la diferencia entre
     diez minutos y unos segundos cuando lo que cambia es un umbral.
     """
-    import torchaudio
-
     # La respiracion se aplica al archivo YA CONCATENADO, no segmento a segmento: una pausa larga del
     # narrador es cola de un trozo + el silencio entre frases + cabeza del siguiente, asi que trozo a
     # trozo no se ve entera.
     audio = limpia_pausas(audio, sr, job.get("respiracion"))
     audio, atenuacion = _bajo_el_techo(audio)
     out.parent.mkdir(parents=True, exist_ok=True)
-    torchaudio.save(str(out), audio, sr)
+    _guarda_wav(out, audio, sr)
 
     elapsed = round(time.perf_counter() - started, 1)
     audio_seconds = audio.shape[-1] / sr

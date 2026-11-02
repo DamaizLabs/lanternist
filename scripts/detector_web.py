@@ -314,8 +314,7 @@ PAGINA = """<!doctype html>
 <body>
 <h1>Was this file made with AI by Lanternist?</h1>
 <p>Check a video, an image or an audio file for the marks that Lanternist puts in everything it makes: signed C2PA
-metadata, two invisible watermarks in the picture (one says "AI", the other which detector to use) and another in the
-sound.</p>
+metadata, an invisible watermark in the picture and another in the sound.</p>
 <p class="small">The file stays on this computer. This page talks only to the detector running in its own window on
 this PC, and loads nothing from the internet. Close that window to stop the detector.</p>
 <label id="drop" for="file">

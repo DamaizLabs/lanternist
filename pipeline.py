@@ -40,6 +40,7 @@ paso final. Ver `lib/provenance.py`.
 import argparse
 import json
 import os
+import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -667,9 +668,7 @@ def stage_escena(run_id: str) -> dict:
     print("\n[ESCENA] Sonido, puesta en escena, comprobaciones y composición...")
     info = _corre(run_id, state, "escena", lambda: etapas.escena(ep))
     run_state.update_stage(run_id, "escena", "complete", _relativa_al_run(info["pagina"], state["output_dir"]))
-    # En un rehecho la miniatura es un fotograma de esta composición (fila 246): si se rehace, la de antes ya no vale.
-    rehecho = ("thumbnail",) if state.get("rehace") else ()
-    _invalida(run_id, ("render", "assembly", *rehecho), "la escena se rehízo: hay que renderizarla otra vez")
+    _invalida(run_id, ("render", "assembly"), "la escena se rehízo: hay que renderizarla otra vez")
     # Lo que la parada 2 enseñó, para que `render` compruebe que renderiza eso mismo.
     run_state.update_run(
         run_id,
@@ -760,29 +759,11 @@ def _avanza_escena(run_id: str) -> bool:
     return True
 
 
-def _fotograma_como_miniatura(state: dict, segundo: float, destino: str) -> dict:
-    """El fotograma del segundo `segundo` de la escena renderizada, sin el karaoke, puesto como miniatura (fila 246)."""
-    from lib.escena import etapas
-    from lib.miniatura import desde_fotograma
-
-    huella = (state.get("escena") or {}).get("huella_composicion") or ""
-    foto = etapas.fotogramas_sin_karaoke(state["output_dir"], [segundo], huella_composicion=huella)
-    return desde_fotograma(
-        state["output_dir"],
-        foto["fotogramas"][0],
-        segundo,
-        destino,
-        huella_composicion=huella,
-        herramientas=foto["herramientas"],
-    )
-
-
 def stage_thumbnail(run_id: str):
-    """Compone la miniatura a partir de la lámina que declara el guion, o de un fotograma de la escena en un rehecho.
-    NO genera ninguna imagen.
+    """Compone la miniatura a partir de la lámina que declara el guion. NO genera ninguna imagen.
 
-    Copia `slides/slide-NN.png` —o, en un rehecho, el fotograma del segundo `thumbnail_segundo` sin el karaoke
-    (fila 246)—, la recorta al objeto y le compone el texto con tipografía real; el adaptador de imagen no interviene.
+    Copia `slides/slide-NN.png`, la recorta al objeto y le compone el texto con tipografía real; el adaptador de imagen
+    no interviene.
     Por qué no se genera, en el comentario de la guarda y en la fila 156 del addendum. Cuando ha pasado sus
     comprobaciones, lleva la marca de IA (OC1.5).
     """
@@ -801,49 +782,18 @@ def stage_thumbnail(run_id: str):
     # humano. El gate automático no la cubre y está medido: `lineas_rojas` mide manchas de COLOR, así
     # que aprobó con `cumple: true` una figura humana decapitada en tinta sepia (fila 155). Una lámina
     # del run ya pasó por los ojos del usuario en el gate de láminas, y esa es toda la garantía.
-    #
-    # EN UN REHECHO SALE DE UN FOTOGRAMA DE SU ESCENA, NO DE LA LÁMINA (02-10, fila 246): la
-    # lámina es la del vídeo viejo, así que su miniatura sería la que ya se vio. Sigue saliendo del run, que es
-    # el motivo de la regla, y la escena también pasó por sus ojos, en la parada 2. Qué run es un rehecho lo
-    # dice su estado (`rehace`, que escribía el script de rehechos del estudio, borrado en OC1.1), no el canal; en los
-    # demás, la lámina.
-    from lib.miniatura import CLAVE_SEGUNDO, desde_lamina, lamina_declarada, segundo_declarado
+    from lib.miniatura import desde_lamina, lamina_declarada
 
-    rehace = state.get("rehace") or None
     try:
-        segundo = segundo_declarado(slides_json)
-        lamina_miniatura = None if rehace else lamina_declarada(slides_json)
+        lamina_miniatura = lamina_declarada(slides_json)
     except ValueError as exc:
         run_state.update_stage(run_id, "thumbnail", "blocked", str(exc)[:300])
         raise
 
-    if rehace and segundo is None:
-        run_state.update_stage(run_id, "thumbnail", "blocked", f"slides.json sin {CLAVE_SEGUNDO}")
-        raise ValueError(
-            f"este run rehace {rehace.get('video_id') or 'un vídeo ya subido'}, y su miniatura sale de un fotograma de "
-            f'su escena, no de la lámina, que es la del vídeo viejo. Escribe `"{CLAVE_SEGUNDO}": <segundo>` '
-            'en slides.json con el instante del vídeo (420 o "7:00"), elegido con '
-            "canales/<id>/contrato-miniatura.md, y vuelve a lanzar la etapa. Los segundos de cada fotograma de la "
-            "parada 2 están en revision/fotogramas/."
-        )
-    if rehace and not _hecha(state, "render"):
-        run_state.update_stage(run_id, "thumbnail", "blocked", "sin render no hay fotograma")
-        raise ValueError(
-            "la miniatura de un rehecho sale de un fotograma de la escena renderizada, y este run aún no tiene la "
-            "etapa `render` hecha: renderízalo antes (tras la parada 2) y vuelve a lanzar la miniatura."
-        )
-    if not rehace and segundo is not None:
-        run_state.update_stage(run_id, "thumbnail", "blocked", f"{CLAVE_SEGUNDO} fuera de un rehecho")
-        raise ValueError(
-            f"`slides.json` declara `{CLAVE_SEGUNDO}`, y la miniatura solo sale de un fotograma en los rehechos de "
-            "un vídeo ya subido. Este run no rehace ningún vídeo, así que la saca de su lámina: quita la "
-            "clave y declara `thumbnail_lamina`."
-        )
-
     # Antes de esto la etapa aceptaba `thumbnail_prompt` como alternativa; y antes aún se marcaba
     # `skipped` y `run_all` subía el vídeo **sin miniatura y en silencio**. Las dos veces el defecto
     # fue el mismo: dejar que la pieza que decide el clic saliera sin que nadie la mirara.
-    if not rehace and lamina_miniatura is None:
+    if lamina_miniatura is None:
         disponibles = sorted(q.name for q in (Path(run_dir) / "slides").glob("slide-*.png"))
         run_state.update_stage(run_id, "thumbnail", "blocked", "slides.json sin thumbnail_lamina")
         raise ValueError(
@@ -901,23 +851,13 @@ def stage_thumbnail(run_id: str):
     run_state.update_stage(run_id, "thumbnail", "in_progress")
     # Con el vídeo y el `.srt`, en `subir-al-canal/` (10-09).
     thumb_path = str(config.dir_subir_al_canal(run_dir, crear=True) / "thumbnail.png")
-    if rehace:
-        print(
-            f"\n[THUMBNAIL] La miniatura sale del fotograma del segundo {segundo:g} de la escena, sin el karaoke "
-            "(rehecho); no se genera ninguna"
-        )
-    else:
-        print(f"\n[THUMBNAIL] La miniatura sale de la lámina {lamina_miniatura} del run, no se genera ninguna")
+    print(f"\n[THUMBNAIL] La miniatura sale de la lámina {lamina_miniatura} del run, no se genera ninguna")
 
     try:
         try:
-            if rehace:
-                copiada = _fotograma_como_miniatura(state, segundo, thumb_path)
-            else:
-                copiada = desde_lamina(run_dir, lamina_miniatura, thumb_path)
+            copiada = desde_lamina(run_dir, lamina_miniatura, thumb_path)
         except Exception as exc:
-            # En un rehecho falla también lo que toca la GPU (Chrome ocupado, la sonda): la etapa se queda parada con el
-            # motivo, no a medias.
+            # La etapa se queda parada con el motivo, no a medias.
             run_state.update_stage(
                 run_id, "thumbnail", "blocked", (str(exc).splitlines() or [type(exc).__name__])[0][:300]
             )
@@ -986,19 +926,10 @@ def stage_thumbnail(run_id: str):
     # una generada aparte se distinguen aquí sin abrir el registro de procedencia.
     # La ruta va RELATIVA al run, como el resto del expediente (recomendación del auditor): así el
     # `miniatura.json` se sigue leyendo si el run cambia de carpeta.
-    if rehace:
-        veredicto["de_donde_sale"] = {
-            "fotograma_del_run_s": copiada["segundo"],
-            "origen": _relativa_al_run(copiada["origen"], run_dir),
-            "sin_karaoke": True,
-            "huella_composicion": copiada["procedencia"]["huella_composicion"],
-            "rehace": rehace.get("video_id"),
-        }
-    else:
-        veredicto["de_donde_sale"] = {
-            "lamina_del_run": copiada["lamina"],
-            "origen": _relativa_al_run(copiada["origen"], run_dir),
-        }
+    veredicto["de_donde_sale"] = {
+        "lamina_del_run": copiada["lamina"],
+        "origen": _relativa_al_run(copiada["origen"], run_dir),
+    }
     informe(veredicto, Path(run_dir) / "miniatura.json")
     medido = veredicto["reportado_no_es_gate"]
     print(
@@ -1053,7 +984,7 @@ def stage_thumbnail(run_id: str):
     informe(veredicto, Path(run_dir) / "miniatura.json")
     print(
         f"  marca de IA: C2PA {marca['comprobacion']['c2pa']['state']} · Video Seal "
-        f"{marca['comprobacion']['image']['matches']}/256 bits · señal {marca_ia.SENAL} · {marca['segundos']} s"
+        f"{marca['comprobacion']['image']['matches']}/256 bits · {marca['segundos']} s"
     )
 
     run_state.update_stage(run_id, "thumbnail", "complete", thumb_path)
@@ -1412,6 +1343,7 @@ def rehace_guia(run_id: str) -> bool:
     descripción original se vuelve a derivar igual que al subir. Si no coincide con la que enseñaba el LEEME anterior,
     que es la que se subió, lo avisa: el `assets.json` ha cambiado desde la subida.
     """
+    from lib import config
     from lib.config import CANAL_PERFIL, NARRATION_LANG
     from lib.publicacion import (
         descripcion_conforme,
@@ -1455,6 +1387,13 @@ def rehace_guia(run_id: str) -> bool:
         )
     for aviso in avisos + [a for a in avisos_traducidos if a not in avisos]:
         print(f"  [AVISO] {aviso}")
+
+    # El LEEME de antes enseña lo que se subió: se guarda una copia con la hora antes de reescribirlo (fila 335).
+    leeme = config.dir_subir_al_canal(run_dir) / "LEEME.html"
+    if leeme.is_file():
+        copia = leeme.with_name(f"LEEME.antes-{datetime.now():%Y%m%d-%H%M%S}.html")
+        shutil.copy2(leeme, copia)
+        print(f"[LEEME] Copia del anterior: {copia.name}")
 
     guia_de_subida(
         run_dir,

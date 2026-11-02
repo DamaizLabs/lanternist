@@ -21,10 +21,14 @@ Envuelve tres órdenes de la CLI de HyperFrames 0.8.78 (`lint`, `snapshot` y `re
 
 Antes de abrir Chrome con la GPU se comprueba con `nvidia-smi` que queda memoria libre: la tarjeta de
 8 GB admite un trabajo de GPU cada vez (regla 5 del plan de F6.2).
+
+**node, Chrome y ffmpeg mueren con este proceso** (OC2.5): cada orden corre dentro de un Job Object de Windows que
+mata todo su árbol cuando se cierra el asa, y el sistema la cierra también si Python muere (`_corre_vigilado`).
 """
 
 from __future__ import annotations
 
+import ctypes
 import json
 import os
 import shutil
@@ -187,9 +191,11 @@ def trabajos_de_gpu_en_marcha() -> list[str]:
     - El obrero de `.venv-escena`: por su cerrojo (`config.ESCENA_CERROJO_OBRERO`), que toma mientras corre.
     - El marcado de la marca de IA (OC1.5), también en `.venv-escena`: por el suyo (`config.MARCA_CERROJO`).
     """
-    llama = config.LLAMA_SERVER.name.lower()
+    # Sin `LLAMA_SERVER` en el `.env`, por el nombre que le da llama.cpp: si no, solo lo cazaría el umbral de memoria,
+    # y el aviso perdería el motivo (fila 335).
+    llama = {config.LLAMA_SERVER.name.lower(), "llama-server.exe"}
     comfy = str(config.COMFY_ROOT).lower()
-    en_marcha = [p for p in procesos_de_gpu() if Path(p).name.lower() == llama or p.lower().startswith(comfy)]
+    en_marcha = [p for p in procesos_de_gpu() if Path(p).name.lower() in llama or p.lower().startswith(comfy)]
     for cerrojo, quien in ((config.ESCENA_CERROJO_OBRERO, "obrero de escena"), (config.MARCA_CERROJO, "marca de IA")):
         tomado = cerrojo_vivo(cerrojo)
         if tomado is not None:
@@ -223,14 +229,130 @@ def _sello() -> str:
     return datetime.now().strftime("%Y%m%d-%H%M%S-%f")
 
 
+# ------------------------------------------------------------------------------------------ el árbol vigilado
+class _LimitesBasicos(ctypes.Structure):
+    """`JOBOBJECT_BASIC_LIMIT_INFORMATION` de Windows."""
+
+    _fields_ = [
+        ("PerProcessUserTimeLimit", ctypes.c_int64),
+        ("PerJobUserTimeLimit", ctypes.c_int64),
+        ("LimitFlags", ctypes.c_uint32),
+        ("MinimumWorkingSetSize", ctypes.c_size_t),
+        ("MaximumWorkingSetSize", ctypes.c_size_t),
+        ("ActiveProcessLimit", ctypes.c_uint32),
+        ("Affinity", ctypes.c_size_t),
+        ("PriorityClass", ctypes.c_uint32),
+        ("SchedulingClass", ctypes.c_uint32),
+    ]
+
+
+class _LimitesDelJob(ctypes.Structure):
+    """`JOBOBJECT_EXTENDED_LIMIT_INFORMATION` de Windows: los límites básicos, los contadores de E/S y la memoria."""
+
+    _fields_ = [
+        ("BasicLimitInformation", _LimitesBasicos),
+        ("IoInfo", ctypes.c_uint64 * 6),
+        ("ProcessMemoryLimit", ctypes.c_size_t),
+        ("JobMemoryLimit", ctypes.c_size_t),
+        ("PeakProcessMemoryUsed", ctypes.c_size_t),
+        ("PeakJobMemoryUsed", ctypes.c_size_t),
+    ]
+
+
+_LIMITES_EXTENDIDOS = 9  # JobObjectExtendedLimitInformation
+_MATA_AL_CERRAR = 0x2000  # JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+_PUEDE_ASIGNARSE = 0x0101  # PROCESS_SET_QUOTA | PROCESS_TERMINATE: lo que pide AssignProcessToJobObject
+
+
+def _kernel32():
+    """kernel32 con los tipos de las asas declarados: sin ellos, ctypes recorta un HANDLE de 64 bits a un int."""
+    k = ctypes.WinDLL("kernel32", use_last_error=True)
+    k.CreateJobObjectW.restype = ctypes.c_void_p
+    k.CreateJobObjectW.argtypes = [ctypes.c_void_p, ctypes.c_wchar_p]
+    k.SetInformationJobObject.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_uint32]
+    k.OpenProcess.restype = ctypes.c_void_p
+    k.OpenProcess.argtypes = [ctypes.c_uint32, ctypes.c_int, ctypes.c_uint32]
+    k.AssignProcessToJobObject.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+    k.CloseHandle.argtypes = [ctypes.c_void_p]
+    return k
+
+
+def _job_que_mata_al_cerrar(pid: int) -> int:
+    """Mete el proceso `pid` en un Job Object nuevo con `KILL_ON_JOB_CLOSE` y devuelve el asa del job.
+
+    Lo que ese proceso lance después nace dentro del job: node lanza Chrome y ffmpeg, y Chrome mete a sus hijos en
+    jobs suyos anidados en este. Sin `BREAKAWAY_OK` en los límites, ninguno puede salirse. Al cerrarse el asa, el
+    sistema mata a todos. El asa no se hereda, así que solo la tiene este proceso: si muere, el sistema la cierra.
+    """
+    k = _kernel32()
+    job = k.CreateJobObjectW(None, None)
+    if not job:
+        raise ctypes.WinError(ctypes.get_last_error())
+    proceso = None
+    try:
+        limites = _LimitesDelJob()
+        limites.BasicLimitInformation.LimitFlags = _MATA_AL_CERRAR
+        if not k.SetInformationJobObject(job, _LIMITES_EXTENDIDOS, ctypes.byref(limites), ctypes.sizeof(limites)):
+            raise ctypes.WinError(ctypes.get_last_error())
+        proceso = k.OpenProcess(_PUEDE_ASIGNARSE, False, pid)
+        if not proceso or not k.AssignProcessToJobObject(job, proceso):
+            raise ctypes.WinError(ctypes.get_last_error())
+    except OSError:
+        k.CloseHandle(job)
+        raise
+    finally:
+        if proceso:
+            k.CloseHandle(proceso)
+    return job
+
+
+def _cierra_job(job: int) -> None:
+    """Cierra el asa del job: el sistema mata lo que quede vivo dentro."""
+    _kernel32().CloseHandle(job)
+
+
+def _corre_vigilado(args: list[str], *, timeout: int, **opciones) -> subprocess.CompletedProcess:
+    """`subprocess.run(args, capture_output=True, timeout=timeout, **opciones)`, con el árbol de procesos vigilado.
+
+    `HYPERFRAMES_RENDER_DETACHED=1` deja a node sin vigilar a quien lo lanzó (`_entorno`). Sin el job, si la etapa
+    de Python muere a mitad de render, node, Chrome y ffmpeg siguen ocupando la GPU (deuda 2). Con él:
+
+    - si este proceso muere, aunque sea con `taskkill /F`, el sistema cierra el asa y mata todo el árbol;
+    - al acabar, se cierra el asa y muere lo que haya quedado vivo;
+    - con el `timeout`, se cierra el asa antes de esperar las tuberías: `subprocess.run` solo mataría a node, y
+      esperaría para siempre a un Chrome que tiene abierta la salida que hereda.
+
+    node entra en el job nada más lanzarse. En ese instante aún no ha lanzado nada: arrancar le lleva decenas de ms.
+    """
+    proceso = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **opciones)
+    try:
+        job = _job_que_mata_al_cerrar(proceso.pid)
+    except OSError:
+        proceso.kill()
+        proceso.communicate()
+        raise
+    try:
+        salida, errores = proceso.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        _cierra_job(job)
+        job = None
+        proceso.communicate()
+        raise
+    finally:
+        if job is not None:
+            _cierra_job(job)
+    return subprocess.CompletedProcess(args, proceso.returncode, salida, errores)
+
+
 def _entorno() -> dict[str, str]:
     """El entorno de la CLI: sin credenciales, sin telemetría y sin vigilar a los procesos que la lanzaron.
 
     `HYPERFRAMES_RENDER_DETACHED=1` (piloto de F6.8): al empezar, el render de HyperFrames apunta TODA la cadena de
     procesos que lo lanzó y se cancela si muere cualquiera (`render_cancelled_parent_exited`). Las etapas de GPU se
     lanzan como proceso independiente (`Start-Process`), así que en esa cadena está la consola que las lanzó, y al
-    cerrarse canceló un render de 17 min al 52 %. Quien espera al render es este proceso (`subprocess.run` con su
+    cerrarse canceló un render de 17 min al 52 %. Quien espera al render es este proceso (`_corre_vigilado` con su
     `timeout`), y el vídeo solo llega a su sitio si salió bien (`render`), así que la vigilancia no protege de nada.
+    Lo que sí hace falta, que node y Chrome mueran si muere este proceso, lo hace el job de `_corre_vigilado`.
     """
     return config.entorno_para_terceros(
         {
@@ -252,11 +374,10 @@ def _cli(orden: list[str], carpeta: Path, dir_log: Path, nombre: str, timeout: i
     dir_log.mkdir(parents=True, exist_ok=True)
     log = dir_log / f"{nombre}-{_sello()}.log"
     args = [node_exe(), "--require", str(config.MOTOR_ESCENA_GUARDA), str(config.HYPERFRAMES_CLI), *orden]
-    r = subprocess.run(
+    r = _corre_vigilado(
         args,
         cwd=carpeta,
         env=_entorno(),
-        capture_output=True,
         text=True,
         encoding="utf-8",
         errors="replace",
@@ -323,11 +444,10 @@ def ejecuta_sonda(carpeta: str | Path, dir_log: str | Path, permite: tuple[str, 
     ]
     for origen in permite:
         args += ["--permite", origen]
-    r = subprocess.run(
+    r = _corre_vigilado(
         args,
         cwd=config.MOTOR_ESCENA_DIR,
         env=config.entorno_para_terceros({"NO_COLOR": "1"}),
-        capture_output=True,
         text=True,
         encoding="utf-8",
         errors="replace",

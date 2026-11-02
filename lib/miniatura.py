@@ -75,7 +75,6 @@ el modelo los pone.
 from __future__ import annotations
 
 import json
-import math
 from pathlib import Path
 
 import cv2
@@ -120,11 +119,8 @@ ALTO_MAXIMO_DEL_TEXTO = 0.20
 ANCHO_MAXIMO_DEL_TEXTO = 0.86  # deja aire a los lados: pegado al borde se lee peor al reducir
 MARGEN_INFERIOR_DEL_TEXTO = 0.04  # y no pegado abajo, que es donde YouTube pinta la barra de tiempo
 
-# Lo que admite `thumbnails.set` de YouTube: 2 MB como mucho, y 1280×720 es el tamaño que recomienda. Un fotograma
-# del vídeo sale a 1920×1080, y en PNG ronda 1,6 MB antes de llevar el texto (la bici a 420 s, 02-10). Por eso un
-# fotograma se reduce a 1280×720, y el peso se comprueba en todas, salga de donde salga la miniatura.
+# Lo que admite `thumbnails.set` de YouTube: 2 MB como mucho. El peso se comprueba en todas las miniaturas.
 PESO_MAXIMO_BYTES = 2 * 1024 * 1024
-TAMANO_DE_FOTOGRAMA = (1280, 720)
 
 # ── La fuente del texto: la declara el canal y sale de la biblioteca del estudio (OC1.4) ────────────────────────────
 # Hasta OC1.4 aquí había una lista de reserva de fuentes de Windows (Impact, Segoe UI Black y Arial): el estudio elegía
@@ -725,149 +721,11 @@ def desde_lamina(run_dir: str | Path, numero: int, destino: str | Path) -> dict:
     return {"lamina": numero, "origen": str(origen), "salida": str(salida), "procedencia": entrada}
 
 
-CLAVE_SEGUNDO = "thumbnail_segundo"
-
-
-def segundo_declarado(slides_json: dict) -> float | None:
-    """El instante del vídeo del que sale la miniatura de un rehecho, en segundos, o `None` si no lo declara.
-
-    **Solo lo usan los rehechos** (02-10, fila 246): su lámina es la del vídeo viejo, así que una miniatura
-    sacada de ella sería la que ya se vio. Qué run es un rehecho lo decide `pipeline.stage_thumbnail`, no este lector.
-
-    Vale un número (`420`, `421.5`) o el reloj con el que el usuario señala un momento del vídeo (`"7:00"`,
-    `"1:02:03"`). Es un LECTOR, como `lamina_declarada`: no lanza por ausencia. Si el instante cae dentro del vídeo lo
-    sabe la composición, no el guion, y lo comprueba `lib/escena/etapas.fotogramas_sin_karaoke`.
-    """
-    valor = slides_json.get(CLAVE_SEGUNDO)
-    if valor is None or (isinstance(valor, str) and not valor.strip()):
-        return None
-    error = ValueError(
-        f"`slides.json → {CLAVE_SEGUNDO}` vale {valor!r} y tiene que ser el instante del vídeo del que sale la "
-        'miniatura: un número de segundos (420) o un reloj ("7:00", "1:02:03").'
-    )
-    # `bool` es un `int` en Python: `True` pasaría por el segundo 1 sin que nadie lo hubiera escrito.
-    if isinstance(valor, bool):
-        raise error
-    if isinstance(valor, int | float):
-        segundos = float(valor)
-    elif isinstance(valor, str):
-        partes = valor.strip().split(":")
-        try:
-            numeros = [float(p) for p in partes]
-        except ValueError:
-            raise error from None
-        if len(numeros) > 3 or any(n < 0 or n >= 60 for n in numeros[1:]):
-            raise error
-        segundos = sum(n * 60**k for k, n in enumerate(reversed(numeros)))
-    else:
-        raise error
-    if not math.isfinite(segundos) or segundos < 0:
-        raise error
-    return segundos
-
-
-def desde_fotograma(
-    run_dir: str | Path,
-    fotograma: str | Path,
-    segundo: float,
-    destino: str | Path,
-    *,
-    huella_composicion: str,
-    herramientas: dict | None = None,
-) -> dict:
-    """Pone un fotograma de la escena del run como miniatura, a 1280×720, y deja su procedencia (fila 246).
-
-    Hace lo mismo que `desde_lamina` y nada más: no recorta ni compone, así que la miniatura pasa por el mismo gate, y
-    la entrada de `thumbnail.png` se sustituye. Lo que cambia es de dónde sale el píxel: no de una lámina, sino de la
-    composición del run, que junta muchas imágenes. Por eso la entrada hereda los modelos y las licencias de todas
-    ellas (`modelos_de_la_escena`), igual que la de una lámina hereda los de su lámina.
-
-    **El modelo no puede ser «ninguno»**: `lib/publicacion.declaracion_de_ia` descarta esos registros, y la
-    declaración de IA del vídeo callaría que la miniatura es IA (decisión 7; lo cazó la revisión de F7.0b). Un
-    fotograma no se genera, pero lo que se ve en él sí. Que no es una generación nueva lo dicen `fuente` y `origen`.
-    """
-    origen = Path(fotograma)
-    if not origen.is_file():
-        raise FileNotFoundError(f"no está el fotograma del que sale la miniatura: {origen}")
-    run = Path(run_dir)
-    modelos, licencias = modelos_de_la_escena(run)
-    imagen = Image.open(origen).convert("RGB")
-    ancho, alto = imagen.size
-    objetivo = TAMANO_DE_FOTOGRAMA[0] / TAMANO_DE_FOTOGRAMA[1]
-    if abs(ancho / alto - objetivo) > 0.01:
-        raise ValueError(
-            f"el fotograma mide {ancho}×{alto} y la miniatura es 16:9: reducirlo a "
-            f"{TAMANO_DE_FOTOGRAMA[0]}×{TAMANO_DE_FOTOGRAMA[1]} lo deformaría"
-        )
-    salida = Path(destino)
-    imagen.resize(TAMANO_DE_FOTOGRAMA, Image.Resampling.LANCZOS).save(salida)
-    entrada = {
-        "file": str(salida),
-        "modelo": "los de las imágenes de la escena: " + "; ".join(modelos),
-        # Sin licencia registrada se dice «desconocida», que es lo que el conteo de assets.json lista como pendiente.
-        "licencia": (
-            "derivada de las imágenes de la escena: " + "; ".join(licencias)
-            if licencias
-            else "desconocida: las imágenes de la escena no registran su licencia"
-        ),
-        "fuente": f"fotograma de la escena del run (segundo {segundo:g}), no una generación nueva",
-        "origen": (
-            f"fotograma de la composición renderizada en el segundo {segundo:g}, capturado sin la capa del karaoke "
-            f"(HyperFrames snapshot), reducido a {TAMANO_DE_FOTOGRAMA[0]}×{TAMANO_DE_FOTOGRAMA[1]} y rotulado como "
-            "miniatura (Pillow, sin generación)"
-        ),
-        "segundo": segundo,
-        "huella_composicion": huella_composicion,
-    }
-    if herramientas:
-        entrada["herramientas"] = dict(herramientas)
-    _sustituye_en_el_registro(run, entrada)
-    return {"segundo": segundo, "origen": str(origen), "salida": str(salida), "procedencia": entrada}
-
-
-# Lo que no generó ningún modelo empieza así en `assets.json`, y la declaración de IA lo salta con este mismo criterio
-# (`lib/publicacion._modelos_por_tipo`).
-_SIN_MODELO = ("ninguno", "no aplica")
-
-
-def modelos_de_la_escena(run_dir: str | Path) -> tuple[list[str], list[str]]:
-    """Los modelos generativos y las licencias de las imágenes de la escena del run, leídos de su `assets.json`.
-
-    Son las de `activos/`: la composición saca de ahí todas sus imágenes, y las láminas de `slides/` son el guion
-    gráfico, que no sale en el vídeo. Se dejan fuera las que no generó ningún modelo (la geometría, el banner partido).
-    **Sin ningún modelo, para**: una miniatura de escena sin modelo registrado dejaría la declaración de IA corta.
-    """
-    from lib import config
-
-    run = Path(run_dir)
-    carpeta = config.activos_del_run(run).relative_to(run).as_posix() + "/"
-    modelos: list[str] = []
-    licencias: list[str] = []
-    for a in provenance.read_ledger(run).get("assets", []):
-        modelo = str(a.get("modelo") or "").strip()
-        if a.get("tipo") != "imagen" or not str(a.get("id", "")).startswith(carpeta):
-            continue
-        if not modelo or modelo.lower().startswith(_SIN_MODELO):
-            continue
-        if modelo not in modelos:
-            modelos.append(modelo)
-        licencia = str(a.get("licencia") or "").strip()
-        if licencia and licencia not in licencias:
-            licencias.append(licencia)
-    if not modelos:
-        raise ValueError(
-            f"el assets.json de {run} no registra ningún modelo para las imágenes de la escena ({carpeta}), así que la "
-            "miniatura no puede decir con qué se generó lo que se ve y la declaración de IA saldría corta. "
-            "La procedencia se escribe en las etapas activos, escena y render: vuelve a lanzarlas."
-        )
-    return modelos, licencias
-
-
 def apunta_la_marca(run_dir: str | Path, miniatura: str | Path, marca: dict) -> None:
     """Añade el registro de la marca de IA (OC1.5) a la entrada de la miniatura en el registro de imágenes del run.
 
     De ahí lo lee `provenance` y lo deja en `assets.json → detalle.marca_ia`, sin que la procedencia tenga que saber
-    nada de la marca. La entrada la escribió `desde_lamina` o `desde_fotograma`, así que una miniatura nueva llega sin
+    nada de la marca. La entrada la escribió `desde_lamina`, así que una miniatura nueva llega sin
     la marca de la anterior. Video Seal toca sus píxeles, así que su licencia y su url se suman a las de la entrada
     (decisión 5), como las herramientas del obrero; el modelo sigue siendo el que dibujó la imagen.
     """
@@ -882,7 +740,8 @@ def apunta_la_marca(run_dir: str | Path, miniatura: str | Path, marca: dict) -> 
     if modelos:
         licencia += " · marca de agua: " + ", ".join(f"{m.get('nombre')} ({m.get('licencia')})" for m in modelos)
     urls = [u for u in str(entrada.get("url") or "").split(" · ") if u]
-    # Sin repetir: los tres ficheros de TrustMark comparten su fuente (revisión de OC1.12, hallazgo 2).
+    # Sin repetir: una fuente que ya está en la entrada (una miniatura marcada otra vez) no se apunta dos veces
+    # (revisión de OC1.12, hallazgo 2).
     urls = list(dict.fromkeys(urls + [m["fuente"] for m in modelos if m.get("fuente")]))
     _sustituye_en_el_registro(
         run, {**entrada, "licencia": licencia, "url": " · ".join(urls) or None, "marca_ia": dict(marca)}

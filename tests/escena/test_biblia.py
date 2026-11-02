@@ -219,3 +219,17 @@ def test_el_guion_es_un_paquete_y_su_huella_cubre_toda_su_carpeta(tmp_path):
     (carpeta / "tramos.py").write_text("COLOR = 'rojo'\n", encoding="utf-8")
     assert ep.huella_del_guion() != huella
     assert carga_guion(ep).puesta(ep) == "rojo"
+
+
+def test_la_huella_del_guion_no_cambia_con_el_fin_de_linea(tmp_path):
+    """Un merge con `core.autocrlf` cambia LF por CRLF entre la parada 2 y el render: el guion es el mismo, y el
+    render no se puede negar por eso (fila 335)."""
+    from lib.escena.episodio import huella_de_carpeta
+
+    (tmp_path / "escena.py").write_bytes(b"from . import tramos\n\nCOLOR = 'azul'\n")
+    huella = huella_de_carpeta(tmp_path, sin=())
+    (tmp_path / "escena.py").write_bytes(b"from . import tramos\r\n\r\nCOLOR = 'azul'\r\n")
+    assert huella_de_carpeta(tmp_path, sin=()) == huella
+    # Control: un cambio de verdad sí cambia la huella, con cualquier fin de línea.
+    (tmp_path / "escena.py").write_bytes(b"from . import tramos\r\n\r\nCOLOR = 'rojo'\r\n")
+    assert huella_de_carpeta(tmp_path, sin=()) != huella

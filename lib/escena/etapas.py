@@ -5,7 +5,8 @@ paradas; aquí está lo que cada etapa hace, sin estado del run, para poder prob
 
 - `alinea`: las marcas por palabra con whisper (`lib/alineador.py`, la misma alineación del montaje) y el `.srt`.
   Deja `subtitulos/alineacion-resultado.json`, `subir-al-canal/subtitulos.<idioma>.srt` y
-  `revision/guion-por-partes.md`. GPU: whisper.
+  `revision/guion-por-partes.md`. Una lámina mal alineada se reintenta sola con otro troceo (OC2.4), y lo de esa
+  pasada queda en `subtitulos/reintento/`. GPU: whisper.
 - `activos`: las imágenes nuevas del guion de escena con Qwen-Image-Edit, el obrero y la escala de cabezas. Deja
   `activos/` y la **parada 1** (`revision/activos.html`). GPU: ComfyUI y el obrero.
 - `escena`: la puesta en escena y, en cuanto está construida, **las imágenes nuevas que el usuario aprobó en la parada 1
@@ -14,9 +15,6 @@ paradas; aquí está lo que cada etapa hace, sin estado del run, para poder prob
   **parada 2** (`revision/fotogramas.html`). GPU: ComfyUI (el lecho, si el canal lleva música) y Chrome.
 - `render`: el vídeo de la composición revisada, su sonoridad, su marca de IA (OC1.5) y `montaje.json`. Deja
   `subir-al-canal/final.mp4`. GPU: Chrome y, después, la marca (`lib/marca_ia.py`).
-
-Y una pieza de la etapa `thumbnail` del pipeline, porque en un rehecho la miniatura sale de esta escena:
-`fotogramas_sin_karaoke`, los fotogramas de la composición renderizada sin la capa del karaoke (fila 246). GPU: Chrome.
 
 **Una sola fuente para los cues y el `.srt`** (auditoría de F6.2b, recomendación 5): el `.srt` de este motor son los
 cues de la línea de tiempo (`LineaDeTiempo.lineas_de_subtitulo`), con sus tiempos del vídeo. No se trocea otra vez.
@@ -33,12 +31,11 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
-import tempfile
 import time
 from collections.abc import Mapping
 from pathlib import Path
 
-from lib import config, marca_ia, musica, provenance
+from lib import alineacion, config, marca_ia, musica, provenance
 from lib.escena import ajustes, audio, compone, comprobaciones, encuadre, revision
 from lib.escena import render as _render
 from lib.escena.episodio import Episodio, carga_guion, lote_de, puesta_de
@@ -88,11 +85,115 @@ def _limpia(carpeta: Path) -> Path:
 
 
 # ------------------------------------------------------------------------------------------ alinea
+# Los troceos con que se reintenta una lámina mal alineada con los 30 s de siempre (OC2.4), en el orden en que se
+# prefieren. Son los dos que se probaban a mano en los cuatro episodios de las filas 254, 255 y 282: en la lámina 5
+# de la fila 282, 30 s anclaron 54 de 123 palabras, 25 s las 123 y 20 s, 104. No hay uno que gane siempre, así que se
+# prueban los dos en el mismo lanzamiento del obrero y la etapa se queda con el que menos palabras aprieta.
+TROCEOS_DE_REINTENTO_S = (25, 20)
+# Donde deja el reintento su trabajo, su resultado y, si cambia alguna lámina, la primera pasada. Está dentro de
+# `subtitulos/`, que es intermedio.
+DIR_REINTENTO = "reintento"
+
+
+def _motivo_de_reintento(medida: Mapping) -> str | None:
+    """Por qué hay que reintentar una lámina con otro troceo (OC2.4), o None si está bien alineada.
+
+    - **Ancla poco**: por debajo de `COBERTURA_MINIMA_POR_LAMINA`, el mismo umbral con que la comprobación `karaoke`
+      avisa de una lámina con un tramo repartido a ojo. Está medido sobre 371 láminas: 369 anclan el 93,7 % o más, y
+      las láminas en que whisper se saltó frases quedaban muy por debajo (54 de 123, un 43,9 %, en la fila 282).
+    - **Whisper oye más palabras que el guion**: se ha inventado texto o ha repetido un tramo (fila 255). Se cuentan
+      con cada cantidad unida a su unidad (`anclaje → de_mas`).
+    """
+    if medida["cobertura"] is not None and medida["cobertura"] < comprobaciones.COBERTURA_MINIMA_POR_LAMINA:
+        return (
+            f"ancla {medida['ancladas']} de {medida['palabras']} palabras, por debajo del "
+            f"{100 * comprobaciones.COBERTURA_MINIMA_POR_LAMINA:.0f} %"
+        )
+    if medida["de_mas"]:
+        return f"whisper oye {medida['de_mas']} palabra(s) más que el guion ({medida['marcas']} marcas)"
+    return None
+
+
+def _aprieta(medida: Mapping) -> tuple[int, int]:
+    """Lo que se mira para elegir troceo: las palabras que el reparto aprieta (fila 254); y, a igualdad, las que
+    whisper oye de más.
+
+    Aprieta las que no tienen marca propia y las que tiene que mover (`colapsadas`); una palabra que está en los dos
+    grupos cuenta dos veces. Medido contra la verdad en las 12 láminas reales que se reintentaron en la verificación
+    (`progress/verificacion_OC2.4.json → evaluacion_contra_la_verdad`): eligiendo así, 49 palabras se encienden a más
+    de 0,25 s de su voz; contando solo las que no tienen marca propia, 59; y quedándose con los 30 s, 155.
+    """
+    apretadas = medida["palabras"] - medida["ancladas"] + medida["colapsadas"]
+    return apretadas, medida["de_mas"]
+
+
+def _reintenta(items: list[dict], palabras: Mapping[str, list[str]], resultado: dict, ruta: Path, cfg) -> list:
+    """Reintenta con otro troceo las láminas mal alineadas y deja en `resultado` el que menos palabras aprieta (OC2.4).
+
+    Mide cada lámina con `linea_tiempo.anclaje`, las mismas cuentas que `por_lamina`. Las que tienen motivo
+    (`_motivo_de_reintento`) se alinean otra vez con cada troceo de `TROCEOS_DE_REINTENTO_S`, todas en UN lanzamiento
+    del obrero: el modelo se carga una vez y la GPU no se reparte. Es una sola vez: lo que sale de esa pasada se
+    compara y no se reintenta más. Gana el troceo que menos aprieta (`_aprieta`); a igualdad, el primero, así que una
+    lámina que no mejora se queda con sus 30 s.
+
+    Si alguna cambia de troceo, se reescribe el resultado (`ruta`) con sus marcas nuevas, que es lo que lee la línea
+    de tiempo, y la primera pasada se guarda en `DIR_REINTENTO`. Devuelve lo que se reintentó: por lámina, el motivo,
+    lo que midió cada troceo y el elegido. Va al resultado (`reintentos`) y al registro de subtítulos, y de ahí a
+    `assets.json`.
+    """
+    from lib import alineador
+    from lib.escena import linea_tiempo
+
+    por_id = {item["id"]: item for item in resultado["items"]}
+    medidas = {item["id"]: linea_tiempo.anclaje(palabras[item["id"]], por_id[item["id"]]["marcas"]) for item in items}
+    malas = {i: m for i, m in medidas.items() if _motivo_de_reintento(m)}
+    if not malas:
+        return []
+    otra = [dict(item, chunk_length_s=t) for item in items if item["id"] in malas for t in TROCEOS_DE_REINTENTO_S]
+    print(
+        f"  [ALINEA] {len(malas)} lámina(s) mal alineada(s) con {alineador.TROCEO_S} s: otra pasada con "
+        f"{' y '.join(str(t) for t in TROCEOS_DE_REINTENTO_S)} s",
+        flush=True,
+    )
+    segunda = alineador.alinea(otra, ruta.parent / DIR_REINTENTO, cfg)
+    nuevas = {(item["id"], item["chunk_length_s"]): item for item in segunda["items"]}
+    reintentos, cambia = [], False
+    for id_, medida in malas.items():
+        candidatos = [(alineador.TROCEO_S, medida, por_id[id_])] + [
+            (t, linea_tiempo.anclaje(palabras[id_], nuevas[(id_, t)]["marcas"]), nuevas[(id_, t)])
+            for t in TROCEOS_DE_REINTENTO_S
+        ]
+        troceo, mejor, item = min(candidatos, key=lambda c: _aprieta(c[1]))
+        if troceo != alineador.TROCEO_S:
+            por_id[id_].update(marcas=item["marcas"], transcripcion=item.get("transcripcion"), chunk_length_s=troceo)
+            cambia = True
+        numero = int(id_.split("-")[1])
+        reintentos.append(
+            {
+                "lamina": numero,
+                "motivo": _motivo_de_reintento(medida),
+                "troceos": {str(t): m for t, m, _ in candidatos},
+                "elegido_s": troceo,
+            }
+        )
+        print(
+            f"  [ALINEA] lámina {numero}: se queda con {troceo} s ({mejor['ancladas']} de {mejor['palabras']} "
+            f"palabras ancladas, {mejor['marcas']} marcas)",
+            flush=True,
+        )
+    if cambia:
+        shutil.copy2(ruta, ruta.parent / DIR_REINTENTO / "primera-pasada.json")
+    resultado["reintentos"] = reintentos
+    ruta.write_text(json.dumps(resultado, indent=2, ensure_ascii=False), encoding="utf-8")
+    return reintentos
+
+
 def alinea(ep: Episodio) -> dict:
     """Las marcas por palabra de la narración, la línea de tiempo y el `.srt` con los mismos cues que el karaoke.
 
     Comprueba antes de gastar la GPU lo que se puede comprobar sin ella: el bloque `escena` (ya al crear el
-    `Episodio`), el de subtítulos del canal (`subtitulos.ajustes`) y que cada lámina con narración tenga su wav.
+    `Episodio`), el de subtítulos del canal (`subtitulos.ajustes`) y que cada lámina con narración tenga su wav. Una
+    lámina que sale mal alineada se reintenta una vez con otro troceo (`_reintenta`, OC2.4).
     """
     from lib import alineador, subtitulos
 
@@ -100,7 +201,7 @@ def alinea(ep: Episodio) -> dict:
     # Los idiomas a los que se traducirá este `.srt` (F7.11): una lista mal escrita para aquí, sin GPU, y no en la
     # traducción.
     subtitulos.traducciones(ep.perfil, origen=ep.idioma)
-    items = []
+    items, palabras = [], {}
     for numero, slide in enumerate(_slides(ep), start=1):
         if not (slide.get("narration") or "").strip():
             continue
@@ -108,6 +209,8 @@ def alinea(ep: Episodio) -> dict:
         if not wav.is_file():
             raise ErrorDeEtapa(f"la lámina {numero} tiene narración y no está su audio ({wav}): falta la etapa tts")
         items.append({"id": f"slide-{numero:02d}", "audio": str(wav)})
+        # Las palabras como las cuenta la línea de tiempo (`LineaDeTiempo._lamina`): con ellas se mide el reintento
+        palabras[items[-1]["id"]] = alineacion.texto_para_pintar(slide["narration"], ep.idioma).split()
     if not items:
         raise ErrorDeEtapa("el run no tiene ni una lámina con narración y audio: no hay nada que alinear")
     try:
@@ -115,7 +218,11 @@ def alinea(ep: Episodio) -> dict:
     except _render.ErrorDeRender as error:
         raise ErrorDeEtapa(str(error)) from None
     print(f"  [ALINEA] {len(items)} lámina(s) con {cfg['modelo_alineacion']}", flush=True)
-    resultado = alineador.alinea(items, config.alineacion_del_run(ep.run_dir).parent, cfg)
+    ruta = config.alineacion_del_run(ep.run_dir)
+    # Lo de un reintento anterior no se mezcla con esta pasada
+    shutil.rmtree(ruta.parent / DIR_REINTENTO, ignore_errors=True)
+    resultado = alineador.alinea(items, ruta.parent, cfg)
+    reintentos = _reintenta(items, palabras, resultado, ruta, cfg)
     linea = ep.linea()
     srt = None
     if cfg["activos"] and cfg.get("srt"):
@@ -138,6 +245,8 @@ def alinea(ep: Episodio) -> dict:
         "texto": "del guion (slides.json); del audio solo se toman los tiempos",
         "lineas_del_srt": "los cues de la línea de tiempo del motor de escena: una línea por cue, los del karaoke",
         "por_lamina": linea.por_lamina,
+        # Las láminas que se alinearon otra vez con otro troceo, con lo que midió cada uno (OC2.4); vacía si ninguna
+        "reintentos": reintentos,
         "load_seconds": resultado.get("load_seconds"),
     }
     (ep.run_dir / provenance.SUBTITLE_RECORDS_FILENAME).write_text(
@@ -149,6 +258,7 @@ def alinea(ep: Episodio) -> dict:
         "srt": srt,
         "cues": len(linea.cues),
         "informe": linea.informe(),
+        "reintentos": reintentos,
         "guion_por_partes": partes,
     }
 
@@ -524,76 +634,3 @@ def render(ep: Episodio, *, huella_composicion: str, huella_guion: str, renderiz
         json.dumps(resumen, indent=2, ensure_ascii=False), encoding="utf-8"
     )
     return {"salida": final, "montaje": resumen}
-
-
-# ------------------------------------------------------------------------------------------ miniatura
-# La capa que `compone` escribe para el karaoke y la regla que la esconde en la copia que se fotografía. La regla va la
-# última de la cabeza, así que gana a la de `CSS_ESTUDIO` sin tocar nada más de la página.
-_CAPA_DEL_KARAOKE = b'<div id="karaoke">'
-_SIN_KARAOKE = b"<style>#karaoke { display: none !important; }</style>\n</head>"
-
-
-def fotogramas_sin_karaoke(
-    run_dir: str | Path, segundos: list[float], *, huella_composicion: str, snapshot=None
-) -> dict:
-    """Los fotogramas de la escena renderizada en `segundos`, sin el karaoke: de ellos sale la miniatura (fila 246).
-
-    **No salen de `final.mp4`, y es a propósito.** El vídeo lleva el karaoke quemado abajo, que es justo donde va el
-    texto de la miniatura (medido el 02-10 en la bici, a 420 s). Y en los silencios entre partes solo están las tarjetas
-    de capítulo. Así que salen de la **misma composición que se renderizó**: su huella tiene que ser la que apuntó la
-    parada 2, y se fotografía una copia con una sola regla más, la que esconde `#karaoke`. La composición del run no se
-    toca: su huella la protege.
-
-    Para sin GPU y antes de copiar nada si un instante cae fuera del vídeo o si la composición ya no es la renderizada.
-    Deja los PNG en `revision/miniatura/`. `snapshot` es `render.snapshot`; las pruebas pasan uno sin Chrome.
-    """
-    snapshot = snapshot or _render.snapshot
-    run_dir = Path(run_dir)
-    composicion = config.composicion_del_run(run_dir)
-    index = composicion / "index.html"
-    if not index.is_file():
-        raise ErrorDeEtapa(f"no está la composición ({index}): sin la escena renderizada no hay fotograma")
-    if huella_de_composicion(composicion) != huella_composicion:
-        raise ErrorDeEtapa(
-            "la composición ha cambiado desde la parada 2, así que ya no es la que se renderizó y su fotograma no "
-            "sería del vídeo. Vuelve a lanzar las etapas escena y render antes de la miniatura."
-        )
-    datos = compone.lee_guion(index)
-    ultimo = float(datos["duracion"]) - 1 / float(datos["fps"])
-    fuera = [t for t in segundos if not 0 <= t <= ultimo]
-    if not segundos or fuera:
-        raise ErrorDeEtapa(
-            f"el vídeo dura {float(datos['duracion']):g} s y su último fotograma está en el {ultimo:g}: "
-            + (f"{', '.join(f'{t:g}' for t in fuera)} cae(n) fuera" if fuera else "no se ha pedido ningún instante")
-        )
-    pagina = index.read_bytes()
-    if pagina.count(_CAPA_DEL_KARAOKE) != 1 or pagina.count(b"</head>") != 1:
-        raise ErrorDeEtapa(
-            f"no encuentro una sola capa del karaoke ({_CAPA_DEL_KARAOKE.decode()}) y una sola cabeza en {index}: si "
-            "compone.py ha cambiado cómo la escribe, esta función tiene que saberlo, o el karaoke saldría en la "
-            "miniatura"
-        )
-
-    rev = config.revision_del_run(run_dir)
-    destino = _limpia(rev / "miniatura")
-    config.ESCENA_RENDER_TMP.mkdir(parents=True, exist_ok=True)
-    trabajo = Path(tempfile.mkdtemp(prefix="mini-", dir=config.ESCENA_RENDER_TMP))
-    try:
-        copia = trabajo / "composicion"
-        shutil.copytree(composicion / "assets", copia / "assets")
-        for nombre in _LO_QUE_SE_RENDERIZA:
-            if (composicion / nombre).is_file():
-                shutil.copy2(composicion / nombre, copia / nombre)
-        # En bytes, para que la copia sea la página renderizada con una regla más y nada más (ni los finales de línea).
-        (copia / "index.html").write_bytes(pagina.replace(b"</head>", _SIN_KARAOKE))
-        pngs = snapshot(copia, rev / "log", list(segundos), trabajo / "fotos")
-        if len(pngs) != len(segundos):
-            raise ErrorDeEtapa(f"se pidieron {len(segundos)} fotogramas y snapshot dio {len(pngs)}")
-        fotos = []
-        for t, png in zip(segundos, pngs):
-            sale = destino / f"fotograma-{t:g}s.png"
-            shutil.move(str(png), str(sale))
-            fotos.append(sale)
-    finally:
-        shutil.rmtree(trabajo, ignore_errors=True)
-    return {"fotogramas": fotos, "duracion_s": float(datos["duracion"]), "herramientas": _herramientas()}
